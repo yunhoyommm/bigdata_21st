@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 적용 방법 비교</title>
+<!-- 방법 2: 내부 스타일시트 -->
+<style>
+.internal {
+color: rgb(107, 22, 187);
+font-weight: bold;
+font-size: 18px;
+}
+</style>
+<!-- 방법 3: 외부 스타일시트 (별도 style.css 파일 필요) -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- 방법 1: 인라인 스타일 -->
+<p style="color: rgb(104, 219, 129); font-size: 25px;">인라인 스타일로 적용한 문단입니다.</
+<!-- 방법 2: 내부 스타일시트 클래스 사용 -->
+<p class="internal">내부 스타일시트로 적용한 문단입니다.</p>
+<!-- 방법 3: 외부 스타일시트 클래스 사용 -->
+<p class="external">외부 스타일시트로 적용한 문단입니다.</p>
+</body>
+</html>
