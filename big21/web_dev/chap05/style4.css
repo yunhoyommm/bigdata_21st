@@ -1,0 +1,21 @@
+/* style4.css */
+/* 기본 box-sizing: content-box(브라우저 기본 값) */
+
+.box {
+    width: 200px;
+    height: 80px;
+    border: 4px solid #f00;
+    padding: 20px;
+    margin: 30px;
+    background-color: #e3f2fd;
+}
+
+.box-border-box {
+    box-sizing: border-box; /* content, border, padding 합쳐서 width 안에서 해결하도록 설정 */
+    width: 200px;
+    height: 80px;
+    border: 4px solid #f00;
+    padding: 20px;
+    margin: 30px;
+    background-color: #e3f2fd;
+}

@@ -1,0 +1,32 @@
+/* style7.css */
+html {
+    font-size: 16px;
+}
+
+.parent {
+    font-size: 20px;
+    width: 400px;
+    background-color: #ededed;
+    padding: 16px;
+}
+
+.px-text {
+    font-size: 16px;
+    color: #333;
+}
+
+.em-text {
+    font-size: 1.5em;
+    columns: steelblue;
+}
+
+.rem-text {
+    font-size: 1.5rem;
+    color: seagreen;
+}
+
+.percent-box {
+    width: 50%;
+    height: 40px;
+    background-color: #ffe0b2;
+}

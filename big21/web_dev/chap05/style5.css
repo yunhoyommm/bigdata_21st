@@ -1,0 +1,9 @@
+/* style5.css */
+.card {
+    /* box-sizing: border-box; */
+    background-color: #f00;
+    width: 300px;
+    border: 5px solid #00f;
+    padding: 16px 24px;
+    border-radius: 16px;
+}

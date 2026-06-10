@@ -1,0 +1,14 @@
+/* style6.css */
+.swatch {
+    padding: 16px 24px;
+    margin: 8px 0px;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+
+}
+
+.hex { background-color: #3498db;}
+.rgb { background-color: rgb(25,152,219);}
+.hsl { background-color: hsl(204,70%,53%);}
+.alpha { background-color: rgba(52,152,219,0.5);}
