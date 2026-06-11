@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>display 비교</title>
+    <style>
+        /* 공통 스타일 */
+        .box {
+            background-color: #a8d8ea;  /* 배경색 지정 */
+            border: 2px solid #2c7be5;
+            padding: 8px 16px;
+            margin: 4px;
+        }
+
+        .block-box {
+            display: inline;
+            background-color: #ffd6a5;
+            border-color: #f4a261;
+        }
+
+        .inline-box {
+            /* display: inline; */
+            background-color: #bde0fe;
+            border-color: #2c7be5;
+            width: 120px;/* width, height 작동x */
+            height: 60px;
+            vertical-align: middle;  /* 같은 줄의 높은 블록을 기준으로 중앙(인라인에서만 작용)*/
+        }
+        .inline-block-box {
+            display: inline-block;
+            background-color: #bde0fe;
+            border-color: #2c7be5;
+            width: 120px;
+            height: 60px;
+            vertical-align: middle;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <p class="section-title">블록(block): 줄 전체를 차지합니다.</p>
+    <div class="box block-box">블록 요소 A</div>
+    <div class="box block-box">블록 요소 B</div>
+    <div class="box block-box">블록 요소 C</div>
+
+    <p class="section-title">인라인(inline) : 같은 줄에 흐릅니다.</p>
+    <span class="box inline-box">인라인 A</span>  
+    <span class="box inline-box">인라인 B</span>  
+    <span class="box inline-box">인라인 C</span>  
+
+    <p class="section-title">인라인 블록(inline-block): 한줄 + 크기 지정</p>
+    <div class="box inline-block-box">IB 요소 A</div>
+    <div class="box inline-block-box">IB 요소 B</div>
+    <div class="box inline-block-box">IB 요소 C</div>
+</body>
+</html>
