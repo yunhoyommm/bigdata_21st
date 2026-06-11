@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-index 겹침 제어</title>
+    <style>
+        .stack-container {
+            position:relative;
+            width: 300px;
+            height: 200px;
+            border: 1px solid #ccc;
+        }
+        .box {
+            position: absolute;
+            width: 150px;
+            height: 100px;
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .box-a {
+            background-color: rgba(44,123,229,0.89);
+            top: 20px;
+            left: 20px;
+            z-index: 3;
+        }
+        .box-b {
+            background-color: rgba(230,57,70,0.85);
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+        }
+        .box-c {
+            background-color: rgba(38,166,91,0.85);
+            top: 20px;
+            left: 20px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="stack-container">
+        <div class="box box-a">파랑 (z:1)</div>
+        <div class="box box-b">빨강 (z:2)</div>
+        <div class="box box-c">초록 (z:3)</div>
+    </div>
+</body>
+</html>

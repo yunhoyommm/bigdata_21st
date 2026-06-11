@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid 페이지 레이아웃</title>
+    <style>
+        .page-layout {
+            display: grid;
+            grid-template-columns: 200px 1fr;   /* columns 2열 모바일에서는 1fr같은 비율 줌, pc는 딱히..*/
+            grid-template-rows: 60px 1fr 50px;  /* rows 3행(헤더, 본문, 푸터) */
+            grid-template-areas:    /* 3행 2열 레이아웃 설정*/
+            "header header"     /* 헤더는 2열 모두 차지 */
+            "sidebar main"      /* 사이드바와 본문 나란히 */
+            "footer footer";
+            gap: 8px;
+            min-height: 300px;
+        }
+        /* grid-area로 각 요소에 이름 지정 */
+        .site-header { grid-area: header; }
+        .site-sidebar { grid-area: sidebar; }
+        .site-main { grid-area : main; }
+        .site-footer { grid-area : footer;}
+
+        /* 공통 디자인 */
+        .page-layout > * {  /* 자식 4개 모두 선택 */
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+        .site-header {background-color: #2c7be5;}
+        .site-sidebar { background-color: #6c8ebf;}
+        .site-main { background-color: #a8d8ea; color: #444;}
+        .site-footer { background-color: #444;}
+    </style>
+</head>
+<body>
+    <div class="page-layout">
+        <header class="site-header">헤더 (header)</header>
+        <aside class="site-sidebar">사이드바 (sidebar)</aside>
+        <main class="site-main">본문(main)</main>
+        <footer class="site-footer">푸터(footer)</footer>
+    </div>
+</body>
+</html>

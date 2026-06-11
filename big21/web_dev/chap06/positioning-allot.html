@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포지셔닝 실습 - 배치</title>
+    <style>
+        .card-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+        /* 카드 : relative로 자식의 absolute 기준 역할 */
+        .card {
+            position: relative; /* 자식들이 absolute가 되니 부모는 그 기준 */
+            width: 180px;
+            padding: 20px 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        .badge {
+            position: absolute; /* 부모.card 기준으로 배치 */
+            top: -10px;         /* 카드 상단에서 위로 10px */
+            right: -10px;       /* 카드 우측에서 바깥으로 10px */
+            background-color: #e63946;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        /* fixed 버튼 : 화면 오른쪽 아래에 고정 */
+        .floating-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background-color: #2c7be5;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(44, 123, 229, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card">
+            <span class="badge">NEW</span>  <!-- 카드 모서리에 배지 -->
+            <p class="card-title">상품 이름 A</p>
+            <p class="card-desc">설명 텍스트가 들어갑니다.</p>
+        </div>
+        <div class="card">
+            <span class="badge">SALE</span>
+            <p class="card-title">상품 이름 B</p>
+            <p class="card-desc">설명 텍스트가 들어갑니다.</p>
+        </div>
+        <div class="card">
+            <!-- 배지 없음 -->
+            <p class="card-title">상품 이름 C</p>
+            <p class="card-desc">설명 텍스트가 들어갑니다.</p>
+        </div>
+    </div>
+    <button class="floating-btn">+ 새로 추가</button>
+</body>
+</html>

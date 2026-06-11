@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid 3열 배치</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 균등한 3열 */
+            gap: 1px;
+            padding: 16px;
+            background-color: #f0f4ff;
+            border: 2px solid #6c8ebf;
+            border-radius: 8px;
+        }
+        .grid-item {
+            background-color: #2c7be5;
+            color: #fff;
+            padding: 24px 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .span-2 {
+            grid-column: span 2;    /* 이 아이템은 열 2칸 차지 */
+            background-color: #1558b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="grid-item">1</div>
+        <div class="grid-item">2</div>
+        <div class="grid-item">3</div>
+        <div class="grid-item span-2">4 (2열 차지)</div>
+        <div class="grid-item">5</div>
+        <div class="grid-item">6</div>
+        <div class="grid-item">7</div>
+        <div class="grid-item">8</div>
+    </div>
+</body>
+</html>
