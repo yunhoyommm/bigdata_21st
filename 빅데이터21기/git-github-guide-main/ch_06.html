@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06장: Pull Request와 코드 리뷰 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#pull-request-ch_06_s01">Pull Request의 개념과 워크플로우 (ch_06_s01)</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_3">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#pr-ch_06_s02">PR 생성과 관리 (ch_06_s02)</a><ul>
+<li><a href="#_4">도입</a></li>
+<li><a href="#_5">핵심 개념 설명</a></li>
+<li><a href="#_6">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_06_s03">코드 리뷰 수행하기 (ch_06_s03)</a><ul>
+<li><a href="#_7">도입</a></li>
+<li><a href="#_8">핵심 개념 설명</a></li>
+<li><a href="#_11">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_06_s04">머지 전략 선택하기 (ch_06_s04)</a><ul>
+<li><a href="#_12">도입</a></li>
+<li><a href="#_13">핵심 개념 설명</a></li>
+<li><a href="#_15">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#pr-ch_06_s05">PR 충돌 해결과 업데이트 (ch_06_s05)</a><ul>
+<li><a href="#_16">도입</a></li>
+<li><a href="#_17">핵심 개념 설명</a></li>
+<li><a href="#_18">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_19">장 요약</a><ul>
+<li><a href="#_20">핵심 키워드</a></li>
+<li><a href="#_21">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>06장: Pull Request와 코드 리뷰</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-기초">기초</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="pull-request">Pull Request와 코드 리뷰<a class="headerlink" href="#pull-request" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- Pull Request의 목적과 코드 리뷰의 중요성을 설명할 수 있다
+- 웹 UI와 GitHub CLI로 PR을 생성하고 관리할 수 있다
+- 효과적인 코드 리뷰를 수행하고 Suggestion 기능을 활용할 수 있다
+- 세 가지 머지 전략의 차이를 이해하고 상황에 맞게 선택할 수 있다
+- PR 충돌을 웹 UI와 로컬 환경에서 해결할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="pull-request-ch_06_s01">Pull Request의 개념과 워크플로우 (ch_06_s01)<a class="headerlink" href="#pull-request-ch_06_s01" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>코드를 작성한 후 바로 main 브랜치에 병합하면 어떤 일이 발생할까요?
+버그가 숨어 들어가거나, 코딩 스타일이 일관되지 않거나, 더 나은 방법을 놓칠 수 있습니다.
+이 절에서는 이러한 문제를 해결하는 GitHub의 핵심 협업 메커니즘인 Pull Request를 배웁니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="pull-request_1">Pull Request란 무엇인가<a class="headerlink" href="#pull-request_1" title="Permanent link">&para;</a></h4>
+<p><strong>Pull Request(PR)</strong>는 브랜치의 변경 사항을 다른 브랜치에 병합하기 전에 팀원에게 리뷰를 요청하는 GitHub의 협업 메커니즘입니다.</p>
+<p>논문 심사 과정과 같습니다. 연구자(개발자)가 논문(코드)을 제출하면, 심사위원(팀원)이 검토하고 피드백을 주고, 수정 후 최종 승인되면 학술지(main 브랜치)에 게재됩니다.</p>
+<p>PR은 단순한 병합 요청을 넘어서, 코드 리뷰, 자동화된 테스트, 토론, 문서화가 이루어지는 협업의 중심입니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+timeline
+    title PR 기반 협업 워크플로우
+
+    section 준비
+        브랜치 생성 : feature/login 브랜치 생성
+                    : main에서 분기
+
+    section 개발
+        커밋 작업 : 로그인 UI 구현
+                 : 인증 로직 추가
+                 : 테스트 작성
+
+    section PR 생성
+        PR 열기 : Pull Request 생성
+              : 제목과 설명 작성
+              : Reviewer 지정
+
+    section 리뷰
+        피드백 : 리뷰어가 코드 검토
+              : 개선 사항 코멘트
+        수정 : 피드백 반영
+            : 추가 커밋
+
+    section 승인
+        Approve : 리뷰어 승인
+              : CI 검사 통과
+
+    section 완료
+        머지 : main 브랜치에 병합
+           : 브랜치 삭제
+           : Issue 자동 종료
+
+</div>
+<figcaption>Pull Request 협업 워크플로우 타임라인</figcaption>
+</figure>
+
+<h4 id="pr">PR 기반 협업의 장점<a class="headerlink" href="#pr" title="Permanent link">&para;</a></h4>
+<p><strong>1. 코드 품질 향상</strong></p>
+<p>동료 개발자가 코드를 검토하면 버그, 성능 문제, 보안 취약점을 조기에 발견할 수 있습니다.
+4명의 눈이 2명의 눈보다 버그를 더 잘 찾아냅니다.</p>
+<p><strong>2. 지식 공유와 학습</strong></p>
+<p>코드 리뷰를 통해 팀원이 서로의 코드를 이해하고 새로운 기술을 배웁니다.
+시니어 개발자의 피드백은 주니어의 성장을 가속화합니다.</p>
+<p><strong>3. 변경 사항 문서화</strong></p>
+<p>PR 설명과 리뷰 코멘트는 "왜 이렇게 구현했는가"를 기록합니다.
+6개월 후 코드를 다시 볼 때 맥락을 빠르게 파악할 수 있습니다.</p>
+<p><strong>4. CI/CD 자동화 통합</strong></p>
+<p>PR 생성 시 자동으로 테스트, 린트, 빌드를 실행하여 품질을 보장합니다.
+병합 전에 문제를 발견하여 main 브랜치를 항상 안정적으로 유지합니다.</p>
+<p><strong>5. 비동기 협업 지원</strong></p>
+<p>서로 다른 시간대에서 일하는 팀원도 PR을 통해 효율적으로 협업할 수 있습니다.
+리뷰어는 자신의 시간에 맞춰 검토하고 피드백을 남길 수 있습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: PR은 코드가 완성된 후에만 만드는 것이 아닙니다. Draft PR로 작업 중인 코드를 미리 공유하여 초기 피드백을 받을 수 있습니다.</p>
+</blockquote>
+<h4 id="pr_1">PR 워크플로우: 브랜치 생성부터 머지까지<a class="headerlink" href="#pr_1" title="Permanent link">&para;</a></h4>
+<p>PR 기반 협업의 전체 흐름을 단계별로 살펴봅니다.</p>
+<p><strong>1단계: 브랜치 생성</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feature/user-profile
+<span class="c1"># feature/user-profile 브랜치 생성 및 전환</span>
+</code></pre></div>
+
+<p><strong>2단계: 코드 작성 및 커밋</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>src/components/UserProfile.js
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 프로필 컴포넌트 추가&quot;</span>
+</code></pre></div>
+
+<p><strong>3단계: 원격에 push</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>feature/user-profile
+</code></pre></div>
+
+<p><strong>4단계: PR 생성</strong></p>
+<p>GitHub 웹 UI 또는 CLI로 PR을 생성합니다. (다음 절에서 상세 설명)</p>
+<p><strong>5단계: 리뷰 요청</strong></p>
+<p>Reviewer를 지정하고 리뷰를 요청합니다.</p>
+<p><strong>6단계: 피드백과 수정</strong></p>
+<p>리뷰어의 코멘트를 확인하고 필요한 수정을 진행합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;refactor: 리뷰 피드백 반영&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
+</code></pre></div>
+
+<p>PR에 새 커밋이 자동으로 추가되며, 리뷰어에게 알림이 갑니다.</p>
+<p><strong>7단계: 승인(Approve)</strong></p>
+<p>리뷰어가 코드를 승인합니다.</p>
+<p><strong>8단계: 머지</strong></p>
+<p>PR을 main 브랜치에 병합합니다.</p>
+<p><strong>9단계: 브랜치 삭제</strong></p>
+<p>병합된 브랜치를 삭제하여 저장소를 깔끔하게 유지합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>pull
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-d<span class="w"> </span>feature/user-profile
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: PR 제목에 타입을 명시하세요. <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code> 등 Conventional Commits 규약을 따르면 변경 사항을 한눈에 파악할 수 있습니다.</p>
+</blockquote>
+<h4 id="pr_2">좋은 PR 작성법: 제목, 설명, 크기<a class="headerlink" href="#pr_2" title="Permanent link">&para;</a></h4>
+<p><strong>작게 나누기</strong></p>
+<p>한 PR에 하나의 목적만 담으세요. 300줄 이내를 권장합니다.
+큰 PR은 리뷰하기 어렵고, 버그를 찾기 어려우며, 충돌 가능성이 높습니다.</p>
+<p><strong>명확한 제목</strong></p>
+<div class="codehilite"><pre><span></span><code>좋은 예:
+- feat: 사용자 프로필 페이지 추가
+- fix: 로그인 시 토큰 만료 오류 수정
+- refactor: API 클라이언트를 axios로 전환
+
+나쁜 예:
+- 업데이트
+- 수정
+- 작업 완료
+</code></pre></div>
+
+<p><strong>상세한 설명</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## 변경 사항</span>
+사용자 프로필 페이지를 추가했습니다. 프로필 사진, 이름, 이메일, 가입일을 표시합니다.
+
+<span class="gu">## 변경 이유</span>
+Issue <span class="ni">#123에서</span> 요청된 기능입니다. 사용자가 자신의 정보를 확인할 수 있어야 합니다.
+
+<span class="gu">## 테스트 방법</span>
+<span class="k">1.</span> 로그인 후 우측 상단 프로필 아이콘 클릭
+<span class="k">2.</span> 프로필 페이지에서 정보 확인
+<span class="k">3.</span> 편집 버튼으로 이름 변경 테스트
+
+<span class="gu">## 스크린샷</span>
+![<span class="nt">프로필 페이지</span>](<span class="na">screenshots/profile.png</span>)
+
+<span class="gu">## 체크리스트</span>
+<span class="k">- [x]</span> 로컬에서 테스트 완료
+<span class="k">- [x]</span> 단위 테스트 추가
+<span class="k">- [x]</span> 문서 업데이트
+<span class="k">- [x]</span> 관련 이슈: Closes <span class="ni">#123</span>
+</code></pre></div>
+
+<p><strong>관련 이슈 연결</strong></p>
+<p><code>Closes #123</code>, <code>Fixes #456</code>, <code>Resolves #789</code> 키워드를 사용하면 PR 머지 시 자동으로 이슈가 닫힙니다.</p>
+<blockquote>
+<p><strong>주의</strong>: 여러 기능을 하나의 PR에 넣으면 리뷰어가 부담을 느끼고, 리뷰 시간이 길어지며, 일부만 수정하고 싶어도 전체를 다시 검토해야 합니다.</p>
+</blockquote>
+<h3 id="_3">절 요약<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>PR은 코드 병합 전 리뷰를 요청하는 GitHub의 핵심 협업 도구입니다.</li>
+<li>코드 품질 향상, 지식 공유, 문서화, CI 자동화의 장점이 있습니다.</li>
+<li>브랜치 생성 → 커밋 → push → PR 생성 → 리뷰 → 수정 → 승인 → 머지의 워크플로우를 따릅니다.</li>
+<li>좋은 PR은 작고, 명확한 제목과 상세한 설명을 가지며, 관련 이슈를 연결합니다.</li>
+</ul>
+<hr />
+<h2 id="pr-ch_06_s02">PR 생성과 관리 (ch_06_s02)<a class="headerlink" href="#pr-ch_06_s02" title="Permanent link">&para;</a></h2>
+<h3 id="_4">도입<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>PR의 개념을 이해했다면 이제 실제로 PR을 생성하고 관리하는 방법을 배울 차례입니다.
+이 절에서는 웹 UI와 GitHub CLI 두 가지 방법으로 PR을 생성하고, Draft PR과 PR Template을 활용하는 실무 기술을 익힙니다.</p>
+<h3 id="_5">핵심 개념 설명<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<h4 id="ui-pr">웹 UI에서 PR 생성하기<a class="headerlink" href="#ui-pr" title="Permanent link">&para;</a></h4>
+<p>GitHub 웹사이트에서 PR을 만드는 가장 직관적인 방법입니다.</p>
+<p><strong>1단계: 저장소 이동</strong></p>
+<p>GitHub에서 프로젝트 저장소로 이동합니다.</p>
+<p><strong>2단계: Pull requests 탭 클릭</strong></p>
+<p>상단 메뉴에서 "Pull requests" 탭을 선택합니다.</p>
+<p><strong>3단계: New pull request 클릭</strong></p>
+<p>초록색 "New pull request" 버튼을 클릭합니다.</p>
+<p><strong>4단계: 브랜치 선택</strong></p>
+<ul>
+<li><strong>base</strong>: 병합 대상 브랜치 (일반적으로 <code>main</code> 또는 <code>develop</code>)</li>
+<li><strong>compare</strong>: 내 작업 브랜치 (예: <code>feature/user-profile</code>)</li>
+</ul>
+<p>GitHub은 두 브랜치 간 차이를 자동으로 표시합니다.</p>
+<p><strong>5단계: Create pull request 클릭</strong></p>
+<p>변경 사항을 확인한 후 "Create pull request" 버튼을 클릭합니다.</p>
+<p><strong>6단계: 제목과 설명 작성</strong></p>
+<ul>
+<li><strong>제목</strong>: 50자 이내의 명확한 요약</li>
+<li><strong>설명</strong>: 변경 이유, 테스트 방법, 관련 이슈 등 상세 정보</li>
+</ul>
+<p><strong>7단계: 메타데이터 설정</strong></p>
+<p>우측 사이드바에서 다음을 지정할 수 있습니다.</p>
+<ul>
+<li><strong>Reviewers</strong>: 리뷰를 요청할 팀원 (최소 1명 권장)</li>
+<li><strong>Assignees</strong>: PR 담당자 (보통 작성자 본인)</li>
+<li><strong>Labels</strong>: 타입 분류 (<code>bug</code>, <code>enhancement</code>, <code>documentation</code> 등)</li>
+<li><strong>Projects</strong>: 프로젝트 보드에 연결</li>
+<li><strong>Milestone</strong>: 릴리스 일정과 연결</li>
+</ul>
+<p><strong>8단계: Create pull request</strong></p>
+<p>모든 정보를 입력한 후 "Create pull request" 버튼을 최종 클릭합니다.</p>
+<blockquote>
+<p><strong>팁</strong>: PR 생성 후에도 제목, 설명, 메타데이터를 언제든지 수정할 수 있습니다. 리뷰 도중 추가 정보가 필요하면 편집하세요.</p>
+</blockquote>
+<h4 id="github-cligh-pr-create-pr">GitHub CLI(gh pr create)로 PR 생성하기<a class="headerlink" href="#github-cligh-pr-create-pr" title="Permanent link">&para;</a></h4>
+<p>터미널을 선호하는 개발자를 위한 빠른 방법입니다.</p>
+<p><strong>기본 사용법</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>feature/user-profile
+$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create
+</code></pre></div>
+
+<p>인터랙티브 모드에서 질문에 답변하며 PR을 생성합니다.</p>
+<div class="codehilite"><pre><span></span><code>? Where should we push the &#39;feature/user-profile&#39; branch? myusername/myrepo
+? Title feat: 사용자 프로필 페이지 추가
+? Body &lt;Received&gt;
+? What&#39;s next? Submit
+</code></pre></div>
+
+<p><strong>명령줄에서 모든 옵션 지정</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;feat: 사용자 프로필 페이지 추가&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--body<span class="w"> </span><span class="s2">&quot;Issue #123을 해결합니다. 프로필 페이지를 추가했습니다.&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--base<span class="w"> </span>main<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--head<span class="w"> </span>feature/user-profile<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--reviewer<span class="w"> </span>alice,bob<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--label<span class="w"> </span>enhancement<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--assignee<span class="w"> </span>@me
+</code></pre></div>
+
+<p><strong>파일에서 설명 읽기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;feat: 프로필 추가&quot;</span><span class="w"> </span>--body-file<span class="w"> </span>pr-description.md
+</code></pre></div>
+
+<p><strong>PR 생성 후 브라우저로 열기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--web
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 팀의 워크플로우에 맞는 방법을 선택하세요. 웹 UI는 시각적이고 직관적이며, CLI는 빠르고 스크립트 자동화에 유리합니다.</p>
+</blockquote>
+<h4 id="draft-pr-pr">Draft PR: 작업 중인 PR 표시<a class="headerlink" href="#draft-pr-pr" title="Permanent link">&para;</a></h4>
+<p><strong>Draft PR</strong>은 아직 리뷰 준비가 완료되지 않은 PR을 표시하는 기능입니다.</p>
+<p><strong>사용 시나리오</strong></p>
+<ul>
+<li>초기 피드백을 받고 싶을 때</li>
+<li>CI 테스트를 먼저 실행하고 싶을 때</li>
+<li>작업 진행 상황을 팀에게 공유하고 싶을 때</li>
+<li>나중에 본격적인 리뷰를 요청하려고 할 때</li>
+</ul>
+<p><strong>웹 UI에서 Draft PR 만들기</strong></p>
+<p>"Create pull request" 버튼 옆 드롭다운에서 "Create draft pull request"를 선택합니다.</p>
+<p><strong>GitHub CLI로 Draft PR 만들기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--draft
+</code></pre></div>
+
+<p><strong>Draft에서 Ready for review로 전환</strong></p>
+<p>PR 페이지 하단에서 "Ready for review" 버튼을 클릭하면 리뷰어에게 알림이 전송됩니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># CLI로 전환</span>
+$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>ready<span class="w"> </span>&lt;PR번호&gt;
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: Draft PR은 병합할 수 없습니다. Ready for review로 전환해야 Merge 버튼이 활성화됩니다.</p>
+</blockquote>
+<h4 id="pr-template">PR Template 설정<a class="headerlink" href="#pr-template" title="Permanent link">&para;</a></h4>
+<p><strong>PR Template</strong>을 설정하면 PR 생성 시 자동으로 템플릿 내용이 설명란에 채워집니다.</p>
+<p><strong>템플릿 파일 위치</strong></p>
+<p><code>.github/pull_request_template.md</code> 파일을 저장소 루트에 생성합니다.</p>
+<p><strong>기본 템플릿 예시</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## 변경 사항 요약</span>
+&lt;!-- 무엇을 바꿨는지 간단히 설명 --&gt;
+
+<span class="gu">## 변경 이유</span>
+&lt;!-- 왜 이 변경이 필요한지 설명 --&gt;
+
+<span class="gu">## 테스트 방법</span>
+&lt;!-- 리뷰어가 어떻게 테스트할 수 있는지 안내 --&gt;
+1.
+2.
+3.
+
+<span class="gu">## 스크린샷 (선택)</span>
+&lt;!-- UI 변경이 있다면 스크린샷 첨부 --&gt;
+
+<span class="gu">## 체크리스트</span>
+<span class="k">- [ ]</span> 로컬에서 테스트 완료
+<span class="k">- [ ]</span> 단위 테스트 추가/업데이트
+<span class="k">- [ ]</span> 문서 업데이트 (필요 시)
+<span class="k">- [ ]</span> 관련 이슈: Closes #
+
+<span class="gu">## 추가 참고사항</span>
+&lt;!-- 리뷰어가 알아야 할 추가 정보 --&gt;
+</code></pre></div>
+
+<p><strong>여러 템플릿 사용 (고급)</strong></p>
+<p><code>.github/PULL_REQUEST_TEMPLATE/</code> 디렉토리에 여러 템플릿을 저장하고 선택할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code>.github/
+└── PULL_REQUEST_TEMPLATE/
+    ├── bug_fix.md
+    ├── feature.md
+    └── documentation.md
+</code></pre></div>
+
+<p>PR 생성 시 쿼리 파라미터로 템플릿 지정:</p>
+<div class="codehilite"><pre><span></span><code>https://github.com/user/repo/compare/main...feature?template=feature.md
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: PR Template은 팀의 리뷰 프로세스를 표준화하고, PR 작성자가 중요한 정보를 누락하지 않도록 도와줍니다.</p>
+</blockquote>
+<h4 id="reviewer-assignee-label">Reviewer, Assignee, Label 지정<a class="headerlink" href="#reviewer-assignee-label" title="Permanent link">&para;</a></h4>
+<p><strong>Reviewer</strong></p>
+<p>리뷰를 요청할 팀원을 지정합니다.
+일반적으로 1~2명을 지정하며, 코드 소유자나 해당 영역의 전문가를 선택합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--reviewer<span class="w"> </span>alice,bob
+</code></pre></div>
+
+<p><strong>Assignee</strong></p>
+<p>PR의 담당자를 지정합니다.
+보통 PR 작성자 본인을 지정하여 책임 소재를 명확히 합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--assignee<span class="w"> </span>@me
+</code></pre></div>
+
+<p><strong>Label</strong></p>
+<p>PR의 타입이나 우선순위를 분류합니다.</p>
+<ul>
+<li><code>bug</code>: 버그 수정</li>
+<li><code>enhancement</code>: 기능 추가</li>
+<li><code>documentation</code>: 문서 작업</li>
+<li><code>breaking change</code>: 호환성이 깨지는 변경</li>
+<li><code>needs review</code>: 리뷰 필요</li>
+<li><code>work in progress</code>: 작업 중</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--label<span class="w"> </span>bug,urgent
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: CODEOWNERS 파일을 설정하면 특정 파일 수정 시 자동으로 해당 코드 소유자가 리뷰어로 지정됩니다.</p>
+</blockquote>
+<h3 id="_6">절 요약<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>웹 UI에서 "New pull request"로 직관적으로 PR을 생성할 수 있습니다.</li>
+<li>GitHub CLI(<code>gh pr create</code>)로 터미널에서 빠르게 PR을 만들 수 있습니다.</li>
+<li>Draft PR로 작업 중인 PR을 표시하고 초기 피드백을 받을 수 있습니다.</li>
+<li>PR Template으로 PR 작성을 표준화하고 중요 정보 누락을 방지합니다.</li>
+<li>Reviewer, Assignee, Label을 지정하여 PR을 체계적으로 관리합니다.</li>
+</ul>
+<hr />
+<h2 id="ch_06_s03">코드 리뷰 수행하기 (ch_06_s03)<a class="headerlink" href="#ch_06_s03" title="Permanent link">&para;</a></h2>
+<h3 id="_7">도입<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>PR을 만들었다면 이제 리뷰어의 역할을 이해해야 합니다.
+효과적인 코드 리뷰는 버그를 줄이고 코드 품질을 높이며 팀 전체의 역량을 끌어올립니다.
+이 절에서는 GitHub의 코드 리뷰 기능을 활용하여 건설적인 피드백을 제공하는 방법을 배웁니다.</p>
+<h3 id="_8">핵심 개념 설명<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<h4 id="files-changed">Files Changed 탭에서 변경 사항 검토<a class="headerlink" href="#files-changed" title="Permanent link">&para;</a></h4>
+<p><strong>Files Changed 탭 열기</strong></p>
+<p>PR 페이지에서 "Files changed" 탭을 클릭하면 모든 변경 사항을 파일별로 확인할 수 있습니다.</p>
+<p><strong>코드 색상</strong></p>
+<ul>
+<li><strong>초록색 배경</strong>: 추가된 줄 (<code>+</code>)</li>
+<li><strong>빨간색 배경</strong>: 삭제된 줄 (<code>-</code>)</li>
+<li><strong>흰색 배경</strong>: 맥락을 위한 변경되지 않은 줄</li>
+</ul>
+<p><strong>뷰 모드 전환</strong></p>
+<ul>
+<li><strong>Unified</strong>: 변경 전후를 하나의 창에 표시 (기본값)</li>
+<li><strong>Split</strong>: 변경 전/후를 좌우로 나눠 표시</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>Unified 뷰:
+  10  function login(username, password) {
+- 11    return api.post(&#39;/login&#39;, { username, password });
++ 11    return api.post(&#39;/auth/login&#39;, { username, password });
+  12  }
+
+Split 뷰:
+[이전]                          [변경 후]
+function login(user, pass) {    function login(username, password) {
+  return api.post(&#39;/login&#39;,       return api.post(&#39;/auth/login&#39;,
+    { user, pass });                { username, password });
+}                               }
+</code></pre></div>
+
+<p><strong>변경 파일 필터링</strong></p>
+<p>파일이 많을 때 체크박스로 검토 완료한 파일을 표시할 수 있습니다.
+"Viewed" 체크를 하면 해당 파일이 접히고 진행 상황을 추적할 수 있습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 큰 PR은 논리적인 순서로 파일을 검토하세요. 예를 들어 모델 → 컨트롤러 → 뷰 순서로 리뷰하면 맥락을 이해하기 쉽습니다.</p>
+</blockquote>
+<h4 id="_9">라인별 코멘트 달기<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
+<p><strong>단일 라인 코멘트</strong></p>
+<ol>
+<li>코멘트를 달고 싶은 줄 번호 옆 <code>+</code> 아이콘 클릭</li>
+<li>코멘트 작성</li>
+<li>선택:</li>
+<li><strong>Add single comment</strong>: 즉시 게시 (다른 사람이 바로 볼 수 있음)</li>
+<li><strong>Start a review</strong>: 리뷰에 추가 (나중에 일괄 게시)</li>
+</ol>
+<p><strong>여러 라인에 코멘트</strong></p>
+<ol>
+<li>시작 줄의 줄 번호 클릭 후 드래그하여 끝 줄 선택</li>
+<li><code>+</code> 아이콘 클릭하여 코멘트 작성</li>
+<li>선택한 여러 줄에 대한 코멘트 작성</li>
+</ol>
+<p><strong>코멘트 작성 요령</strong></p>
+<div class="codehilite"><pre><span></span><code>좋은 코멘트:
+<span class="k">-</span><span class="w"> </span>이 부분에서 <span class="sb">`username`</span>이 null일 경우를 처리하는 게 좋을 것 같습니다. 예를 들어:
+<span class="sb">  ```javascript</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">username</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">&#39;Username is required&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="sb">  ```</span>
+
+나쁜 코멘트:
+<span class="k">-</span><span class="w"> </span>이거 틀렸어요.
+<span class="k">-</span><span class="w"> </span>왜 이렇게 했나요?
+</code></pre></div>
+
+<p><strong>응답하기</strong></p>
+<p>코멘트에 대한 토론이 가능합니다. 리뷰어와 작성자가 주고받으며 최선의 해결책을 찾습니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 긍정적이고 건설적인 피드백을 제공하세요. "이렇게 하면 어떨까요?"라는 제안이 "왜 이렇게 했나요?"라는 질문보다 효과적입니다.</p>
+</blockquote>
+<h4 id="suggestion">Suggestion 기능으로 코드 수정 제안<a class="headerlink" href="#suggestion" title="Permanent link">&para;</a></h4>
+<p><strong>Suggestion이란</strong></p>
+<p>리뷰어가 코드를 직접 수정하여 제안하는 기능입니다.
+PR 작성자는 클릭 한 번으로 제안을 적용할 수 있습니다.</p>
+<p><strong>Suggestion 작성</strong></p>
+<p>코멘트 작성 중 툴바에서 <code>±</code> 아이콘(Insert a suggestion)을 클릭하거나 Markdown 직접 작성:</p>
+<div class="codehilite"><pre><span></span><code>이 부분을 상수로 분리하는 게 좋겠습니다:
+
+​```suggestion
+const MAX_LOGIN_ATTEMPTS = 3;
+if (attempts &gt; MAX_LOGIN_ATTEMPTS) {
+  throw new Error(&#39;Too many login attempts&#39;);
+}
+​```
+</code></pre></div>
+
+<p>GitHub은 자동으로 현재 코드와 제안 코드를 비교하여 표시합니다.</p>
+<p><strong>Suggestion 적용</strong></p>
+<p>PR 작성자는 "Commit suggestion" 버튼을 클릭하면 제안이 새 커밋으로 자동 추가됩니다.</p>
+<p><strong>여러 Suggestion 한 번에 적용</strong></p>
+<p>"Add suggestion to batch" 버튼으로 여러 제안을 모은 후 "Commit suggestions" 클릭하여 하나의 커밋으로 적용할 수 있습니다.</p>
+<blockquote>
+<p><strong>주의</strong>: Suggestion은 단일 파일의 연속된 줄에만 적용됩니다. 여러 파일에 걸친 변경은 수동으로 커밋해야 합니다.</p>
+</blockquote>
+<h4 id="approve-request-changes-comment">리뷰 완료: Approve, Request Changes, Comment<a class="headerlink" href="#approve-request-changes-comment" title="Permanent link">&para;</a></h4>
+<p>리뷰를 마치면 전체 피드백을 제출합니다.</p>
+<p><strong>Finish your review 클릭</strong></p>
+<p>"Files changed" 탭 상단의 "Finish your review" 또는 "Review changes" 버튼을 클릭합니다.</p>
+<p><strong>세 가지 리뷰 타입</strong></p>
+<p><strong>1. Comment (코멘트만)</strong></p>
+<p>의견을 남기지만 승인이나 거부는 하지 않습니다.
+질문이나 제안만 있을 때 사용합니다.</p>
+<p><strong>2. Approve (승인)</strong></p>
+<p>코드가 병합 가능한 상태라고 승인합니다.
+브랜치 보호 규칙에서 필수 승인 수를 설정한 경우, 해당 수만큼 승인이 모여야 병합할 수 있습니다.</p>
+<p><strong>3. Request changes (변경 요청)</strong></p>
+<p>반드시 수정이 필요한 문제가 있을 때 사용합니다.
+변경 요청 상태에서는 병합이 차단됩니다. (브랜치 보호 규칙 설정 시)</p>
+<p><strong>리뷰 코멘트 작성</strong></p>
+<div class="codehilite"><pre><span></span><code>전반적으로 좋은 구현입니다! 몇 가지 개선 제안을 남겼습니다.
+
+주요 의견:
+<span class="k">-</span><span class="w"> </span>입력 검증 로직 추가 필요
+<span class="k">-</span><span class="w"> </span>에러 처리 개선 권장
+<span class="k">-</span><span class="w"> </span>단위 테스트가 누락된 것 같습니다
+
+수정 후 재요청 부탁드립니다.
+</code></pre></div>
+
+<p><strong>제출</strong></p>
+<p>"Submit review" 버튼을 클릭하여 모든 코멘트를 한 번에 게시합니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 사소한 문제(코딩 스타일, 오타)는 Comment로, 버그나 보안 문제는 Request changes로 처리하세요.</p>
+</blockquote>
+<h4 id="_10">효과적인 코드 리뷰를 위한 체크리스트<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
+<p><strong>기능성</strong>
+- [ ] 코드가 의도한 대로 동작하는가?
+- [ ] 엣지 케이스를 처리하는가?
+- [ ] 에러 처리가 적절한가?</p>
+<p><strong>가독성</strong>
+- [ ] 변수/함수 이름이 명확한가?
+- [ ] 복잡한 로직에 주석이 있는가?
+- [ ] 코딩 스타일 가이드를 따르는가?</p>
+<p><strong>성능</strong>
+- [ ] 불필요한 반복이나 연산이 없는가?
+- [ ] 데이터베이스 쿼리가 효율적인가?
+- [ ] 메모리 누수 가능성은 없는가?</p>
+<p><strong>보안</strong>
+- [ ] 사용자 입력을 검증하는가?
+- [ ] SQL 인젝션, XSS 등 취약점이 없는가?
+- [ ] 민감한 정보가 로그에 노출되지 않는가?</p>
+<p><strong>테스트</strong>
+- [ ] 새 기능에 대한 테스트가 있는가?
+- [ ] 기존 테스트가 모두 통과하는가?
+- [ ] 테스트 커버리지가 충분한가?</p>
+<p><strong>문서</strong>
+- [ ] README나 API 문서가 업데이트되었는가?
+- [ ] 복잡한 알고리즘에 설명이 있는가?</p>
+<blockquote>
+<p><strong>팁</strong>: 리뷰에 30분 이상 걸린다면 PR이 너무 큰 것입니다. 작성자에게 더 작은 PR로 나눌 것을 제안하세요.</p>
+</blockquote>
+<h3 id="_11">절 요약<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Files Changed 탭에서 변경 사항을 파일별로 검토합니다.</li>
+<li>라인별 코멘트로 구체적인 피드백을 제공합니다.</li>
+<li>Suggestion 기능으로 코드 수정을 직접 제안할 수 있습니다.</li>
+<li>Approve, Request changes, Comment 세 가지 리뷰 타입으로 최종 의견을 제출합니다.</li>
+<li>효과적인 리뷰는 기능성, 가독성, 성능, 보안, 테스트, 문서를 모두 검토합니다.</li>
+</ul>
+<hr />
+<h2 id="ch_06_s04">머지 전략 선택하기 (ch_06_s04)<a class="headerlink" href="#ch_06_s04" title="Permanent link">&para;</a></h2>
+<h3 id="_12">도입<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p>PR이 승인되었다면 이제 main 브랜치에 병합할 차례입니다.
+그런데 GitHub은 세 가지 머지 전략을 제공합니다.
+어떤 전략을 선택하느냐에 따라 커밋 히스토리의 모양이 완전히 달라집니다.
+이 절에서는 각 전략의 특징을 이해하고 프로젝트에 맞는 선택을 할 수 있도록 안내합니다.</p>
+<h3 id="_13">핵심 개념 설명<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    subgraph Initial["초기 상태"]
+        direction LR
+        I_Main["main: A-B"]
+        I_Feature["feature: A-B-C-D-E"]
+
+        style I_Main fill:#e8f5e9,stroke:#388e3c
+        style I_Feature fill:#e1f5fe,stroke:#0288d1
+    end
+
+    subgraph MergeCommit["Merge Commit 결과"]
+        direction LR
+        MC_A["A"] --> MC_B["B"]
+        MC_B --> MC_C["C"]
+        MC_B --> MC_D["D"]
+        MC_C --> MC_M["M<br/>(병합 커밋)"]
+        MC_D --> MC_E["E"]
+        MC_E --> MC_M
+
+        style MC_A fill:#e1f5fe
+        style MC_B fill:#e1f5fe
+        style MC_C fill:#e8f5e9
+        style MC_D fill:#fff3e0
+        style MC_E fill:#fff3e0
+        style MC_M fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    end
+
+    subgraph Squash["Squash and Merge 결과"]
+        direction LR
+        S_A["A"] --> S_B["B"]
+        S_B --> S_S["S<br/>(압축된 커밋:<br/>C+D+E)"]
+
+        style S_A fill:#e1f5fe
+        style S_B fill:#e1f5fe
+        style S_S fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+    end
+
+    subgraph Rebase["Rebase and Merge 결과"]
+        direction LR
+        R_A["A"] --> R_B["B"]
+        R_B --> R_C["C'"]
+        R_C --> R_D["D'"]
+        R_D --> R_E["E'"]
+
+        style R_A fill:#e1f5fe
+        style R_B fill:#e1f5fe
+        style R_C fill:#fff3e0
+        style R_D fill:#fff3e0
+        style R_E fill:#fff3e0
+    end
+
+    Initial --> MergeCommit
+    Initial --> Squash
+    Initial --> Rebase
+
+    MergeCommit --> Note1["모든 커밋 보존<br/>병합 히스토리 명확"]
+    Squash --> Note2["깔끔한 히스토리<br/>세부 커밋 정보 손실"]
+    Rebase --> Note3["선형 히스토리<br/>커밋 해시 변경"]
+
+    style Note1 fill:#f3e5f5
+    style Note2 fill:#e8f5e9
+    style Note3 fill:#fff3e0
+
+</div>
+<figcaption>세 가지 머지 전략 비교</figcaption>
+</figure>
+
+<h4 id="create-a-merge-commit">Create a Merge Commit: 모든 커밋 보존<a class="headerlink" href="#create-a-merge-commit" title="Permanent link">&para;</a></h4>
+<p><strong>동작 방식</strong></p>
+<p>feature 브랜치의 모든 커밋을 유지하고 새로운 병합 커밋을 생성합니다.</p>
+<div class="codehilite"><pre><span></span><code>main:     A --- B --- C ----------- M
+                       \           /
+feature:                D --- E ---
+</code></pre></div>
+
+<p>M은 병합 커밋이며, 두 부모(C와 E)를 가집니다.</p>
+<p><strong>장점</strong></p>
+<ul>
+<li>완전한 히스토리 보존: 모든 커밋과 작업 과정이 기록됩니다</li>
+<li>브랜치 흐름 명확: 어디서 분기했고 어디서 합쳐졌는지 명확합니다</li>
+<li>되돌리기 쉬움: <code>git revert M</code>으로 전체 기능을 한 번에 되돌릴 수 있습니다</li>
+</ul>
+<p><strong>단점</strong></p>
+<ul>
+<li>히스토리 복잡도: 브랜치가 많으면 그래프가 복잡해집니다</li>
+<li>병합 커밋 증가: 작은 PR도 병합 커밋을 만들어 히스토리가 길어집니다</li>
+</ul>
+<p><strong>사용 시나리오</strong></p>
+<ul>
+<li>작은 팀에서 상세한 히스토리를 원할 때</li>
+<li>긴 수명의 기능 브랜치를 개발할 때</li>
+<li>병합 시점을 명확히 기록하고 싶을 때</li>
+</ul>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: feature 브랜치의 커밋이 논리적으로 의미 있게 나뉘어 있다면 Merge Commit이 좋습니다.</p>
+</blockquote>
+<h4 id="squash-and-merge">Squash and Merge: 커밋을 하나로 압축<a class="headerlink" href="#squash-and-merge" title="Permanent link">&para;</a></h4>
+<p><strong>동작 방식</strong></p>
+<p>feature 브랜치의 모든 커밋을 하나의 커밋으로 합친 후 main에 추가합니다.</p>
+<div class="codehilite"><pre><span></span><code>main:     A --- B --- C --- S
+
+feature:                D --- E ---  (병합 후 삭제)
+</code></pre></div>
+
+<p>S는 D와 E의 변경 사항을 모두 포함한 단일 커밋입니다.</p>
+<p><strong>장점</strong></p>
+<ul>
+<li>깔끔한 선형 히스토리: main 브랜치가 간결하고 읽기 쉽습니다</li>
+<li>PR 단위 추적: 각 PR이 하나의 커밋으로 표현되어 변경 단위가 명확합니다</li>
+<li>작은 커밋 정리: 실험적 커밋, 오타 수정 등이 히스토리에서 사라집니다</li>
+</ul>
+<p><strong>단점</strong></p>
+<ul>
+<li>세부 히스토리 소실: feature 브랜치의 커밋 메시지와 작업 과정이 사라집니다</li>
+<li>원본 작성자 정보: Co-authored-by 태그를 수동으로 추가해야 합니다</li>
+<li>되돌리기 어려움: 큰 기능을 부분적으로만 되돌리기 어렵습니다</li>
+</ul>
+<p><strong>Squash 커밋 메시지 작성</strong></p>
+<div class="codehilite"><pre><span></span><code>feat: 사용자 프로필 페이지 추가 (#123)
+
+사용자가 자신의 프로필 정보를 확인하고 편집할 수 있는 페이지를 추가했습니다.
+
+변경 사항:
+- 프로필 조회 API 엔드포인트
+- 프로필 편집 폼 컴포넌트
+- 프로필 이미지 업로드 기능
+
+테스트:
+- 단위 테스트 추가
+- E2E 테스트 추가
+</code></pre></div>
+
+<p><strong>사용 시나리오</strong></p>
+<ul>
+<li>오픈소스 프로젝트: 깔끔한 히스토리를 원할 때</li>
+<li>큰 팀: 많은 PR이 병합되는 프로젝트</li>
+<li>PR 단위 관리: 각 PR을 하나의 논리적 단위로 관리할 때</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: Squash and Merge 사용 시 PR 설명을 상세히 작성하세요. 이것이 커밋 메시지의 본문이 됩니다.</p>
+</blockquote>
+<h4 id="rebase-and-merge">Rebase and Merge: 선형 히스토리 유지<a class="headerlink" href="#rebase-and-merge" title="Permanent link">&para;</a></h4>
+<p><strong>동작 방식</strong></p>
+<p>feature 브랜치의 커밋들을 main의 최신 커밋 위에 다시 적용합니다.</p>
+<div class="codehilite"><pre><span></span><code>병합 전:
+main:     A --- B --- C
+                       \
+feature:                D --- E
+
+병합 후:
+main:     A --- B --- C --- D&#39; --- E&#39;
+</code></pre></div>
+
+<p>D'와 E'는 D와 E의 내용은 같지만 새로운 커밋 해시를 가집니다.</p>
+<p><strong>장점</strong></p>
+<ul>
+<li>완전 선형 히스토리: 병합 커밋이 없어 히스토리가 일직선입니다</li>
+<li>모든 커밋 보존: feature의 각 커밋이 main에 그대로 포함됩니다</li>
+<li>bisect 친화적: 선형 히스토리에서 이진 탐색이 효율적입니다</li>
+</ul>
+<p><strong>단점</strong></p>
+<ul>
+<li>커밋 해시 변경: 원본 커밋과 다른 해시를 가져 혼란 가능</li>
+<li>Rebase 이해 필요: 팀원이 rebase 개념을 이해해야 합니다</li>
+<li>병합 시점 불명확: 언제 병합되었는지 히스토리만으로는 알기 어렵습니다</li>
+</ul>
+<p><strong>사용 시나리오</strong></p>
+<ul>
+<li>선형 히스토리를 선호하는 팀</li>
+<li>각 커밋이 의미 있고 독립적일 때</li>
+<li>Git 고급 사용자로 구성된 팀</li>
+</ul>
+<blockquote>
+<p><strong>주의</strong>: Rebase and Merge는 커밋 해시를 변경하므로, feature 브랜치를 다른 개발자와 공유 중이라면 주의해야 합니다.</p>
+</blockquote>
+<h4 id="_14">세 가지 전략 비교와 선택 기준<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Merge Commit</th>
+<th>Squash and Merge</th>
+<th>Rebase and Merge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>히스토리</td>
+<td>브랜치 구조 유지</td>
+<td>선형, PR 단위</td>
+<td>완전 선형, 커밋 단위</td>
+</tr>
+<tr>
+<td>커밋 수</td>
+<td>모두 보존 + 병합 커밋</td>
+<td>1개로 압축</td>
+<td>모두 보존</td>
+</tr>
+<tr>
+<td>되돌리기</td>
+<td>병합 커밋 revert</td>
+<td>Squash 커밋 revert</td>
+<td>각 커밋 revert</td>
+</tr>
+<tr>
+<td>복잡도</td>
+<td>높음 (브랜치 많을 때)</td>
+<td>낮음</td>
+<td>낮음</td>
+</tr>
+<tr>
+<td>학습 곡선</td>
+<td>낮음</td>
+<td>낮음</td>
+<td>높음 (rebase 이해 필요)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>프로젝트 유형별 권장</strong></p>
+<table>
+<thead>
+<tr>
+<th>프로젝트 유형</th>
+<th>권장 전략</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>오픈소스</td>
+<td>Squash and Merge</td>
+<td>깔끔한 히스토리, 기여자 커밋 스타일 통일</td>
+</tr>
+<tr>
+<td>큰 조직</td>
+<td>Squash and Merge</td>
+<td>많은 PR 관리, PR 단위 추적</td>
+</tr>
+<tr>
+<td>작은 팀 (3~5명)</td>
+<td>Merge Commit</td>
+<td>상세 히스토리, 협업 과정 기록</td>
+</tr>
+<tr>
+<td>선형 히스토리 선호</td>
+<td>Rebase and Merge</td>
+<td>Git 고급 사용자, bisect 활용</td>
+</tr>
+</tbody>
+</table>
+<h4 id="auto-merge">Auto-merge 설정<a class="headerlink" href="#auto-merge" title="Permanent link">&para;</a></h4>
+<p><strong>Auto-merge란</strong></p>
+<p>필수 조건(리뷰 승인, CI 통과)이 충족되면 자동으로 병합하는 기능입니다.</p>
+<p><strong>사용법</strong></p>
+<div class="codehilite"><pre><span></span><code>1. PR 페이지에서 &quot;Enable auto-merge&quot; 클릭
+2. 머지 전략 선택 (Merge commit / Squash / Rebase)
+3. 조건 충족 시 자동 병합 실행
+</code></pre></div>
+
+<p><strong>CLI로 설정</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>merge<span class="w"> </span>&lt;PR번호&gt;<span class="w"> </span>--auto<span class="w"> </span>--squash
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 팀 전체가 하나의 머지 전략을 일관되게 사용하세요. 프로젝트 Settings → General → Pull Requests에서 허용할 전략을 제한할 수 있습니다.</p>
+</blockquote>
+<h3 id="_15">절 요약<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Merge Commit은 모든 커밋을 보존하고 병합 커밋을 생성합니다.</li>
+<li>Squash and Merge는 PR의 모든 커밋을 하나로 압축합니다.</li>
+<li>Rebase and Merge는 커밋을 main 위에 재적용하여 선형 히스토리를 만듭니다.</li>
+<li>프로젝트 특성과 팀 규모에 따라 적절한 전략을 선택하세요.</li>
+<li>Auto-merge로 조건 충족 시 자동 병합을 설정할 수 있습니다.</li>
+</ul>
+<hr />
+<h2 id="pr-ch_06_s05">PR 충돌 해결과 업데이트 (ch_06_s05)<a class="headerlink" href="#pr-ch_06_s05" title="Permanent link">&para;</a></h2>
+<h3 id="_16">도입<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>PR을 만든 후 다른 팀원이 먼저 같은 파일을 수정한 PR을 병합하면 어떻게 될까요?
+충돌이 발생합니다. 충돌은 두려워할 일이 아니라 협업 과정에서 자연스럽게 발생하는 상황입니다.
+이 절에서는 PR에서 충돌을 해결하고 리뷰 피드백을 반영하는 방법을 배웁니다.</p>
+<h3 id="_17">핵심 개념 설명<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h4 id="pr_3">PR에서 충돌이 발생했을 때<a class="headerlink" href="#pr_3" title="Permanent link">&para;</a></h4>
+<p><strong>충돌 알림</strong></p>
+<p>PR 페이지에 다음 메시지가 표시됩니다.</p>
+<div class="codehilite"><pre><span></span><code>This branch has conflicts that must be resolved
+Use the web editor or the command line to resolve conflicts before the branch can be merged.
+</code></pre></div>
+
+<p><strong>충돌 발생 원인</strong></p>
+<ol>
+<li>같은 파일의 같은 줄을 다르게 수정</li>
+<li>한쪽에서 파일을 삭제하고 다른 쪽에서 수정</li>
+<li>파일 이름을 다르게 변경</li>
+</ol>
+<p><strong>충돌 해결 방법 선택</strong></p>
+<ul>
+<li>간단한 충돌: 웹 UI에서 해결</li>
+<li>복잡한 충돌: 로컬 환경에서 해결</li>
+</ul>
+<h4 id="ui">웹 UI에서 충돌 해결하기<a class="headerlink" href="#ui" title="Permanent link">&para;</a></h4>
+<p><strong>1단계: Resolve conflicts 클릭</strong></p>
+<p>PR 페이지의 "Resolve conflicts" 버튼을 클릭합니다.</p>
+<p><strong>2단계: 충돌 마커 확인</strong></p>
+<p>GitHub 에디터에서 충돌이 발생한 파일이 열립니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">greet</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="o">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span><span class="w"> </span><span class="nx">feature</span><span class="o">/</span><span class="nx">greeting</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="sb">`Hello, </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
+<span class="o">=======</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="sb">`Hi, </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
+<span class="o">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="w"> </span><span class="nx">main</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; feature/greeting</code>: 내 브랜치의 변경</li>
+<li><code>=======</code>: 구분선</li>
+<li><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code>: 대상 브랜치(main)의 변경</li>
+</ul>
+<p><strong>3단계: 충돌 해결</strong></p>
+<p>충돌 마커를 제거하고 최종 코드를 작성합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">greet</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="sb">`Hello, </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>또는 두 변경을 조합:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">greet</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="sb">`Hello and hi, </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>4단계: Mark as resolved</strong></p>
+<p>우측 상단의 "Mark as resolved" 버튼을 클릭합니다.</p>
+<p><strong>5단계: Commit merge</strong></p>
+<p>모든 충돌을 해결한 후 "Commit merge" 버튼을 클릭하여 충돌 해결 커밋을 추가합니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 웹 UI는 간단한 텍스트 충돌에만 적합합니다. 여러 파일에 걸친 복잡한 충돌은 로컬에서 해결하는 것이 좋습니다.</p>
+</blockquote>
+<h4 id="push">로컬에서 충돌 해결 후 push하기<a class="headerlink" href="#push" title="Permanent link">&para;</a></h4>
+<p><strong>1단계: 브랜치 전환</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>feature/my-feature
+</code></pre></div>
+
+<p><strong>2단계: main의 최신 변경 가져오기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>origin
+</code></pre></div>
+
+<p><strong>3단계: main 브랜치 병합</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>origin/main
+<span class="c1"># 출력:</span>
+<span class="c1"># Auto-merging src/greet.js</span>
+<span class="c1"># CONFLICT (content): Merge conflict in src/greet.js</span>
+<span class="c1"># Automatic merge failed; fix conflicts and then commit the result.</span>
+</code></pre></div>
+
+<p><strong>4단계: 충돌 파일 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>status
+<span class="c1"># 출력:</span>
+<span class="c1"># Unmerged paths:</span>
+<span class="c1">#   both modified:   src/greet.js</span>
+</code></pre></div>
+
+<p><strong>5단계: 에디터에서 충돌 해결</strong></p>
+<p>VS Code, IntelliJ 등 에디터의 병합 도구를 사용하면 시각적으로 충돌을 해결할 수 있습니다.</p>
+<p>VS Code 예시:</p>
+<div class="codehilite"><pre><span></span><code>Accept Current Change | Accept Incoming Change | Accept Both Changes | Compare Changes
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD (Current Change)
+  return `Hello, ${name}!`;
+=======
+  return `Hi, ${name}!`;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/main (Incoming Change)
+</code></pre></div>
+
+<p><strong>6단계: 해결 완료 후 스테이징</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>src/greet.js
+</code></pre></div>
+
+<p><strong>7단계: 병합 커밋 생성</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit
+<span class="c1"># 기본 병합 커밋 메시지 사용 또는 수정</span>
+</code></pre></div>
+
+<p><strong>8단계: push</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push
+</code></pre></div>
+
+<p>PR에 충돌 해결 커밋이 자동으로 추가되며, 충돌 경고가 사라집니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 충돌 해결 후 테스트를 다시 실행하세요. 두 변경을 합친 결과가 예상대로 동작하는지 확인해야 합니다.</p>
+</blockquote>
+<h4 id="pr_4">리뷰 반영 후 PR 업데이트하기<a class="headerlink" href="#pr_4" title="Permanent link">&para;</a></h4>
+<p><strong>피드백 확인</strong></p>
+<p>PR 페이지의 "Files changed" 탭에서 리뷰 코멘트를 확인합니다.</p>
+<p><strong>로컬에서 수정</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>feature/my-feature
+<span class="c1"># 파일 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;refactor: 리뷰 피드백 반영 - 입력 검증 추가&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
+</code></pre></div>
+
+<p><strong>PR 자동 업데이트</strong></p>
+<p>push하면 PR에 새 커밋이 자동으로 추가되고, 리뷰어에게 알림이 갑니다.</p>
+<p><strong>Suggestion 일괄 적용</strong></p>
+<p>여러 Suggestion을 "Add to batch"로 모은 후 "Commit suggestions" 클릭하여 한 번에 적용할 수 있습니다.</p>
+<p><strong>Re-review 요청</strong></p>
+<p>수정이 완료되면 리뷰어에게 다시 검토를 요청합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>ready<span class="w"> </span>&lt;PR번호&gt;<span class="w">  </span><span class="c1"># Draft에서 Ready로 전환</span>
+</code></pre></div>
+
+<p>또는 웹 UI에서 리뷰어에게 "Re-request review" 버튼을 클릭합니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 리뷰 피드백에 대한 응답을 코멘트로 남기세요. "수정 완료했습니다" 또는 "다른 방법으로 구현했습니다"처럼 소통하면 리뷰어가 변경 사항을 빠르게 파악할 수 있습니다.</p>
+</blockquote>
+<h4 id="force-push">Force push가 필요한 상황과 주의사항<a class="headerlink" href="#force-push" title="Permanent link">&para;</a></h4>
+<p><strong>Force push가 필요한 경우</strong></p>
+<ul>
+<li>인터랙티브 rebase로 커밋을 정리한 후</li>
+<li>커밋 메시지를 수정한 후 (<code>git commit --amend</code>)</li>
+<li>실수로 push한 민감한 정보를 제거한 후</li>
+</ul>
+<p><strong>안전한 force push: --force-with-lease</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force-with-lease
+</code></pre></div>
+
+<p><code>--force-with-lease</code>는 원격 브랜치가 예상과 다르면 push를 거부하여 다른 사람의 변경을 덮어쓰는 것을 방지합니다.</p>
+<p><strong>일반 force push (위험)</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force
+</code></pre></div>
+
+<p>이 명령은 원격 브랜치를 강제로 덮어씁니다. 다른 사람의 변경을 날릴 수 있으므로 주의해야 합니다.</p>
+<p><strong>Force push 안전 규칙</strong></p>
+<ol>
+<li>PR 작업 브랜치에서만 사용</li>
+<li>main, develop 등 공유 브랜치에는 절대 사용 금지</li>
+<li>다른 팀원과 같은 브랜치를 공유 중이라면 사전 협의</li>
+<li>가능하면 <code>--force-with-lease</code> 사용</li>
+</ol>
+<p><strong>예시 시나리오</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 커밋 메시지 오타 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>--amend<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 프로필 페이지 추가 (오타 수정)&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force-with-lease
+</code></pre></div>
+
+<blockquote>
+<p><strong>경고</strong>: main 브랜치에 force push하면 다른 팀원의 작업이 날아가고 저장소가 혼란에 빠집니다. 브랜치 보호 규칙으로 force push를 차단하는 것을 권장합니다.</p>
+</blockquote>
+<h3 id="_18">절 요약<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>PR 충돌은 웹 UI 또는 로컬 환경에서 해결할 수 있습니다.</li>
+<li>웹 UI는 간단한 충돌에 적합하고, 복잡한 충돌은 로컬에서 해결합니다.</li>
+<li>충돌 마커(<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>)를 제거하고 최종 코드를 작성합니다.</li>
+<li>리뷰 피드백 반영 후 push하면 PR이 자동 업데이트됩니다.</li>
+<li>Force push는 PR 작업 브랜치에서만 제한적으로 사용하며, <code>--force-with-lease</code>를 권장합니다.</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: PR을 너무 크게 만들어버렸는데, 나눌 수 있나요?</strong></p>
+<p>A1: PR을 닫고 작은 PR들로 나누는 것이 좋습니다. 또는 리뷰어에게 커밋별로 리뷰를 요청하세요. 향후에는 작업 시작 전에 큰 기능을 작은 단위로 나누는 습관을 들이세요. Stacked PRs 기법을 사용하면 의존성이 있는 작은 PR들을 순차적으로 만들 수 있습니다.</p>
+<p><strong>Q2: 리뷰어가 승인했는데 머지 버튼이 비활성화되어 있습니다.</strong></p>
+<p>A2: 브랜치 보호 규칙 때문일 수 있습니다. Settings → Branches에서 확인하세요. CI 검사 통과, 최소 리뷰 승인 수, 최신 상태 유지, 관리자 승인 등이 요구될 수 있습니다. "View details"를 클릭하면 어떤 조건이 충족되지 않았는지 확인할 수 있습니다.</p>
+<p><strong>Q3: Squash and Merge 후 feature 브랜치를 삭제했는데, 로컬에 흔적이 남아있습니다.</strong></p>
+<p>A3: 로컬 브랜치도 삭제하고 원격 추적 정보도 정리하세요.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>pull
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-d<span class="w"> </span>feature/my-feature
+$<span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>--prune<span class="w">  </span><span class="c1"># 삭제된 원격 브랜치 정리</span>
+</code></pre></div>
+
+<p><strong>Q4: PR에서 특정 파일을 리뷰에서 제외하고 싶습니다.</strong></p>
+<p>A4: GitHub은 파일별 제외 기능을 제공하지 않지만, <code>.gitattributes</code>에서 언어 감지를 조정하거나, 대용량 생성 파일은 별도 커밋으로 분리하여 리뷰 부담을 줄일 수 있습니다. 또는 리뷰어에게 "generated/ 디렉토리는 자동 생성이므로 건너뛰셔도 됩니다"라고 코멘트로 안내하세요.</p>
+<p><strong>Q5: 리뷰어가 응답하지 않아 PR이 정체되어 있습니다.</strong></p>
+<p>A5: GitHub에서 리뷰어에게 "Re-request review"를 클릭하거나, Slack/이메일로 직접 요청하세요. 팀의 리뷰 SLA(Service Level Agreement)를 정하는 것도 좋습니다. 예: "PR은 24시간 이내 초기 리뷰, 48시간 이내 최종 승인". CODEOWNERS 파일로 자동 리뷰어 지정을 설정하면 책임이 명확해집니다.</p>
+<hr />
+<h2 id="_19">장 요약<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 GitHub의 핵심 기능인 Pull Request를 마스터했습니다.
+PR의 개념과 협업에서의 장점을 이해하고, 웹 UI와 GitHub CLI로 PR을 생성하는 두 가지 방법을 배웠습니다.
+Draft PR로 초기 피드백을 받고, PR Template으로 작성을 표준화하는 실무 기술을 익혔습니다.
+효과적인 코드 리뷰를 수행하고 Suggestion 기능으로 수정을 제안하는 방법을 실습했습니다.
+세 가지 머지 전략(Merge Commit, Squash and Merge, Rebase and Merge)의 장단점을 비교하고 프로젝트에 맞게 선택하는 기준을 배웠습니다.
+마지막으로 PR 충돌을 웹 UI와 로컬 환경에서 해결하고, 리뷰 피드백을 반영하여 PR을 업데이트하는 전체 프로세스를 완성했습니다.</p>
+<h3 id="_20">핵심 키워드<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<p><code>Pull Request</code>, <code>코드 리뷰</code>, <code>Draft PR</code>, <code>PR Template</code>, <code>Suggestion</code>, <code>Merge Commit</code>, <code>Squash and Merge</code>, <code>Rebase and Merge</code>, <code>Auto-merge</code>, <code>브랜치 충돌</code>, <code>force-with-lease</code></p>
+<h3 id="_21">다음 장 미리보기<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 Git의 고급 명령어들을 배웁니다.
+rebase로 커밋 히스토리를 깔끔하게 정리하고, cherry-pick으로 특정 커밋만 선택적으로 가져오며, stash로 작업을 임시 저장하는 기술을 익힙니다.
+reflog로 실수를 복구하는 Git의 안전망을 이해하고, bisect로 버그를 도입한 커밋을 효율적으로 찾아내는 강력한 디버깅 기법을 마스터합니다.
+tag로 릴리스 버전을 표시하고 Semantic Versioning을 적용하는 방법도 배웁니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_05.html" class="nav-prev">&larr; GitHub 시작하기</a><a href="index.html" class="nav-home">목차</a><a href="ch_07.html" class="nav-next">고급 Git 기법 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

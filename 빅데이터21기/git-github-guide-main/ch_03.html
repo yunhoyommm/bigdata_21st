@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03장: 브랜치와 병합의 기초 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#_2">브랜치의 개념과 필요성</a><ul>
+<li><a href="#_3">도입</a></li>
+<li><a href="#_4">핵심 개념 설명</a></li>
+<li><a href="#_8">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_9">브랜치 생성과 전환</a><ul>
+<li><a href="#_10">도입</a></li>
+<li><a href="#_11">핵심 개념 설명</a></li>
+<li><a href="#_12">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#merge">브랜치 병합하기: merge</a><ul>
+<li><a href="#_13">도입</a></li>
+<li><a href="#_14">핵심 개념 설명</a></li>
+<li><a href="#_15">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_16">병합 충돌 해결하기</a><ul>
+<li><a href="#_17">도입</a></li>
+<li><a href="#_18">핵심 개념 설명</a></li>
+<li><a href="#_22">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_23">브랜치 전략 소개</a><ul>
+<li><a href="#_24">도입</a></li>
+<li><a href="#_25">핵심 개념 설명</a></li>
+<li><a href="#_28">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_29">장 요약</a><ul>
+<li><a href="#_30">핵심 키워드</a></li>
+<li><a href="#_31">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>03장: 브랜치와 병합의 기초</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-입문">입문</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="_1">브랜치와 병합의 기초<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- 브랜치가 커밋을 가리키는 경량 포인터임을 이해할 수 있다
+- git switch와 git branch로 브랜치를 생성, 전환, 삭제할 수 있다
+- Fast-Forward 병합과 3-Way 병합의 차이를 설명할 수 있다
+- 병합 충돌을 침착하게 해결하고 병합을 완료할 수 있다
+- 기본적인 브랜치 전략의 종류를 알고 적절한 전략을 선택할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="_2">브랜치의 개념과 필요성<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">도입<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>"동시에 여러 기능을 개발하고 싶은데 서로 영향을 주지 않게 할 수 있을까?" 브랜치(Branch)는 이 문제의 해답입니다. 브랜치를 사용하면 안정적인 코드를 유지하면서 새로운 기능을 실험할 수 있습니다.</p>
+<h3 id="_4">핵심 개념 설명<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h4 id="_5">브랜치란 무엇인가: 평행 세계 비유<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p><strong>브랜치(Branch)</strong>는 커밋 히스토리에서 분기하여 독립적인 작업 흐름을 만드는 메커니즘입니다.</p>
+<p>소설의 평행 세계와 같습니다. 주인공이 선택의 갈림길에서 각기 다른 세계가 펼쳐지듯, 브랜치를 만들면 독립적인 작업 흐름이 생깁니다. 나중에 원하는 세계를 선택하거나 합칠 수 있습니다.</p>
+<h4 id="_6">브랜치는 커밋을 가리키는 포인터<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<p>많은 사람이 브랜치를 만들면 프로젝트 전체가 복사된다고 생각하지만, Git 브랜치는 단순히 특정 커밋을 가리키는 40바이트짜리 포인터에 불과합니다. 따라서 브랜치 생성은 거의 즉시 완료되며 디스크 공간도 거의 차지하지 않습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 현재 브랜치 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch
+*<span class="w"> </span>main
+
+<span class="c1"># 브랜치 목록과 각각이 가리키는 커밋 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-v
+*<span class="w"> </span>main<span class="w">    </span>7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+<span class="w">  </span>feature<span class="w"> </span>5d2c1a3<span class="w"> </span>feat:<span class="w"> </span>회원가입<span class="w"> </span>폼<span class="w"> </span>작성<span class="w"> </span>중
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+gitGraph
+    commit id: "A: 초기 커밋"
+    commit id: "B: 기능 추가"
+    commit id: "C: 버그 수정"
+    branch feature
+    commit id: "D: 새 기능 시작"
+    commit id: "E: 기능 구현"
+    checkout main
+    commit id: "F: 핫픽스"
+
+
+</div>
+<figcaption>브랜치와 HEAD 포인터 구조</figcaption>
+</figure>
+
+<h4 id="head">HEAD: 현재 위치를 나타내는 특수 포인터<a class="headerlink" href="#head" title="Permanent link">&para;</a></h4>
+<p><strong>HEAD</strong>는 현재 체크아웃된 브랜치(또는 커밋)를 가리키는 특수한 참조 포인터입니다. "지금 내가 어디에 있는가"를 나타냅니다.</p>
+<p>'현재 위치' 표시가 있는 지도와 같습니다. 지도 위 어디에 있든 현재 위치 아이콘은 항상 나의 위치를 표시합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># HEAD가 가리키는 커밋 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>-1
+7f3a9e8<span class="w"> </span><span class="o">(</span>HEAD<span class="w"> </span>-&gt;<span class="w"> </span>main<span class="o">)</span><span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+</code></pre></div>
+
+<p>이 출력에서 <code>HEAD -&gt; main</code>은 HEAD가 main 브랜치를 가리키고, main 브랜치는 7f3a9e8 커밋을 가리킨다는 의미입니다.</p>
+<h4 id="_7">왜 브랜치가 필요한가: 실무 시나리오<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p>실무에서 브랜치가 필요한 상황들:</p>
+<ol>
+<li><strong>기능 개발</strong>: 새 기능을 개발하는 동안 main은 안정적인 상태 유지</li>
+<li><strong>버그 수정</strong>: 긴급 버그를 수정하는 동안 개발 중인 기능과 분리</li>
+<li><strong>실험</strong>: 불확실한 아이디어를 안전하게 테스트</li>
+<li><strong>협업</strong>: 여러 개발자가 서로 방해하지 않고 동시 작업</li>
+</ol>
+<p>예시: 웹사이트를 운영 중인데 새로운 결제 시스템을 개발해야 합니다. 하지만 기존 결제 시스템은 계속 작동해야 합니다. 브랜치를 사용하면 main에서는 기존 시스템이 작동하고, feature/payment 브랜치에서는 새 시스템을 개발할 수 있습니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: main 브랜치는 항상 배포 가능한 안정적인 상태로 유지하고, 모든 작업은 별도 브랜치에서 진행하세요.</p>
+</blockquote>
+<h3 id="_8">절 요약<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>브랜치는 독립적인 작업 흐름을 만드는 메커니즘입니다</li>
+<li>Git 브랜치는 특정 커밋을 가리키는 경량 포인터입니다</li>
+<li>HEAD는 현재 체크아웃된 브랜치를 가리킵니다</li>
+<li>브랜치는 기능 개발, 버그 수정, 실험, 협업에 필수적입니다</li>
+</ul>
+<hr />
+<h2 id="_9">브랜치 생성과 전환<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">도입<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>브랜치의 개념을 이해했으니 이제 실제로 만들어보고 사용해봅시다. Git 2.23부터는 <code>git switch</code>라는 새로운 명령어가 도입되어 브랜치 전환이 더 직관적이 되었습니다.</p>
+<h3 id="_11">핵심 개념 설명<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h4 id="git-branch">git branch: 브랜치 생성 및 목록 확인<a class="headerlink" href="#git-branch" title="Permanent link">&para;</a></h4>
+<p><strong>git branch</strong>는 브랜치를 생성하고 관리하는 명령어입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 현재 브랜치 목록 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch
+*<span class="w"> </span>main
+<span class="w">  </span>feature/login
+
+<span class="c1"># 새 브랜치 생성 (전환하지 않음)</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>feature/signup
+
+<span class="c1"># 브랜치와 마지막 커밋 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-v
+*<span class="w"> </span>main<span class="w">           </span>7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+<span class="w">  </span>feature/login<span class="w">  </span>5d2c1a3<span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>폼<span class="w"> </span>작성
+<span class="w">  </span>feature/signup<span class="w"> </span>7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+
+<span class="c1"># 모든 브랜치 (원격 포함) 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-a
+</code></pre></div>
+
+<p><code>*</code> 표시는 현재 체크아웃된 브랜치를 나타냅니다.</p>
+<h4 id="git-switch-git-223">git switch: 브랜치 전환 (Git 2.23+)<a class="headerlink" href="#git-switch-git-223" title="Permanent link">&para;</a></h4>
+<p><strong>git switch</strong>는 브랜치를 전환하는 명령어로, Git 2.23에서 <code>git checkout</code>의 브랜치 전환 기능을 분리하여 만들어졌습니다.</p>
+<p>TV 채널을 변경하는 것과 같습니다. 리모컨으로 채널을 바꾸면 다른 프로그램이 나오듯, git switch로 브랜치를 바꾸면 해당 브랜치의 파일 상태가 작업 디렉토리에 나타납니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 기존 브랜치로 전환</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>feature/login
+
+<span class="c1"># 현재 브랜치 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>branch
+<span class="w">  </span>main
+*<span class="w"> </span>feature/login
+<span class="w">  </span>feature/signup
+</code></pre></div>
+
+<h4 id="git-switch-c">git switch -c: 생성과 전환을 동시에<a class="headerlink" href="#git-switch-c" title="Permanent link">&para;</a></h4>
+<p>가장 자주 사용하는 패턴은 브랜치를 만들고 바로 전환하는 것입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 새 브랜치 생성과 동시에 전환</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feature/dashboard
+
+<span class="c1"># 위 명령은 다음 두 명령을 합친 것과 같음</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>feature/dashboard
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>feature/dashboard
+</code></pre></div>
+
+<h4 id="git-checkout">git checkout과의 차이점<a class="headerlink" href="#git-checkout" title="Permanent link">&para;</a></h4>
+<p>Git 2.23 이전에는 <code>git checkout</code>이 브랜치 전환과 파일 복원을 모두 담당했습니다. 이는 혼란스러웠기 때문에 두 기능이 분리되었습니다.</p>
+<ul>
+<li><strong>git switch</strong>: 브랜치 전환 전용</li>
+<li><strong>git restore</strong>: 파일 복원 전용 (2장에서 배움)</li>
+<li><strong>git checkout</strong>: 여전히 사용 가능 (호환성 유지)</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 구식 방법 (여전히 작동함)</span>
+$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>feature/login
+$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/new
+
+<span class="c1"># 현대적 방법 (권장)</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>feature/login
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feature/new
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: Git 2.23 이상을 사용한다면 <code>git switch</code>와 <code>git restore</code>를 사용하세요. 더 명확하고 안전합니다.</p>
+</blockquote>
+<h4 id="git-branch-d-d">브랜치 삭제: git branch -d / -D<a class="headerlink" href="#git-branch-d-d" title="Permanent link">&para;</a></h4>
+<p>더 이상 필요 없는 브랜치는 삭제할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 병합된 브랜치 삭제 (안전)</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-d<span class="w"> </span>feature/login
+
+<span class="c1"># 병합되지 않은 브랜치 강제 삭제 (주의)</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-D<span class="w"> </span>feature/abandoned
+</code></pre></div>
+
+<p><code>-d</code> 옵션은 병합되지 않은 브랜치를 삭제하려 하면 경고를 표시하여 실수를 방지합니다. <code>-D</code>는 경고 없이 강제 삭제합니다.</p>
+<blockquote>
+<p><strong>주의</strong>: 브랜치를 삭제해도 커밋은 일정 기간 동안 reflog에 남아있어 복구가 가능합니다 (7장에서 배움).</p>
+</blockquote>
+<h3 id="_12">절 요약<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git branch</code>는 브랜치를 생성하고 목록을 확인합니다</li>
+<li><code>git switch &lt;branch&gt;</code>는 브랜치를 전환합니다</li>
+<li><code>git switch -c &lt;branch&gt;</code>는 브랜치 생성과 전환을 동시에 합니다</li>
+<li>Git 2.23+에서는 <code>git switch</code>가 <code>git checkout</code>보다 권장됩니다</li>
+<li><code>git branch -d</code>는 안전하게, <code>-D</code>는 강제로 브랜치를 삭제합니다</li>
+</ul>
+<hr />
+<h2 id="merge">브랜치 병합하기: merge<a class="headerlink" href="#merge" title="Permanent link">&para;</a></h2>
+<h3 id="_13">도입<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>별도 브랜치에서 작업을 완료했다면 이제 main 브랜치에 합쳐야 합니다. 이 과정을 병합(Merge)이라고 하며, Git은 두 가지 병합 방식을 자동으로 선택합니다.</p>
+<h3 id="_14">핵심 개념 설명<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<h4 id="fast-forward">Fast-Forward 병합: 직선 히스토리<a class="headerlink" href="#fast-forward" title="Permanent link">&para;</a></h4>
+<p><strong>Fast-Forward 병합</strong>은 분기 이후 main 브랜치에 새로운 커밋이 없을 때 발생합니다. Git은 단순히 main 브랜치 포인터를 앞으로 이동시킵니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main에서 시작</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+
+<span class="c1"># feature 브랜치 병합</span>
+$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feature/login
+Updating<span class="w"> </span>7f3a9e8..a1b2c3d
+Fast-forward
+<span class="w"> </span>login.html<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">50</span><span class="w"> </span>++++++++++++++++++++++++++++++++++++++++++++++++++
+<span class="w"> </span>login.js<span class="w">   </span><span class="p">|</span><span class="w"> </span><span class="m">30</span><span class="w"> </span>++++++++++++++++++++++++++++++
+<span class="w"> </span><span class="m">2</span><span class="w"> </span>files<span class="w"> </span>changed,<span class="w"> </span><span class="m">80</span><span class="w"> </span>insertions<span class="o">(</span>+<span class="o">)</span>
+</code></pre></div>
+
+<p>"Fast-forward"라는 메시지는 단순히 포인터가 이동했음을 의미합니다. 새로운 병합 커밋은 생성되지 않습니다.</p>
+<h4 id="3-way">3-Way 병합: 두 갈래 합치기<a class="headerlink" href="#3-way" title="Permanent link">&para;</a></h4>
+<p><strong>3-Way 병합</strong>은 main과 feature 브랜치가 각각 다른 커밋을 가지고 있을 때 발생합니다. Git은 두 브랜치와 공통 조상을 비교하여 새로운 병합 커밋을 생성합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feature/signup
+Merge<span class="w"> </span>made<span class="w"> </span>by<span class="w"> </span>the<span class="w"> </span><span class="s1">&#39;recursive&#39;</span><span class="w"> </span>strategy.
+<span class="w"> </span>signup.html<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">60</span><span class="w"> </span>+++++++++++++++++++++++++++++++++++++++++++++++++++++
+<span class="w"> </span>signup.js<span class="w">   </span><span class="p">|</span><span class="w"> </span><span class="m">40</span><span class="w"> </span>++++++++++++++++++++++++++++++++++
+<span class="w"> </span><span class="m">2</span><span class="w"> </span>files<span class="w"> </span>changed,<span class="w"> </span><span class="m">100</span><span class="w"> </span>insertions<span class="o">(</span>+<span class="o">)</span>
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    subgraph FF["Fast-Forward 병합"]
+        direction LR
+        FF_A["A"] --> FF_B["B"]
+        FF_B --> FF_C["C"]
+        FF_Main["main"]
+        FF_Feature["feature"]
+
+        FF_Main -.->|"병합 전"| FF_B
+        FF_Feature -.-> FF_C
+
+        FF_Main2["main"]
+        FF_Main2 -.->|"병합 후<br/>(포인터만 이동)"| FF_C
+
+        FF_C --> FF_Main2
+
+        style FF_A fill:#e1f5fe,stroke:#0288d1
+        style FF_B fill:#e1f5fe,stroke:#0288d1
+        style FF_C fill:#e8f5e9,stroke:#388e3c
+        style FF_Main fill:#fff3e0,stroke:#f57c00
+        style FF_Feature fill:#f3e5f5,stroke:#7b1fa2
+        style FF_Main2 fill:#e8f5e9,stroke:#388e3c
+    end
+
+    subgraph ThreeWay["3-Way 병합"]
+        direction LR
+        TW_A["A"] --> TW_B["B"]
+        TW_A --> TW_C["C"]
+        TW_B --> TW_M["M<br/>(병합 커밋)"]
+        TW_C --> TW_M
+
+        TW_Main["main"]
+        TW_Feature["feature"]
+
+        TW_Main -.->|"병합 전"| TW_B
+        TW_Feature -.-> TW_C
+
+        TW_Main2["main"]
+        TW_Main2 -.->|"병합 후<br/>(새 커밋 생성)"| TW_M
+
+        style TW_A fill:#e1f5fe,stroke:#0288d1
+        style TW_B fill:#e1f5fe,stroke:#0288d1
+        style TW_C fill:#f3e5f5,stroke:#7b1fa2
+        style TW_M fill:#e8f5e9,stroke:#388e3c
+        style TW_Main fill:#fff3e0,stroke:#f57c00
+        style TW_Feature fill:#f3e5f5,stroke:#7b1fa2
+        style TW_Main2 fill:#e8f5e9,stroke:#388e3c
+    end
+
+    Note1["직선 히스토리<br/>브랜치 기록 없음"]
+    Note2["병합 커밋으로<br/>브랜치 기록 보존"]
+
+    FF --> Note1
+    ThreeWay --> Note2
+
+    style Note1 fill:#fff3e0
+    style Note2 fill:#e8f5e9
+
+</div>
+<figcaption>Fast-Forward 병합과 3-Way 병합 비교</figcaption>
+</figure>
+
+<h4 id="merge-commit">병합 커밋(Merge Commit)의 의미<a class="headerlink" href="#merge-commit" title="Permanent link">&para;</a></h4>
+<p>3-Way 병합에서 생성되는 병합 커밋은 두 개의 부모 커밋을 가집니다. 이는 "이 시점에서 두 브랜치가 합쳐졌다"는 역사적 기록입니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>--graph
+*<span class="w">   </span>d5e6f7a<span class="w"> </span><span class="o">(</span>HEAD<span class="w"> </span>-&gt;<span class="w"> </span>main<span class="o">)</span><span class="w"> </span>Merge<span class="w"> </span>branch<span class="w"> </span><span class="s1">&#39;feature/signup&#39;</span>
+<span class="p">|</span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>*<span class="w"> </span>b4c5d6e<span class="w"> </span>feat:<span class="w"> </span>회원가입<span class="w"> </span>폼<span class="w"> </span>완성
+<span class="p">|</span><span class="w"> </span>*<span class="w"> </span>a3b4c5d<span class="w"> </span>feat:<span class="w"> </span>회원가입<span class="w"> </span>유효성<span class="w"> </span>검사<span class="w"> </span>추가
+*<span class="w"> </span><span class="p">|</span><span class="w"> </span>c4d5e6f<span class="w"> </span>docs:<span class="w"> </span>README<span class="w"> </span>업데이트
+<span class="p">|</span>/
+*<span class="w"> </span>7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+</code></pre></div>
+
+<h4 id="-no-ff">--no-ff 옵션으로 명시적 병합 커밋 생성<a class="headerlink" href="#-no-ff" title="Permanent link">&para;</a></h4>
+<p>Fast-Forward가 가능한 상황에서도 병합 커밋을 만들고 싶다면 <code>--no-ff</code> 옵션을 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>--no-ff<span class="w"> </span>feature/login
+</code></pre></div>
+
+<p>이렇게 하면 브랜치의 존재가 히스토리에 명확히 기록됩니다. 많은 팀이 이 방식을 선호합니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 팀에서 브랜치 히스토리를 명확히 유지하고 싶다면 <code>--no-ff</code>를 기본값으로 설정하세요.
+<code>bash
+$ git config --global merge.ff false</code></p>
+</blockquote>
+<h3 id="_15">절 요약<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fast-Forward 병합은 포인터만 이동하며 새 커밋을 만들지 않습니다</li>
+<li>3-Way 병합은 두 브랜치를 합친 새 병합 커밋을 생성합니다</li>
+<li>병합 커밋은 두 개의 부모 커밋을 가집니다</li>
+<li><code>--no-ff</code> 옵션으로 Fast-Forward를 방지하고 명시적 병합 커밋을 만들 수 있습니다</li>
+</ul>
+<hr />
+<h2 id="_16">병합 충돌 해결하기<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
+<h3 id="_17">도입<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<p>두 브랜치가 같은 파일의 같은 부분을 다르게 수정했다면 Git은 어느 쪽이 맞는지 판단할 수 없습니다. 이때 병합 충돌(Merge Conflict)이 발생하며, 개발자가 직접 해결해야 합니다. 충돌은 두렵지 않습니다. 체계적으로 접근하면 누구나 해결할 수 있습니다.</p>
+<h3 id="_18">핵심 개념 설명<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<h4 id="_19">충돌이 발생하는 이유<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h4>
+<p>두 명의 편집자가 같은 문단을 서로 다르게 수정한 원고를 받은 편집장과 같습니다. 어느 쪽을 택할지, 혹은 둘을 어떻게 조합할지 직접 판단해야 합니다.</p>
+<p>충돌 예시:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feature/update-title
+Auto-merging<span class="w"> </span>index.html
+CONFLICT<span class="w"> </span><span class="o">(</span>content<span class="o">)</span>:<span class="w"> </span>Merge<span class="w"> </span>conflict<span class="w"> </span><span class="k">in</span><span class="w"> </span>index.html
+Automatic<span class="w"> </span>merge<span class="w"> </span>failed<span class="p">;</span><span class="w"> </span>fix<span class="w"> </span>conflicts<span class="w"> </span>and<span class="w"> </span><span class="k">then</span><span class="w"> </span>commit<span class="w"> </span>the<span class="w"> </span>result.
+</code></pre></div>
+
+<h4 id="_20">충돌 마커 읽기: &lt;&lt;&lt;&lt;&lt;&lt;&lt;, =======, &gt;&gt;&gt;&gt;&gt;&gt;&gt;<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h4>
+<p>충돌이 발생한 파일을 열면 다음과 같은 마커가 표시됩니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="err">&lt;&lt;&lt;&lt;&lt;&lt;</span><span class="p">&lt;</span> <span class="nt">HEAD</span>
+  <span class="na">Git</span> <span class="err">&amp;</span> <span class="na">GitHub</span> <span class="na">완벽</span> <span class="na">가이드</span>
+<span class="o">=</span><span class="s">======</span>
+  <span class="na">Git과</span> <span class="na">GitHub</span> <span class="na">마스터하기</span>
+<span class="p">&gt;</span>&gt;&gt;&gt;&gt;&gt;&gt; feature/update-title
+<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<ul>
+<li><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>: 현재 브랜치(main)의 내용 시작</li>
+<li><code>=======</code>: 구분선</li>
+<li><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/update-title</code>: 병합하려는 브랜치의 내용 끝</li>
+</ul>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TD
+    Start["두 브랜치에서<br/>같은 파일의<br/>같은 줄 수정"]
+
+    Merge["git merge<br/>실행"]
+
+    Check{{"Git이<br/>자동 병합<br/>가능?"}}
+
+    AutoMerge["자동 병합 성공<br/>병합 커밋 생성"]
+
+    Conflict["병합 충돌 발생<br/>(CONFLICT 메시지)"]
+
+    Status["git status로<br/>충돌 파일 확인"]
+
+    OpenFile["충돌 파일 열기<br/>충돌 마커 확인"]
+
+    Markers["<<<<<<< HEAD<br/>현재 브랜치 내용<br/>=======<br/>병합할 브랜치 내용<br/>>>>>>>> branch"]
+
+    Resolve["충돌 마커 제거하고<br/>최종 내용 작성"]
+
+    Add["git add<br/>해결된 파일 스테이징"]
+
+    Commit["git commit<br/>병합 커밋 완료"]
+
+    Done["병합 완료"]
+
+    Abort["git merge --abort<br/>(병합 중단)"]
+
+    Start --> Merge
+    Merge --> Check
+    Check -->|"예<br/>(다른 영역 수정)"| AutoMerge
+    Check -->|"아니오<br/>(같은 영역 수정)"| Conflict
+
+    AutoMerge --> Done
+
+    Conflict --> Status
+    Status --> OpenFile
+    OpenFile --> Markers
+    Markers --> Resolve
+    Resolve --> Add
+    Add --> Commit
+    Commit --> Done
+
+    Conflict -.->|"병합 포기"| Abort
+
+    style Start fill:#e1f5fe,stroke:#0288d1
+    style Merge fill:#fff3e0,stroke:#f57c00
+    style Check fill:#f3e5f5,stroke:#7b1fa2
+    style AutoMerge fill:#e8f5e9,stroke:#388e3c
+    style Conflict fill:#fce4ec,stroke:#c2185b
+    style Markers fill:#fff3e0,stroke:#f57c00
+    style Resolve fill:#e8f5e9,stroke:#388e3c
+    style Done fill:#e8f5e9,stroke:#388e3c
+    style Abort fill:#fce4ec,stroke:#c2185b
+
+</div>
+<figcaption>병합 충돌 발생과 해결 프로세스</figcaption>
+</figure>
+
+<h4 id="_21">충돌 해결 단계별 가이드<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>충돌 파일 확인</strong></li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>status
+Unmerged<span class="w"> </span>paths:
+<span class="w">  </span><span class="o">(</span>use<span class="w"> </span><span class="s2">&quot;git add &lt;file&gt;...&quot;</span><span class="w"> </span>to<span class="w"> </span>mark<span class="w"> </span>resolution<span class="o">)</span>
+<span class="w">        </span>both<span class="w"> </span>modified:<span class="w">   </span>index.html
+</code></pre></div>
+
+<ol>
+<li>
+<p><strong>파일 열어서 충돌 마커 찾기</strong>
+에디터로 <code>index.html</code>을 엽니다.</p>
+</li>
+<li>
+<p><strong>원하는 내용으로 수정</strong>
+충돌 마커를 제거하고 최종 내용을 작성합니다.</p>
+</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>
+  Git <span class="err">&amp;</span> GitHub 올인원 가이드
+<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<ol>
+<li><strong>파일 저장하고 스테이징</strong></li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>index.html
+</code></pre></div>
+
+<ol>
+<li><strong>병합 완료</strong></li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit
+</code></pre></div>
+
+<p>커밋 메시지가 자동으로 생성되지만 필요시 수정할 수 있습니다.</p>
+<h4 id="git-merge-abort">병합 중단하기: git merge --abort<a class="headerlink" href="#git-merge-abort" title="Permanent link">&para;</a></h4>
+<p>충돌 해결이 복잡하거나 잘못 진행 중이라면 병합을 중단할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>--abort
+</code></pre></div>
+
+<p>이 명령은 병합 전 상태로 완전히 되돌립니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 충돌 해결에 자신이 없다면 주저하지 말고 <code>git merge --abort</code>로 중단한 후, 팀원에게 도움을 요청하세요.</p>
+</blockquote>
+<h4 id="vs-code">VS Code에서 충돌 해결하기<a class="headerlink" href="#vs-code" title="Permanent link">&para;</a></h4>
+<p>VS Code는 충돌 해결을 위한 편리한 UI를 제공합니다.</p>
+<ol>
+<li>충돌 파일을 열면 다음 버튼이 표시됩니다:</li>
+<li><strong>Accept Current Change</strong>: 현재 브랜치 내용 선택</li>
+<li><strong>Accept Incoming Change</strong>: 병합 브랜치 내용 선택</li>
+<li><strong>Accept Both Changes</strong>: 양쪽 모두 유지</li>
+<li>
+<p><strong>Compare Changes</strong>: 비교 뷰 열기</p>
+</li>
+<li>
+<p>원하는 옵션을 클릭하거나 직접 편집합니다.</p>
+</li>
+<li>
+<p>저장 후 터미널에서 <code>git add</code> 및 <code>git commit</code>으로 완료합니다.</p>
+</li>
+</ol>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 큰 충돌은 GUI 도구(VS Code, GitKraken, Sourcetree 등)를 사용하면 훨씬 쉽게 해결할 수 있습니다.</p>
+</blockquote>
+<h3 id="_22">절 요약<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>병합 충돌은 같은 파일의 같은 부분을 다르게 수정했을 때 발생합니다</li>
+<li>충돌 마커는 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>로 표시됩니다</li>
+<li>충돌 해결 순서: 파일 확인 → 수정 → add → commit</li>
+<li><code>git merge --abort</code>로 병합을 중단하고 이전 상태로 되돌릴 수 있습니다</li>
+<li>VS Code 같은 GUI 도구를 사용하면 충돌 해결이 더 쉽습니다</li>
+</ul>
+<hr />
+<h2 id="_23">브랜치 전략 소개<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h2>
+<h3 id="_24">도입<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<p>브랜치를 어떻게 관리할 것인가는 팀의 생산성에 큰 영향을 미칩니다. 이 절에서는 기본적인 브랜치 전략을 소개합니다. 11장에서 더 자세한 전략을 배웁니다.</p>
+<h3 id="_25">핵심 개념 설명<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h3>
+<h4 id="feature-branch">기능 브랜치(Feature Branch) 패턴<a class="headerlink" href="#feature-branch" title="Permanent link">&para;</a></h4>
+<p>가장 기본적인 패턴은 각 기능마다 별도 브랜치를 만드는 것입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main에서 새 기능 브랜치 생성</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feature/user-profile
+
+<span class="c1"># 작업 후 커밋</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 프로필 페이지 추가&quot;</span>
+
+<span class="c1"># main으로 돌아와 병합</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>feature/user-profile
+
+<span class="c1"># 브랜치 삭제</span>
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-d<span class="w"> </span>feature/user-profile
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+gitGraph
+    commit id: "초기 상태"
+    commit id: "기능 A 완료"
+
+    branch feature/login
+    commit id: "로그인 UI 구현"
+    commit id: "인증 로직 추가"
+
+    checkout main
+    commit id: "README 업데이트"
+
+    checkout feature/login
+    commit id: "테스트 작성"
+
+    checkout main
+    merge feature/login tag: "로그인 기능 병합"
+
+    branch feature/profile
+    commit id: "프로필 페이지 생성"
+    commit id: "프로필 수정 기능"
+
+    checkout main
+    commit id: "보안 패치"
+
+    checkout feature/profile
+    commit id: "프로필 이미지 업로드"
+
+    checkout main
+    merge feature/profile tag: "프로필 기능 병합"
+
+    commit id: "릴리스 1.0"
+
+</div>
+<figcaption>기본 Feature Branch 워크플로우</figcaption>
+</figure>
+
+<h4 id="_26">브랜치 네이밍 규칙<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h4>
+<p>일관된 네이밍 규칙은 협업의 첫걸음입니다.</p>
+<p><strong>일반적인 접두사</strong>:
+- <code>feature/</code> - 새 기능 (예: <code>feature/login</code>, <code>feature/payment</code>)
+- <code>bugfix/</code> - 버그 수정 (예: <code>bugfix/login-error</code>)
+- <code>hotfix/</code> - 긴급 수정 (예: <code>hotfix/security-patch</code>)
+- <code>docs/</code> - 문서 작업 (예: <code>docs/api-guide</code>)
+- <code>refactor/</code> - 리팩터링 (예: <code>refactor/user-service</code>)
+- <code>test/</code> - 테스트 추가 (예: <code>test/login-validation</code>)</p>
+<p><strong>좋은 브랜치 이름 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code>feature/add-dark-mode
+bugfix/fix-login-redirect
+hotfix/critical-security-update
+docs/update-contributing-guide
+</code></pre></div>
+
+<p><strong>피해야 할 브랜치 이름</strong>:</p>
+<div class="codehilite"><pre><span></span><code>my-branch          (무엇을 하는지 불명확)
+test               (어떤 테스트인지 불명확)
+fix                (무엇을 고치는지 불명확)
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 브랜치 이름은 Issue 번호를 포함하면 더 명확합니다.
+예: <code>feature/123-add-user-profile</code>, <code>bugfix/456-fix-login-error</code></p>
+</blockquote>
+<h4 id="git-flow-github-flow">주요 브랜치 전략 미리보기 (Git Flow, GitHub Flow)<a class="headerlink" href="#git-flow-github-flow" title="Permanent link">&para;</a></h4>
+<p><strong>Git Flow</strong>: 복잡하지만 체계적
+- main, develop, feature, release, hotfix 브랜치 사용
+- 릴리스 주기가 긴 프로젝트에 적합</p>
+<p><strong>GitHub Flow</strong>: 단순하고 빠름
+- main과 feature 브랜치만 사용
+- PR 기반 협업, 빈번한 배포</p>
+<p>11장에서 각 전략을 자세히 배웁니다.</p>
+<h4 id="_27">어떤 전략을 선택할 것인가<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>소규모 팀, 빠른 배포</strong>: GitHub Flow</li>
+<li><strong>대규모 팀, 정기 릴리스</strong>: Git Flow</li>
+<li><strong>초대형 프로젝트</strong>: Trunk-Based Development</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: 처음에는 단순한 전략으로 시작하고, 팀이 성장하면서 점진적으로 복잡도를 높이세요.</p>
+</blockquote>
+<h3 id="_28">절 요약<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
+<ul>
+<li>기능 브랜치 패턴은 각 기능마다 별도 브랜치를 만드는 기본 전략입니다</li>
+<li>일관된 브랜치 네이밍 규칙은 협업을 원활하게 합니다</li>
+<li>Git Flow는 복잡하지만 체계적이고, GitHub Flow는 단순하고 빠릅니다</li>
+<li>팀의 규모와 배포 주기에 맞는 전략을 선택하세요</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: 브랜치를 전환하려는데 "변경 사항이 덮어써질 수 있다"는 경고가 나옵니다.</strong></p>
+<p>A1: 현재 브랜치에 커밋하지 않은 변경 사항이 있고, 전환하려는 브랜치와 충돌하기 때문입니다. 해결 방법은 세 가지입니다. (1) 변경 사항을 커밋, (2) <code>git stash</code>로 임시 저장 (7장에서 배움), (3) <code>git restore .</code>로 변경 취소.</p>
+<p><strong>Q2: Fast-Forward 병합과 3-Way 병합 중 어느 것이 더 좋나요?</strong></p>
+<p>A2: 상황에 따라 다릅니다. Fast-Forward는 히스토리가 선형적이고 간결하지만 브랜치 존재가 기록되지 않습니다. 3-Way 병합은 히스토리가 복잡하지만 브랜치의 흐름이 명확히 보입니다. 많은 팀이 <code>git merge --no-ff</code>로 항상 병합 커밋을 만드는 것을 선호합니다.</p>
+<p><strong>Q3: 병합 충돌이 자주 발생합니다. 어떻게 줄일 수 있나요?</strong></p>
+<p>A3: (1) 브랜치를 오래 유지하지 말고 자주 병합하세요. (2) main의 변경 사항을 정기적으로 feature 브랜치로 가져오세요(<code>git merge main</code>). (3) 팀원과 작업 영역을 조율하여 같은 파일을 동시에 수정하지 않도록 하세요. (4) 코드 리뷰를 통해 변경 범위를 미리 파악하세요.</p>
+<p><strong>Q4: 실수로 브랜치를 삭제했는데 복구할 수 있나요?</strong></p>
+<p>A4: 네, 브랜치를 삭제해도 커밋은 일정 기간 남아있습니다. <code>git reflog</code>로 삭제된 브랜치의 마지막 커밋 해시를 찾은 후 <code>git switch -c &lt;브랜치명&gt; &lt;커밋해시&gt;</code>로 브랜치를 다시 만들 수 있습니다. 자세한 내용은 7장에서 배웁니다.</p>
+<p><strong>Q5: main 브랜치에 있을 때 실수로 파일을 수정했습니다. 이 변경을 feature 브랜치로 옮길 수 있나요?</strong></p>
+<p>A5: 네, 변경 사항을 커밋하지 않았다면 간단합니다. (1) <code>git stash</code>로 변경 저장, (2) <code>git switch feature/my-feature</code>, (3) <code>git stash pop</code>으로 변경 복원. 이미 커밋했다면 <code>git cherry-pick</code>을 사용합니다 (7장에서 배움).</p>
+<hr />
+<h2 id="_29">장 요약<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 Git의 강력한 기능인 브랜치를 배웠습니다. 브랜치는 단순히 커밋을 가리키는 경량 포인터이며, <code>git switch</code>와 <code>git branch</code>로 쉽게 생성하고 전환할 수 있습니다. 병합은 Fast-Forward와 3-Way 두 가지 방식이 있으며, 충돌이 발생해도 체계적으로 해결할 수 있습니다. 기능 브랜치 패턴과 네이밍 규칙을 익혀 팀 협업의 기초를 다졌습니다.</p>
+<h3 id="_30">핵심 키워드<a class="headerlink" href="#_30" title="Permanent link">&para;</a></h3>
+<p><code>브랜치</code>, <code>HEAD</code>, <code>git switch</code>, <code>git merge</code>, <code>Fast-Forward</code>, <code>3-Way 병합</code>, <code>병합 충돌</code>, <code>충돌 마커</code>, <code>기능 브랜치</code>, <code>브랜치 네이밍</code></p>
+<h3 id="_31">다음 장 미리보기<a class="headerlink" href="#_31" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 로컬 저장소를 넘어 원격 저장소(Remote Repository)의 세계로 들어갑니다. GitHub 같은 호스팅 서비스에 코드를 업로드하고, 팀원과 코드를 공유하며, 원격과 로컬을 동기화하는 방법을 배웁니다. 협업의 진정한 시작입니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_02.html" class="nav-prev">&larr; Git 기본 명령어 마스터하기</a><a href="index.html" class="nav-home">목차</a><a href="ch_04.html" class="nav-next">원격 저장소와 협업의 시작 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

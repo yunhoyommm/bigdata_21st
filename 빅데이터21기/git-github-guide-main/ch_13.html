@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13장: 오픈소스 기여하기 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#fork-ch_13_s01">Fork 기반 워크플로우 (ch_13_s01)</a><ul>
+<li><a href="#_2">도입</a></li>
+<li><a href="#_3">핵심 개념 설명</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_13_s02">기여 준비: 프로젝트 이해하기 (ch_13_s02)</a><ul>
+<li><a href="#_5">도입</a></li>
+<li><a href="#_6">핵심 개념 설명</a></li>
+<li><a href="#_9">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_13_s03">첫 번째 기여 실습 (ch_13_s03)</a><ul>
+<li><a href="#_10">도입</a></li>
+<li><a href="#_11">핵심 개념 설명</a></li>
+<li><a href="#_15">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_13_s04">라이선스의 이해 (ch_13_s04)</a><ul>
+<li><a href="#_16">도입</a></li>
+<li><a href="#_17">핵심 개념 설명</a></li>
+<li><a href="#_21">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#ch_13_s05">오픈소스 프로젝트 운영하기 (ch_13_s05)</a><ul>
+<li><a href="#_22">도입</a></li>
+<li><a href="#_23">핵심 개념 설명</a></li>
+<li><a href="#_26">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_27">장 요약</a><ul>
+<li><a href="#_28">핵심 키워드</a></li>
+<li><a href="#_29">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>13장: 오픈소스 기여하기</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-실무">실무</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="_1">오픈소스 기여하기<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- Fork 기반 워크플로우로 오픈소스 프로젝트에 기여할 수 있다
+- CONTRIBUTING.md를 읽고 프로젝트의 기여 규칙을 이해할 수 있다
+- 오픈소스 라이선스의 종류와 의무사항을 구분할 수 있다
+- PR을 통해 실제 오픈소스 프로젝트에 첫 기여를 할 수 있다
+- 자신의 오픈소스 프로젝트를 시작하고 운영할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="fork-ch_13_s01">Fork 기반 워크플로우 (ch_13_s01)<a class="headerlink" href="#fork-ch_13_s01" title="Permanent link">&para;</a></h2>
+<h3 id="_2">도입<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>오픈소스 프로젝트에 기여하고 싶은데 저장소에 직접 접근 권한이 없다면 어떻게 해야 할까요?
+이 절에서는 누구나 오픈소스에 기여할 수 있게 해주는 Fork 기반 워크플로우를 배웁니다.
+Fork는 GitHub의 핵심 협업 기능으로, 원본 저장소에 영향을 주지 않고 자유롭게 실험하고 개선할 수 있습니다.</p>
+<h3 id="_3">핵심 개념 설명<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h4 id="fork">Fork란 무엇인가: 개인 복사본<a class="headerlink" href="#fork" title="Permanent link">&para;</a></h4>
+<p><strong>Fork</strong>는 다른 사용자의 저장소를 자신의 GitHub 계정으로 완전히 복사하는 기능입니다.
+요리 레시피를 복사해서 나만의 레시피북에 적어두는 것과 같습니다.
+원본 레시피(원본 저장소)를 바꾸지 않고 자유롭게 변형(수정)할 수 있고, 좋은 변형이 있으면 원본 작성자에게 제안(PR)할 수 있습니다.</p>
+<p><strong>Fork의 주요 특징</strong></p>
+<ol>
+<li><strong>완전한 복사본</strong>: 원본 저장소의 모든 커밋 히스토리, 브랜치, 태그가 복사됩니다.</li>
+<li><strong>독립적 작업</strong>: 원본 저장소에 영향을 주지 않고 자유롭게 수정할 수 있습니다.</li>
+<li><strong>원본과의 연결 유지</strong>: 원본 저장소의 업데이트를 쉽게 가져올 수 있습니다.</li>
+<li><strong>기여 경로 제공</strong>: Pull Request를 통해 원본 저장소에 변경 사항을 제안할 수 있습니다.</li>
+</ol>
+<blockquote>
+<p><strong>주의</strong>: Fork는 GitHub 서버에서의 복사이고 Clone은 로컬로의 복사입니다. Fork 후에는 반드시 로컬로 Clone하여 작업해야 합니다.</p>
+</blockquote>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    Upstream["Upstream<br/>(원본 저장소)<br/>github.com/original/repo"]
+
+    Fork["Fork<br/>(개인 복사본)<br/>github.com/myname/repo"]
+
+    Local["Local Clone<br/>(로컬 저장소)<br/>내 컴퓨터"]
+
+    Upstream -->|"1. Fork 버튼 클릭"| Fork
+
+    Fork -->|"2. git clone"| Local
+
+    Local -->|"3. git remote add upstream"| Upstream
+
+    Local -->|"4. 브랜치 생성<br/>작업/커밋"| LocalBranch["feature 브랜치"]
+
+    LocalBranch -->|"5. git push origin feature"| Fork
+
+    Fork -->|"6. Pull Request 생성"| Upstream
+
+    Upstream -.->|"7. PR 리뷰/머지"| UpstreamMain["Upstream main<br/>업데이트됨"]
+
+    UpstreamMain -.->|"8. git fetch upstream<br/>git merge upstream/main"| Local
+
+    Local -.->|"9. git push origin main"| Fork
+
+    style Upstream fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    style Fork fill:#e1f5fe,stroke:#0288d1,stroke-width:3px
+    style Local fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+    style LocalBranch fill:#fff3e0,stroke:#f57c00
+    style UpstreamMain fill:#f3e5f5,stroke:#7b1fa2
+
+    Note["Fork 워크플로우:<br/>1. 원본 Fork<br/>2. 로컬에 Clone<br/>3. Upstream 설정<br/>4. 기여 작업<br/>5. 개인 Fork에 Push<br/>6. PR 생성<br/>7-9. Upstream 동기화"]
+
+    Upstream -.-> Note
+
+    style Note fill:#fff3e0
+
+</div>
+<figcaption>Fork 기반 오픈소스 기여 워크플로우</figcaption>
+</figure>
+
+<h4 id="fork-clone-branch-pr">Fork -&gt; Clone -&gt; Branch -&gt; PR 워크플로우<a class="headerlink" href="#fork-clone-branch-pr" title="Permanent link">&para;</a></h4>
+<p>오픈소스 기여의 표준 워크플로우는 다음과 같습니다.</p>
+<p><strong>1단계: 원본 저장소 Fork하기</strong></p>
+<p>GitHub 웹 UI에서 기여하고 싶은 저장소로 이동하여 우측 상단의 <strong>Fork</strong> 버튼을 클릭합니다.
+이제 <code>original-owner/repo</code>가 <code>my-username/repo</code>로 복사됩니다.</p>
+<p><strong>2단계: Fork한 저장소를 로컬로 Clone하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:my-username/awesome-project.git
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>awesome-project
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: SSH URL을 사용하면 매번 비밀번호를 입력하지 않아도 됩니다. SSH 키 설정은 ch_04를 참고하세요.</p>
+</blockquote>
+<p><strong>3단계: Upstream 원격 저장소 추가하기</strong></p>
+<p>원본 저장소의 업데이트를 받기 위해 <code>upstream</code> 원격 저장소를 추가합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>upstream<span class="w"> </span>https://github.com/original-owner/awesome-project.git
+$<span class="w"> </span>git<span class="w"> </span>remote<span class="w"> </span>-v
+
+<span class="c1"># 출력:</span>
+<span class="c1"># origin    git@github.com:my-username/awesome-project.git (fetch)</span>
+<span class="c1"># origin    git@github.com:my-username/awesome-project.git (push)</span>
+<span class="c1"># upstream  https://github.com/original-owner/awesome-project.git (fetch)</span>
+<span class="c1"># upstream  https://github.com/original-owner/awesome-project.git (push)</span>
+</code></pre></div>
+
+<p>이제 두 개의 원격 저장소가 설정되었습니다.</p>
+<ul>
+<li><strong>origin</strong>: 자신의 Fork (읽기/쓰기 가능)</li>
+<li><strong>upstream</strong>: 원본 저장소 (읽기만 가능)</li>
+</ul>
+<p><strong>4단계: 기능 브랜치 생성하기</strong></p>
+<p>main 브랜치에서 직접 작업하지 말고, 새 브랜치를 만들어 작업합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>fix-typo-in-readme
+</code></pre></div>
+
+<p>브랜치 이름은 작업 내용을 명확히 표현해야 합니다.</p>
+<ul>
+<li><code>fix-typo-in-readme</code></li>
+<li><code>add-korean-translation</code></li>
+<li><code>improve-performance-algorithm</code></li>
+</ul>
+<p><strong>5단계: 변경 사항 커밋하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Fix typo in installation section&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 프로젝트의 커밋 규약(Conventional Commits 등)을 따르세요. CONTRIBUTING.md에 명시되어 있습니다.</p>
+</blockquote>
+<p><strong>6단계: Fork에 Push하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>fix-typo-in-readme
+</code></pre></div>
+
+<p><strong>7단계: Pull Request 생성하기</strong></p>
+<p>GitHub에서 자신의 Fork 저장소로 이동하면 "Compare &amp; pull request" 버튼이 표시됩니다.
+버튼을 클릭하여 PR을 작성합니다.</p>
+<ul>
+<li><strong>베이스 저장소</strong>: <code>original-owner/awesome-project</code> (main)</li>
+<li><strong>헤드 저장소</strong>: <code>my-username/awesome-project</code> (fix-typo-in-readme)</li>
+</ul>
+<p>PR 설명에는 변경 이유, 관련 Issue 번호, 테스트 방법 등을 포함합니다.</p>
+<h4 id="upstream-fork">Upstream 설정과 Fork 동기화<a class="headerlink" href="#upstream-fork" title="Permanent link">&para;</a></h4>
+<p>원본 저장소는 계속 업데이트됩니다.
+자신의 Fork를 최신 상태로 유지하려면 정기적으로 upstream의 변경 사항을 가져와야 합니다.</p>
+<p><strong>방법 1: 로컬에서 동기화 후 Push</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>upstream
+$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>upstream/main
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+
+<p><strong>방법 2: GitHub UI에서 Sync Fork 사용</strong></p>
+<p>GitHub 웹 UI에서 Fork 저장소로 이동하여 "Sync fork" 버튼을 클릭합니다.
+"Update branch"를 누르면 원본 저장소의 최신 변경 사항이 Fork에 반영됩니다.</p>
+<blockquote>
+<p><strong>주의</strong>: 로컬에서 작업한 내용이 있다면 충돌이 발생할 수 있으므로, 먼저 로컬 작업을 커밋하거나 stash 하세요.</p>
+</blockquote>
+<p><strong>동기화 후 로컬 업데이트</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+
+<h4 id="fork-vs-clone">Fork vs Clone: 언제 무엇을 쓸 것인가<a class="headerlink" href="#fork-vs-clone" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Fork</th>
+<th>Clone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>위치</strong></td>
+<td>GitHub 서버에서 복사</td>
+<td>로컬 컴퓨터로 복사</td>
+</tr>
+<tr>
+<td><strong>목적</strong></td>
+<td>기여를 위한 개인 복사본 생성</td>
+<td>로컬 작업 환경 구축</td>
+</tr>
+<tr>
+<td><strong>원본과의 관계</strong></td>
+<td>연결 유지 (upstream 설정 가능)</td>
+<td>연결 없음 (직접 추가해야 함)</td>
+</tr>
+<tr>
+<td><strong>쓰기 권한</strong></td>
+<td>Fork한 저장소에는 있음</td>
+<td>로컬 파일 시스템 권한만</td>
+</tr>
+<tr>
+<td><strong>PR 생성</strong></td>
+<td>가능</td>
+<td>원본 저장소 쓰기 권한 필요</td>
+</tr>
+</tbody>
+</table>
+<p><strong>사용 시나리오</strong></p>
+<ul>
+<li><strong>Fork</strong>: 오픈소스 프로젝트에 기여할 때</li>
+<li><strong>Clone</strong>: 직접 쓰기 권한이 있는 저장소(팀 프로젝트 등)를 로컬에서 작업할 때</li>
+</ul>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fork는 원본 저장소를 자신의 계정으로 완전히 복사하는 기능입니다.</li>
+<li>Fork -&gt; Clone -&gt; Branch -&gt; PR 워크플로우가 오픈소스 기여의 표준입니다.</li>
+<li>upstream 원격 저장소를 추가하여 원본 저장소의 업데이트를 가져올 수 있습니다.</li>
+<li>Fork는 GitHub 서버의 복사, Clone은 로컬의 복사입니다.</li>
+</ul>
+<hr />
+<h2 id="ch_13_s02">기여 준비: 프로젝트 이해하기 (ch_13_s02)<a class="headerlink" href="#ch_13_s02" title="Permanent link">&para;</a></h2>
+<h3 id="_5">도입<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>오픈소스 프로젝트에 기여하기 전에 프로젝트의 문화, 규칙, 구조를 이해하는 것이 중요합니다.
+이 절에서는 기여할 프로젝트를 찾고, 기여 가이드라인을 읽고, 프로젝트 환경을 파악하는 방법을 배웁니다.
+준비를 철저히 하면 첫 기여가 성공할 확률이 높아집니다.</p>
+<h3 id="_6">핵심 개념 설명<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="_7">기여할 프로젝트 찾기<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p><strong>좋은 첫 프로젝트의 조건</strong></p>
+<ol>
+<li><strong>활발한 유지보수</strong>: 최근 커밋, Issue, PR이 활발한 프로젝트</li>
+<li><strong>초보자 친화적</strong>: "Good First Issue", "Help Wanted" 라벨이 있는 프로젝트</li>
+<li><strong>명확한 문서</strong>: README, CONTRIBUTING.md가 잘 작성된 프로젝트</li>
+<li><strong>관심 분야</strong>: 자신이 사용하거나 관심 있는 기술 스택</li>
+</ol>
+<p><strong>프로젝트 찾는 방법</strong></p>
+<ul>
+<li><strong>GitHub Explore</strong>: <a href="https://github.com/explore">https://github.com/explore</a>에서 트렌딩 프로젝트 탐색</li>
+<li><strong>GitHub Topics</strong>: <code>good-first-issue</code>, <code>hacktoberfest</code> 등의 토픽으로 검색</li>
+<li><strong>First Timers Only</strong>: <a href="https://www.firsttimersonly.com/">https://www.firsttimersonly.com/</a></li>
+<li><strong>Up For Grabs</strong>: <a href="https://up-for-grabs.net/">https://up-for-grabs.net/</a></li>
+<li><strong>자신이 사용 중인 도구</strong>: 평소 사용하는 라이브러리나 프레임워크</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: 처음에는 문서 개선, 번역, 오타 수정 등 코드가 아닌 기여로 시작하는 것이 좋습니다.</p>
+</blockquote>
+<h4 id="contributingmd">CONTRIBUTING.md 읽기: 기여 가이드라인<a class="headerlink" href="#contributingmd" title="Permanent link">&para;</a></h4>
+<p><strong>CONTRIBUTING.md</strong>는 프로젝트의 기여 가이드라인을 담은 문서로, 프로젝트마다 다른 규칙과 절차를 정의합니다.</p>
+<p><strong>일반적인 CONTRIBUTING.md 내용</strong></p>
+<ol>
+<li><strong>기여 절차</strong>: Fork, 브랜치 생성, PR 작성 방법</li>
+<li><strong>개발 환경 설정</strong>: 의존성 설치, 빌드 방법, 테스트 실행</li>
+<li><strong>커밋 규약</strong>: 커밋 메시지 형식 (Conventional Commits 등)</li>
+<li><strong>코드 스타일</strong>: 린트 규칙, 포맷팅 도구 (Prettier, ESLint 등)</li>
+<li><strong>테스트 요구사항</strong>: 새 코드에 대한 테스트 작성 규칙</li>
+<li><strong>PR 템플릿</strong>: PR 작성 시 포함해야 할 내용</li>
+<li><strong>리뷰 프로세스</strong>: 리뷰 대기 시간, 리뷰어 선정 방법</li>
+</ol>
+<p><strong>CONTRIBUTING.md 예시</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># Contributing to Awesome Project</span>
+
+<span class="gu">## Development Setup</span>
+
+<span class="k">1.</span> Fork the repository
+<span class="k">2.</span> Clone your fork: <span class="sb">`git clone git@github.com:your-username/awesome-project.git`</span>
+<span class="k">3.</span> Install dependencies: <span class="sb">`npm install`</span>
+<span class="k">4.</span> Run tests: <span class="sb">`npm test`</span>
+
+<span class="gu">## Commit Message Format</span>
+
+We follow Conventional Commits:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`feat:`</span> New feature
+<span class="k">-</span><span class="w"> </span><span class="sb">`fix:`</span> Bug fix
+<span class="k">-</span><span class="w"> </span><span class="sb">`docs:`</span> Documentation changes
+<span class="k">-</span><span class="w"> </span><span class="sb">`test:`</span> Adding or updating tests
+
+Example: <span class="sb">`feat: Add Korean translation for README`</span>
+
+<span class="gu">## Pull Request Process</span>
+
+<span class="k">1.</span> Create a feature branch: <span class="sb">`git switch -c feature/my-feature`</span>
+<span class="k">2.</span> Make your changes and commit
+<span class="k">3.</span> Push to your fork: <span class="sb">`git push origin feature/my-feature`</span>
+<span class="k">4.</span> Open a PR against the <span class="sb">`main`</span> branch
+<span class="k">5.</span> Wait for CI checks to pass
+<span class="k">6.</span> Address review feedback
+
+<span class="gu">## Code Style</span>
+
+We use Prettier for formatting. Run <span class="sb">`npm run format`</span> before committing.
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: CONTRIBUTING.md를 읽지 않고 PR을 만들면 거절당할 가능성이 높습니다. 반드시 먼저 읽으세요.</p>
+</blockquote>
+<h4 id="code-of-conduct">Code of Conduct: 행동 강령<a class="headerlink" href="#code-of-conduct" title="Permanent link">&para;</a></h4>
+<p><strong>Code of Conduct</strong>는 커뮤니티 구성원이 지켜야 할 행동 규칙입니다.
+존중, 배려, 포용의 원칙을 명시하여 건강한 커뮤니티를 유지합니다.</p>
+<p><strong>일반적인 Code of Conduct 내용</strong></p>
+<ol>
+<li><strong>존중과 배려</strong>: 다른 기여자를 존중하고 건설적인 피드백 제공</li>
+<li><strong>차별 금지</strong>: 인종, 성별, 종교, 국적, 성적 지향 등에 따른 차별 금지</li>
+<li><strong>괴롭힘 금지</strong>: 공격적 언어, 인신공격, 스토킹 등 금지</li>
+<li><strong>신고 절차</strong>: 위반 사례 발견 시 신고 방법</li>
+<li><strong>처벌 조치</strong>: 규정 위반 시 경고, 차단 등의 조치</li>
+</ol>
+<p><strong>대표적인 Code of Conduct</strong></p>
+<ul>
+<li><strong>Contributor Covenant</strong>: <a href="https://www.contributor-covenant.org/">https://www.contributor-covenant.org/</a></li>
+<li><strong>Citizen Code of Conduct</strong>: <a href="https://github.com/stumpsyn/policies/blob/master/citizen_code_of_conduct.md">https://github.com/stumpsyn/policies/blob/master/citizen_code_of_conduct.md</a></li>
+</ul>
+<blockquote>
+<p><strong>주의</strong>: Code of Conduct를 위반하면 프로젝트에서 영구 차단될 수 있습니다. 항상 예의를 지키세요.</p>
+</blockquote>
+<h4 id="good-first-issue">Good First Issue로 시작하기<a class="headerlink" href="#good-first-issue" title="Permanent link">&para;</a></h4>
+<p><strong>Good First Issue</strong>는 초보자가 쉽게 시작할 수 있도록 프로젝트 메인테이너가 선별한 이슈입니다.</p>
+<p><strong>Good First Issue의 특징</strong></p>
+<ol>
+<li><strong>명확한 범위</strong>: 작업 범위가 제한적이고 명확함</li>
+<li><strong>낮은 복잡도</strong>: 프로젝트 전체 구조를 이해하지 않아도 해결 가능</li>
+<li><strong>자세한 설명</strong>: 문제 상황, 기대 결과, 힌트가 포함됨</li>
+<li><strong>멘토링 가능</strong>: 메인테이너가 도움을 줄 준비가 되어 있음</li>
+</ol>
+<p><strong>Good First Issue 찾기</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># GitHub CLI로 검색</span>
+$<span class="w"> </span>gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>--repo<span class="w"> </span>owner/repo<span class="w"> </span>--label<span class="w"> </span><span class="s2">&quot;good first issue&quot;</span>
+
+<span class="c1"># GitHub UI에서 검색</span>
+<span class="c1"># Issues 탭 -&gt; Labels -&gt; &quot;good first issue&quot; 클릭</span>
+</code></pre></div>
+
+<p><strong>다른 유용한 라벨</strong></p>
+<ul>
+<li><code>help wanted</code>: 외부 기여자의 도움이 필요한 이슈</li>
+<li><code>documentation</code>: 문서 관련 작업</li>
+<li><code>bug</code>: 버그 수정</li>
+<li><code>enhancement</code>: 기능 개선</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: 이슈를 선택했으면 댓글로 "I'd like to work on this"라고 남겨 중복 작업을 방지하세요.</p>
+</blockquote>
+<h4 id="_8">프로젝트 구조와 빌드 환경 파악<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<p>기여하기 전에 프로젝트의 구조와 빌드 환경을 이해해야 합니다.</p>
+<p><strong>프로젝트 구조 파악하기</strong></p>
+<ol>
+<li><strong>README.md 읽기</strong>: 프로젝트 목적, 주요 기능, 사용법 이해</li>
+<li><strong>디렉토리 구조 확인</strong>: 소스 코드, 테스트, 문서 위치 파악</li>
+<li><strong>package.json / requirements.txt 등</strong>: 의존성 및 스크립트 확인</li>
+</ol>
+<p><strong>빌드 환경 설정하기</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Node.js 프로젝트 예시</span>
+$<span class="w"> </span>npm<span class="w"> </span>install
+$<span class="w"> </span>npm<span class="w"> </span><span class="nb">test</span>
+$<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>build
+
+<span class="c1"># Python 프로젝트 예시</span>
+$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w">  </span><span class="c1"># Windows: venv\Scripts\activate</span>
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+$<span class="w"> </span>pytest
+
+<span class="c1"># Go 프로젝트 예시</span>
+$<span class="w"> </span>go<span class="w"> </span>mod<span class="w"> </span>download
+$<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./...
+$<span class="w"> </span>go<span class="w"> </span>build
+</code></pre></div>
+
+<p><strong>로컬에서 실행 확인</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 웹 프로젝트</span>
+$<span class="w"> </span>npm<span class="w"> </span>start
+<span class="c1"># 브라우저에서 http://localhost:3000 확인</span>
+
+<span class="c1"># CLI 도구</span>
+$<span class="w"> </span>go<span class="w"> </span>run<span class="w"> </span>main.go<span class="w"> </span>--help
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 코드를 수정하기 전에 테스트가 통과하는지 먼저 확인하세요. 환경 문제를 미리 해결할 수 있습니다.</p>
+</blockquote>
+<h3 id="_9">절 요약<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>기여할 프로젝트는 활발하고, 초보자 친화적이며, 문서가 잘 갖춰진 곳을 선택합니다.</li>
+<li>CONTRIBUTING.md는 프로젝트의 기여 규칙을 정의하며, 반드시 먼저 읽어야 합니다.</li>
+<li>Code of Conduct는 커뮤니티 행동 규칙으로, 위반 시 차단될 수 있습니다.</li>
+<li>Good First Issue로 시작하여 프로젝트에 익숙해지는 것이 좋습니다.</li>
+<li>로컬 빌드 환경을 먼저 설정하고 테스트가 통과하는지 확인합니다.</li>
+</ul>
+<hr />
+<h2 id="ch_13_s03">첫 번째 기여 실습 (ch_13_s03)<a class="headerlink" href="#ch_13_s03" title="Permanent link">&para;</a></h2>
+<h3 id="_10">도입<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>이제 실제로 오픈소스 프로젝트에 첫 기여를 할 시간입니다.
+이 절에서는 좋은 첫 기여 주제를 선택하고, 기여용 브랜치를 만들고, 프로젝트 규약에 맞춰 커밋하고, PR을 작성하고, 리뷰에 대응하는 전체 과정을 단계별로 안내합니다.
+긴장하지 마세요. 모든 오픈소스 기여자는 이 과정을 거쳤습니다.</p>
+<h3 id="_11">핵심 개념 설명<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h4 id="_12">좋은 첫 기여: 문서 오타 수정, 번역<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
+<p><strong>코드가 아닌 기여도 가치 있습니다</strong></p>
+<p>첫 기여로 코드를 작성할 필요는 없습니다.
+다음과 같은 비코드 기여도 프로젝트에 큰 도움이 됩니다.</p>
+<p><strong>1. 문서 오타 수정</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 예시: README.md의 오타 수정</span>
+-<span class="w"> </span>insatllation<span class="w">  </span><span class="c1"># 틀림</span>
++<span class="w"> </span>installation<span class="w">  </span><span class="c1"># 맞음</span>
+</code></pre></div>
+
+<p><strong>2. 번역 추가</strong></p>
+<p>많은 프로젝트가 다국어 지원을 환영합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># 한국어 번역 추가</span>
+README.md
+README.ko.md  # 새로 생성
+</code></pre></div>
+
+<p><strong>3. 예제 코드 추가</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># 사용 예시 추가</span>
+<span class="gu">## Examples</span>
+
+<span class="gu">### Basic Usage</span>
+
+\`\`\`python
+import awesome_lib
+
+result = awesome_lib.process(&quot;Hello&quot;)
+print(result)  # Output: &quot;HELLO&quot;
+\`\`\`
+</code></pre></div>
+
+<p><strong>4. 링크 수정</strong></p>
+<p>404 에러 링크, 깨진 이미지 링크 등을 수정합니다.</p>
+<p><strong>5. 코드 주석 개선</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 수정 전</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+<span class="c1"># 수정 후</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert input string to uppercase.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (str): Input string to convert</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Uppercase version of input</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 문서 개선은 코드보다 리뷰가 빠르고 승인될 확률이 높아 첫 기여로 적합합니다.</p>
+</blockquote>
+<h4 id="_13">기여용 브랜치 만들고 작업하기<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p><strong>브랜치 생성 전 최신 상태 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>upstream
+$<span class="w"> </span>git<span class="w"> </span>merge<span class="w"> </span>upstream/main
+</code></pre></div>
+
+<p><strong>의미 있는 브랜치 이름 짓기</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 좋은 예</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>fix-typo-in-installation-docs
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>add-korean-translation
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>improve-readme-examples
+
+<span class="c1"># 나쁜 예</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>my-branch
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>temp
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>test123
+</code></pre></div>
+
+<p>브랜치 이름은 작업 내용을 명확히 표현해야 합니다.</p>
+<p><strong>작업하기</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 파일 수정</span>
+$<span class="w"> </span>code<span class="w"> </span>README.md
+
+<span class="c1"># 변경 사항 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>diff
+
+<span class="c1"># 스테이징</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+
+<span class="c1"># 상태 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>status
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 작은 단위로 자주 커밋하세요. 리뷰어가 변경 사항을 이해하기 쉽습니다.</p>
+</blockquote>
+<h4 id="_14">프로젝트 커밋 규약에 맞춰 커밋하기<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
+<p><strong>Conventional Commits 규약</strong></p>
+<p>대부분의 프로젝트가 Conventional Commits 규약을 따릅니다.</p>
+<div class="codehilite"><pre><span></span><code>&lt;type&gt;<span class="o">(</span>&lt;scope&gt;<span class="o">)</span>:<span class="w"> </span>&lt;subject&gt;
+
+&lt;body&gt;
+
+&lt;footer&gt;
+</code></pre></div>
+
+<p><strong>주요 타입</strong></p>
+<ul>
+<li><code>feat</code>: 새로운 기능</li>
+<li><code>fix</code>: 버그 수정</li>
+<li><code>docs</code>: 문서 변경</li>
+<li><code>style</code>: 코드 포맷팅 (동작 변경 없음)</li>
+<li><code>refactor</code>: 리팩터링</li>
+<li><code>test</code>: 테스트 추가/수정</li>
+<li><code>chore</code>: 빌드 설정, 의존성 업데이트 등</li>
+</ul>
+<p><strong>예시</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 문서 오타 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Fix typo in installation section&quot;</span>
+
+<span class="c1"># 한국어 번역 추가</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Add Korean translation for README&quot;</span>
+
+<span class="c1"># 예제 추가</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Add usage example for basic configuration&quot;</span>
+
+<span class="c1"># 버그 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: Resolve crash when input is empty</span>
+
+<span class="s2">This commit adds a null check before processing input.</span>
+
+<span class="s2">Fixes #123&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: 프로젝트마다 규약이 다를 수 있으므로 CONTRIBUTING.md를 확인하세요.</p>
+</blockquote>
+<p><strong>커밋 메시지 작성 팁</strong></p>
+<ol>
+<li><strong>제목은 명령형으로</strong>: "Fix bug" (O), "Fixed bug" (X)</li>
+<li><strong>제목은 50자 이내</strong>: 간결하게 요약</li>
+<li><strong>본문은 72자마다 줄바꿈</strong>: 읽기 쉽게 정렬</li>
+<li><strong>Why보다 What과 How</strong>: 무엇을, 어떻게 변경했는지 설명</li>
+<li><strong>관련 Issue 번호 포함</strong>: <code>Fixes #123</code>, <code>Closes #456</code></li>
+</ol>
+<h4 id="pr-issue">PR 작성: 변경 사항 설명, 관련 Issue 링크<a class="headerlink" href="#pr-issue" title="Permanent link">&para;</a></h4>
+<p><strong>Push하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>fix-typo-in-installation-docs
+</code></pre></div>
+
+<p><strong>PR 템플릿 활용하기</strong></p>
+<p>많은 프로젝트가 <code>.github/PULL_REQUEST_TEMPLATE.md</code>를 제공합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## Description</span>
+
+Fixes a typo in the installation section of README.md.
+Changed &quot;insatllation&quot; to &quot;installation&quot;.
+
+<span class="gu">## Related Issue</span>
+
+Closes <span class="ni">#123</span>
+
+<span class="gu">## Type of Change</span>
+
+<span class="k">- [x]</span> Documentation update
+<span class="k">- [ ]</span> Bug fix
+<span class="k">- [ ]</span> New feature
+<span class="k">- [ ]</span> Breaking change
+
+<span class="gu">## Checklist</span>
+
+<span class="k">- [x]</span> I have read the CONTRIBUTING.md
+<span class="k">- [x]</span> My code follows the project&#39;s style guidelines
+<span class="k">- [x]</span> I have performed a self-review
+<span class="k">- [x]</span> I have commented my code where necessary
+<span class="k">- [x]</span> My changes generate no new warnings
+<span class="k">- [ ]</span> I have added tests that prove my fix is effective
+<span class="k">- [x]</span> New and existing unit tests pass locally
+</code></pre></div>
+
+<p><strong>PR 제목 작성</strong></p>
+<div class="codehilite"><pre><span></span><code># 좋은 예
+docs: Fix typo in installation section
+feat: Add Korean translation for README
+fix: Resolve crash when input is empty
+
+# 나쁜 예
+Update README
+Fixed some bugs
+My changes
+</code></pre></div>
+
+<p><strong>PR 설명 작성 요소</strong></p>
+<ol>
+<li><strong>변경 내용 요약</strong>: 무엇을 변경했는지</li>
+<li><strong>변경 이유</strong>: 왜 이 변경이 필요한지</li>
+<li><strong>관련 Issue</strong>: <code>Fixes #123</code>, <code>Closes #456</code>, <code>Related to #789</code></li>
+<li><strong>스크린샷</strong>: UI 변경 시 전/후 스크린샷</li>
+<li><strong>테스트 방법</strong>: 리뷰어가 검증할 수 있는 단계</li>
+</ol>
+<p><strong>GitHub UI에서 PR 생성하기</strong></p>
+<ol>
+<li>Fork한 저장소로 이동</li>
+<li>"Compare &amp; pull request" 버튼 클릭</li>
+<li><strong>베이스 저장소</strong>: <code>original-owner/repo</code> (main)</li>
+<li><strong>헤드 저장소</strong>: <code>my-username/repo</code> (fix-typo-in-installation-docs)</li>
+<li>제목과 설명 작성</li>
+<li>"Create pull request" 클릭</li>
+</ol>
+<p><strong>GitHub CLI로 PR 생성하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;docs: Fix typo in installation section&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--body<span class="w"> </span><span class="s2">&quot;Fixes a typo in the installation section. Changes &#39;insatllation&#39; to &#39;installation&#39;. Closes #123&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: Draft PR로 먼저 만들어 초기 피드백을 받고, 준비가 되면 "Ready for review"로 전환할 수 있습니다.</p>
+</blockquote>
+<h4 id="ci">CI 검사 통과와 리뷰 대응<a class="headerlink" href="#ci" title="Permanent link">&para;</a></h4>
+<p><strong>CI 검사 기다리기</strong></p>
+<p>PR을 만들면 자동으로 CI(Continuous Integration) 검사가 실행됩니다.</p>
+<ul>
+<li><strong>빌드 성공 여부</strong></li>
+<li><strong>테스트 통과 여부</strong></li>
+<li><strong>린트 검사</strong></li>
+<li><strong>코드 커버리지</strong></li>
+</ul>
+<p><strong>CI 실패 시 대응</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># CI 실패 원인 확인</span>
+<span class="c1"># GitHub PR 페이지에서 &quot;Details&quot; 클릭</span>
+
+<span class="c1"># 로컬에서 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: Resolve lint error&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>fix-typo-in-installation-docs
+</code></pre></div>
+
+<p>PR에 새 커밋을 push하면 CI가 자동으로 재실행됩니다.</p>
+<p><strong>리뷰 피드백 받기</strong></p>
+<p>리뷰어가 코멘트를 남기면 신속하고 정중하게 응답합니다.</p>
+<p><strong>좋은 응답 예시</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># 피드백: 이 부분 더 명확하게 설명할 수 있나요?</span>
+
+Thanks for the feedback! I&#39;ve updated the description to be more explicit.
+Let me know if this is clearer.
+</code></pre></div>
+
+<p><strong>수정 사항 반영하기</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Clarify installation steps based on review feedback&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>fix-typo-in-installation-docs
+</code></pre></div>
+
+<p><strong>리뷰 승인 후 머지</strong></p>
+<p>리뷰어가 "Approve"하면 메인테이너가 PR을 머지합니다.
+일부 프로젝트는 기여자가 직접 머지할 수 있습니다.</p>
+<p><strong>머지 후 정리</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 로컬 브랜치 삭제</span>
+$<span class="w"> </span>git<span class="w"> </span>switch<span class="w"> </span>main
+$<span class="w"> </span>git<span class="w"> </span>branch<span class="w"> </span>-d<span class="w"> </span>fix-typo-in-installation-docs
+
+<span class="c1"># 원격 브랜치 삭제 (GitHub UI에서도 가능)</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>--delete<span class="w"> </span>fix-typo-in-installation-docs
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 리뷰 피드백에 방어적이거나 공격적으로 반응하지 마세요. 배움의 기회로 받아들이세요.</p>
+</blockquote>
+<h3 id="_15">절 요약<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>첫 기여는 문서 오타 수정, 번역, 예제 추가 등 비코드 기여로 시작하는 것이 좋습니다.</li>
+<li>브랜치 이름은 작업 내용을 명확히 표현해야 합니다.</li>
+<li>Conventional Commits 규약을 따라 커밋 메시지를 작성합니다.</li>
+<li>PR 설명에는 변경 내용, 이유, 관련 Issue, 테스트 방법을 포함합니다.</li>
+<li>CI 검사를 통과하고, 리뷰 피드백에 정중하고 신속하게 대응합니다.</li>
+</ul>
+<hr />
+<h2 id="ch_13_s04">라이선스의 이해 (ch_13_s04)<a class="headerlink" href="#ch_13_s04" title="Permanent link">&para;</a></h2>
+<h3 id="_16">도입<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>오픈소스 프로젝트를 사용하거나 기여할 때 라이선스는 매우 중요한 법적 문서입니다.
+이 절에서는 오픈소스 라이선스의 필요성, Permissive와 Copyleft 라이선스의 차이, 주요 라이선스의 특징, 라이선스 선택 가이드, 라이선스 호환성 문제를 배웁니다.
+라이선스를 이해하지 못하면 법적 분쟁에 휘말릴 수 있습니다.</p>
+<h3 id="_17">핵심 개념 설명<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h4 id="_18">왜 라이선스가 중요한가<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h4>
+<p><strong>라이선스의 역할</strong></p>
+<p>오픈소스 라이선스는 소프트웨어의 사용, 수정, 배포 권한과 의무를 명시하는 법적 문서입니다.
+Creative Commons와 같은 저작물 이용 약관과 같습니다.
+'마음대로 써도 됨(MIT)', '출처만 밝히면 됨(Apache)', '같은 조건으로 공유해야 함(GPL)' 등 사용 조건이 다릅니다.</p>
+<p><strong>라이선스 없는 코드의 위험</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># 라이선스가 없는 GitHub 저장소</span>
+
+MIT LICENSE 파일 없음
+Apache LICENSE 파일 없음
+GPL LICENSE 파일 없음
+→ 기본적으로 저작권법 적용
+→ 저작권자의 명시적 허락 없이 사용, 수정, 배포 금지
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: 라이선스가 없는 코드는 자유롭게 사용할 수 있는 것이 아니라, 오히려 사용이 제한됩니다.</p>
+</blockquote>
+<p><strong>라이선스 선택의 영향</strong></p>
+<ol>
+<li><strong>사용자</strong>: 프로젝트를 어떻게 사용할 수 있는가</li>
+<li><strong>기여자</strong>: 기여한 코드의 권리는 누구에게 있는가</li>
+<li><strong>상업적 이용</strong>: 상업 프로젝트에서 사용 가능한가</li>
+<li><strong>파생 작업</strong>: 수정한 코드의 라이선스는 무엇인가</li>
+</ol>
+<h4 id="permissive-mit-apache-20-bsd">Permissive 라이선스: MIT, Apache 2.0, BSD<a class="headerlink" href="#permissive-mit-apache-20-bsd" title="Permanent link">&para;</a></h4>
+<p><strong>Permissive 라이선스의 특징</strong></p>
+<p>Permissive(허용적) 라이선스는 최소한의 제약으로 자유로운 사용을 허용합니다.</p>
+<p><strong>1. MIT License</strong></p>
+<p>가장 인기 있는 오픈소스 라이선스로, 매우 간단하고 허용적입니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- 상업적 이용 ✓
+- 수정 ✓
+- 배포 ✓
+- 개인 사용 ✓
+- 재배포 시 라이선스 변경 ✓
+
+의무사항:
+- 라이선스 및 저작권 고지 포함
+
+금지사항:
+- 보증 없음 (책임 면책)
+</code></pre></div>
+
+<p><strong>사용 예</strong>: React, Angular, Rails, jQuery</p>
+<p><strong>2. Apache License 2.0</strong></p>
+<p>MIT보다 조금 더 상세하며, 특허권 보호 조항이 있습니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- 상업적 이용 ✓
+- 수정 ✓
+- 배포 ✓
+- 개인 사용 ✓
+- 특허 사용 ✓
+
+의무사항:
+- 라이선스 및 저작권 고지 포함
+- 변경 사항 명시 (NOTICE 파일)
+
+금지사항:
+- 상표권 사용 금지
+- 보증 없음 (책임 면책)
+</code></pre></div>
+
+<p><strong>사용 예</strong>: Kubernetes, TensorFlow, Android</p>
+<p><strong>3. BSD License (2-Clause, 3-Clause)</strong></p>
+<p>MIT와 유사하나, BSD 3-Clause는 상표권 보호 조항이 추가되었습니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- MIT와 거의 동일
+
+의무사항:
+- 라이선스 및 저작권 고지 포함
+
+금지사항 (3-Clause):
+- 프로젝트 이름이나 기여자 이름을 홍보에 사용 금지
+</code></pre></div>
+
+<p><strong>사용 예</strong>: Go, FreeBSD, Django</p>
+<blockquote>
+<p><strong>팁</strong>: MIT와 Apache 2.0 중 선택이 어렵다면, 특허 관련 프로젝트는 Apache 2.0, 그 외는 MIT를 권장합니다.</p>
+</blockquote>
+<h4 id="copyleft-gpl-lgpl-agpl">Copyleft 라이선스: GPL, LGPL, AGPL<a class="headerlink" href="#copyleft-gpl-lgpl-agpl" title="Permanent link">&para;</a></h4>
+<p><strong>Copyleft 라이선스의 특징</strong></p>
+<p>Copyleft(상호주의) 라이선스는 파생 작업물도 같은 라이선스로 공개할 것을 요구합니다.</p>
+<p><strong>1. GPL v3 (GNU General Public License v3)</strong></p>
+<p>가장 강력한 Copyleft 라이선스입니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- 상업적 이용 ✓
+- 수정 ✓
+- 배포 ✓
+- 개인 사용 ✓
+
+의무사항:
+- 소스 코드 공개 (배포 시)
+- 라이선스 및 저작권 고지 포함
+- 변경 사항 명시
+- 파생 작업물도 GPL로 공개
+
+금지사항:
+- 보증 없음 (책임 면책)
+</code></pre></div>
+
+<p><strong>사용 예</strong>: Linux Kernel, Git, GIMP</p>
+<p><strong>2. LGPL (GNU Lesser General Public License)</strong></p>
+<p>GPL보다 완화된 버전으로, 라이브러리로 링크만 하는 경우 GPL 의무가 전파되지 않습니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- 동적 링크는 LGPL 전파 안 됨
+- 정적 링크는 LGPL 전파됨
+
+의무사항:
+- 라이브러리 자체 수정 시 소스 공개
+- 라이선스 및 저작권 고지 포함
+</code></pre></div>
+
+<p><strong>사용 예</strong>: Qt (일부), GTK+, GNU C Library</p>
+<p><strong>3. AGPL (Affero GPL)</strong></p>
+<p>GPL보다 더 강력하며, 네트워크 서비스로 제공 시에도 소스 공개 의무가 있습니다.</p>
+<div class="codehilite"><pre><span></span><code>허용사항:
+- GPL과 동일
+
+의무사항:
+- GPL 의무 + 네트워크 서비스 제공 시에도 소스 공개
+
+사용 시나리오:
+- 웹 애플리케이션으로 서비스할 때도 소스 공개 필요
+</code></pre></div>
+
+<p><strong>사용 예</strong>: MongoDB (과거), Nextcloud, Mastodon</p>
+<blockquote>
+<p><strong>주의</strong>: GPL 라이브러리를 사용한 상업 소프트웨어는 전체 소스를 공개해야 할 수 있습니다.</p>
+</blockquote>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart LR
+    subgraph Permissive["Permissive 라이선스 (자유로움)"]
+        direction TB
+        MIT["MIT License"]
+        Apache["Apache 2.0"]
+        BSD["BSD License"]
+
+        MIT_Desc["최소한의 제약<br/>출처 명시만 필요<br/>상업적 사용 자유"]
+        Apache_Desc["특허권 명시<br/>변경 사항 표시<br/>상업적 사용 자유"]
+        BSD_Desc["MIT와 유사<br/>이름 사용 제한"]
+
+        MIT --> MIT_Desc
+        Apache --> Apache_Desc
+        BSD --> BSD_Desc
+
+        style MIT fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+        style Apache fill:#e8f5e9,stroke:#388e3c
+        style BSD fill:#e8f5e9,stroke:#388e3c
+        style MIT_Desc fill:#e8f5e9
+        style Apache_Desc fill:#e8f5e9
+        style BSD_Desc fill:#e8f5e9
+    end
+
+    subgraph Copyleft["Copyleft 라이선스 (전염성)"]
+        direction TB
+        GPL["GPL v3"]
+        LGPL["LGPL v3"]
+        AGPL["AGPL v3"]
+
+        GPL_Desc["강한 Copyleft<br/>파생물도 GPL<br/>소스 공개 필수"]
+        LGPL_Desc["약한 Copyleft<br/>라이브러리 링크는<br/>독립 라이선스 허용"]
+        AGPL_Desc["네트워크 서비스도<br/>소스 공개 필수<br/>(가장 강한 제약)"]
+
+        GPL --> GPL_Desc
+        LGPL --> LGPL_Desc
+        AGPL --> AGPL_Desc
+
+        style GPL fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+        style LGPL fill:#fff3e0,stroke:#f57c00
+        style AGPL fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+        style GPL_Desc fill:#fce4ec
+        style LGPL_Desc fill:#fff3e0
+        style AGPL_Desc fill:#fce4ec
+    end
+
+    Spectrum["자유도 스펙트럼"]
+
+    Permissive -->|"매우 자유로움"| Spectrum
+    Copyleft -->|"제약이 있음"| Spectrum
+
+    Spectrum --> Guide["선택 가이드:<br/>- 상업적 활용 허용: MIT, Apache<br/>- 오픈소스 유지: GPL, LGPL<br/>- 네트워크 서비스 공개: AGPL"]
+
+    style Permissive fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style Copyleft fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style Spectrum fill:#f3e5f5,stroke:#7b1fa2
+    style Guide fill:#fff3e0
+
+</div>
+<figcaption>오픈소스 라이선스 자유도 스펙트럼</figcaption>
+</figure>
+
+<h4 id="_19">라이선스 선택 가이드<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h4>
+<p><strong>프로젝트 목적에 따른 라이선스 선택</strong></p>
+<table>
+<thead>
+<tr>
+<th>목적</th>
+<th>추천 라이선스</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>최대한의 자유</strong></td>
+<td>MIT</td>
+<td>가장 간단하고 제약 없음</td>
+</tr>
+<tr>
+<td><strong>특허 보호 필요</strong></td>
+<td>Apache 2.0</td>
+<td>특허권 명시적 부여</td>
+</tr>
+<tr>
+<td><strong>파생 작업물도 오픈소스 유지</strong></td>
+<td>GPL v3</td>
+<td>강력한 Copyleft</td>
+</tr>
+<tr>
+<td><strong>라이브러리 (링크 허용)</strong></td>
+<td>LGPL</td>
+<td>동적 링크는 전파 안 됨</td>
+</tr>
+<tr>
+<td><strong>SaaS 서비스</strong></td>
+<td>AGPL</td>
+<td>네트워크 서비스도 공개</td>
+</tr>
+<tr>
+<td><strong>공공 도메인</strong></td>
+<td>Unlicense / CC0</td>
+<td>모든 권리 포기</td>
+</tr>
+</tbody>
+</table>
+<p><strong>주요 고려사항</strong></p>
+<ol>
+<li><strong>상업적 이용 허용 여부</strong>: MIT/Apache는 허용, GPL은 제한적</li>
+<li><strong>기여자 유입</strong>: MIT/Apache가 GPL보다 기여자가 많은 경향</li>
+<li><strong>기업 친화성</strong>: MIT/Apache가 기업에서 선호됨</li>
+<li><strong>철학적 선택</strong>: 자유 소프트웨어 운동 지지 시 GPL</li>
+</ol>
+<p><strong>GitHub에서 인기 있는 라이선스</strong></p>
+<ol>
+<li>MIT License (45%)</li>
+<li>Apache License 2.0 (15%)</li>
+<li>GPL v3 (10%)</li>
+<li>BSD 3-Clause (5%)</li>
+<li>LGPL (3%)</li>
+</ol>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 확신이 서지 않으면 MIT License를 선택하세요. 가장 널리 쓰이고 이해하기 쉽습니다.</p>
+</blockquote>
+<h4 id="_20">라이선스 호환성과 주의사항<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h4>
+<p><strong>라이선스 호환성 문제</strong></p>
+<p>여러 라이선스의 코드를 섞을 때 충돌이 발생할 수 있습니다.</p>
+<p><strong>호환성 매트릭스</strong></p>
+<table>
+<thead>
+<tr>
+<th>프로젝트 라이선스</th>
+<th>MIT 코드 사용</th>
+<th>Apache 코드 사용</th>
+<th>GPL 코드 사용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MIT</strong></td>
+<td>✓</td>
+<td>✓</td>
+<td>X (GPL로 전환 필요)</td>
+</tr>
+<tr>
+<td><strong>Apache 2.0</strong></td>
+<td>✓</td>
+<td>✓</td>
+<td>X (GPL로 전환 필요)</td>
+</tr>
+<tr>
+<td><strong>GPL v3</strong></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p><strong>주의사항</strong></p>
+<ol>
+<li><strong>GPL은 전염성이 있음</strong>: GPL 코드를 포함하면 전체 프로젝트가 GPL이 되어야 함</li>
+<li><strong>Apache 2.0 + GPL v2 비호환</strong>: Apache 2.0과 GPL v2는 호환되지 않음 (GPL v3는 호환)</li>
+<li><strong>의존성 라이선스 확인</strong>: npm, pip 등 의존성의 라이선스도 검토 필요</li>
+<li><strong>상표권과 특허권</strong>: 라이선스가 코드만 다루고 상표는 별도</li>
+</ol>
+<p><strong>라이선스 확인 도구</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Node.js 프로젝트 의존성 라이선스 확인</span>
+$<span class="w"> </span>npx<span class="w"> </span>license-checker<span class="w"> </span>--summary
+
+<span class="c1"># Python 프로젝트</span>
+$<span class="w"> </span>pip-licenses
+
+<span class="c1"># GitHub에서 라이선스 확인</span>
+$<span class="w"> </span>gh<span class="w"> </span>repo<span class="w"> </span>view<span class="w"> </span>owner/repo<span class="w"> </span>--json<span class="w"> </span>licenseInfo
+</code></pre></div>
+
+<p><strong>듀얼 라이선싱</strong></p>
+<p>일부 프로젝트는 두 가지 라이선스를 제공합니다.</p>
+<div class="codehilite"><pre><span></span><code>Qt: LGPL (오픈소스) / Commercial License (상업용)
+MySQL: GPL / Commercial License
+</code></pre></div>
+
+<p>기업은 GPL 의무를 피하기 위해 상업 라이선스를 구매합니다.</p>
+<blockquote>
+<p><strong>주의</strong>: 오픈소스 프로젝트를 상업 제품에 사용하기 전에 반드시 법무팀과 상의하세요.</p>
+</blockquote>
+<h3 id="_21">절 요약<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>라이선스는 소프트웨어 사용, 수정, 배포 권한과 의무를 명시합니다.</li>
+<li>Permissive 라이선스(MIT, Apache)는 자유롭고, Copyleft(GPL)는 파생 작업물 공개를 요구합니다.</li>
+<li>프로젝트 목적에 따라 적절한 라이선스를 선택해야 합니다.</li>
+<li>라이선스 호환성을 고려하여 의존성을 선택해야 합니다.</li>
+<li>라이선스 없는 코드는 사용이 제한됩니다.</li>
+</ul>
+<hr />
+<h2 id="ch_13_s05">오픈소스 프로젝트 운영하기 (ch_13_s05)<a class="headerlink" href="#ch_13_s05" title="Permanent link">&para;</a></h2>
+<h3 id="_22">도입<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<p>오픈소스에 기여하는 것을 넘어, 자신의 프로젝트를 만들어 운영할 수도 있습니다.
+이 절에서는 나만의 오픈소스 프로젝트를 시작하는 방법, 필수 문서 작성, 이슈 및 PR 템플릿 설정, 커뮤니티 빌딩, 릴리스 관리 방법을 배웁니다.
+작은 프로젝트라도 체계적으로 운영하면 많은 기여자를 끌어들일 수 있습니다.</p>
+<h3 id="_23">핵심 개념 설명<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<h4 id="_24">나만의 오픈소스 프로젝트 시작하기<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h4>
+<p><strong>프로젝트 아이디어 찾기</strong></p>
+<ol>
+<li><strong>자신이 겪은 문제 해결</strong>: 직접 필요해서 만든 도구가 최고의 프로젝트</li>
+<li><strong>기존 도구 개선</strong>: 불편한 점을 개선한 대안 도구</li>
+<li><strong>학습 목적</strong>: 새로운 기술을 배우며 만든 프로젝트</li>
+<li><strong>재미와 실험</strong>: 창의적인 아이디어 구현</li>
+</ol>
+<p><strong>프로젝트 초기 설정</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># GitHub에서 새 저장소 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>repo<span class="w"> </span>create<span class="w"> </span>my-awesome-tool<span class="w"> </span>--public<span class="w"> </span>--clone
+
+<span class="c1"># 기본 파일 생성</span>
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>my-awesome-tool
+$<span class="w"> </span>touch<span class="w"> </span>README.md<span class="w"> </span>LICENSE<span class="w"> </span>CONTRIBUTING.md<span class="w"> </span>CODE_OF_CONDUCT.md<span class="w"> </span>.gitignore
+$<span class="w"> </span>mkdir<span class="w"> </span>.github/ISSUE_TEMPLATE
+</code></pre></div>
+
+<p><strong>좋은 프로젝트 이름 짓기</strong></p>
+<ul>
+<li><strong>짧고 기억하기 쉬움</strong>: <code>axios</code>, <code>jest</code>, <code>vite</code></li>
+<li><strong>의미 전달</strong>: <code>prettier</code>, <code>webpack</code>, <code>eslint</code></li>
+<li><strong>검색 가능</strong>: 너무 일반적인 단어는 피함</li>
+<li><strong>사용 가능</strong>: npm, PyPI 등에서 중복 확인</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: 이름을 짓기 어렵다면 <a href="https://namae.dev/">namae.dev</a>에서 사용 가능 여부를 확인하세요.</p>
+</blockquote>
+<h4 id="readme-contributing-code_of_conduct">README, CONTRIBUTING, CODE_OF_CONDUCT 작성<a class="headerlink" href="#readme-contributing-code_of_conduct" title="Permanent link">&para;</a></h4>
+<p><strong>1. README.md: 프로젝트의 얼굴</strong></p>
+<p>README는 프로젝트의 첫인상을 결정합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># My Awesome Tool</span>
+
+A brief description of what this project does.
+
+[<span class="nt">![Build Status</span>](<span class="na">https://github.com/username/my-awesome-tool/workflows/CI/badge.svg</span>)](https://github.com/username/my-awesome-tool/actions)
+[<span class="nt">![License: MIT</span>](<span class="na">https://img.shields.io/badge/License-MIT-yellow.svg</span>)](https://opensource.org/licenses/MIT)
+
+<span class="gu">## Features</span>
+
+<span class="k">-</span><span class="w"> </span>Fast and lightweight
+<span class="k">-</span><span class="w"> </span>Easy to use
+<span class="k">-</span><span class="w"> </span>Cross-platform support
+
+<span class="gu">## Installation</span>
+
+\`\`\`bash
+npm install my-awesome-tool
+<span class="gh"># or</span>
+pip install my-awesome-tool
+\`\`\`
+
+<span class="gu">## Usage</span>
+
+\`\`\`javascript
+const tool = require(&#39;my-awesome-tool&#39;);
+
+tool.doSomething();
+\`\`\`
+
+<span class="gu">## Contributing</span>
+
+Contributions are welcome! See [<span class="nt">CONTRIBUTING.md</span>](<span class="na">CONTRIBUTING.md</span>).
+
+<span class="gu">## License</span>
+
+This project is licensed under the MIT License - see [<span class="nt">LICENSE</span>](<span class="na">LICENSE</span>).
+
+<span class="gu">## Acknowledgments</span>
+
+<span class="k">-</span><span class="w"> </span>Inspired by [<span class="nt">Project X</span>](<span class="na">https://example.com</span>)
+<span class="k">-</span><span class="w"> </span>Thanks to all contributors
+</code></pre></div>
+
+<p><strong>README 필수 섹션</strong></p>
+<ul>
+<li><strong>프로젝트 설명</strong>: 무엇을 하는 프로젝트인가</li>
+<li><strong>배지</strong>: 빌드 상태, 라이선스, 버전 등</li>
+<li><strong>주요 기능</strong>: 핵심 기능 3-5개</li>
+<li><strong>설치 방법</strong>: 패키지 매니저별 설치 명령</li>
+<li><strong>사용 예시</strong>: 코드 예제</li>
+<li><strong>문서 링크</strong>: 상세 문서가 있다면 링크</li>
+<li><strong>기여 방법</strong>: CONTRIBUTING.md 링크</li>
+<li><strong>라이선스</strong>: LICENSE 파일 링크</li>
+</ul>
+<p><strong>2. CONTRIBUTING.md: 기여 가이드</strong></p>
+<p>→ 예제: ch_13_s02 참조</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># Contributing to My Awesome Tool</span>
+
+Thank you for your interest in contributing!
+
+<span class="gu">## Development Setup</span>
+
+<span class="k">1.</span> Fork and clone the repository
+<span class="k">2.</span> Install dependencies: <span class="sb">`npm install`</span>
+<span class="k">3.</span> Run tests: <span class="sb">`npm test`</span>
+<span class="k">4.</span> Make your changes
+<span class="k">5.</span> Create a PR
+
+<span class="gu">## Commit Message Guidelines</span>
+
+We use Conventional Commits:
+<span class="k">-</span><span class="w"> </span><span class="sb">`feat:`</span> New feature
+<span class="k">-</span><span class="w"> </span><span class="sb">`fix:`</span> Bug fix
+<span class="k">-</span><span class="w"> </span><span class="sb">`docs:`</span> Documentation
+<span class="k">-</span><span class="w"> </span><span class="sb">`test:`</span> Tests
+
+<span class="gu">## Pull Request Process</span>
+
+<span class="k">1.</span> Update README.md if needed
+<span class="k">2.</span> Add tests for new features
+<span class="k">3.</span> Ensure all tests pass
+<span class="k">4.</span> Request review from maintainers
+
+<span class="gu">## Code of Conduct</span>
+
+Please read [<span class="nt">CODE_OF_CONDUCT.md</span>](<span class="na">CODE_OF_CONDUCT.md</span>).
+</code></pre></div>
+
+<p><strong>3. CODE_OF_CONDUCT.md: 행동 강령</strong></p>
+<p>Contributor Covenant를 사용하는 것이 표준입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># Contributor Covenant Code of Conduct</span>
+
+<span class="gu">## Our Pledge</span>
+
+We pledge to make participation in our community a harassment-free experience for everyone.
+
+<span class="gu">## Our Standards</span>
+
+Examples of behavior that contributes to a positive environment:
+<span class="k">-</span><span class="w"> </span>Using welcoming and inclusive language
+<span class="k">-</span><span class="w"> </span>Being respectful of differing viewpoints
+<span class="k">-</span><span class="w"> </span>Gracefully accepting constructive criticism
+
+Examples of unacceptable behavior:
+<span class="k">-</span><span class="w"> </span>Trolling, insulting/derogatory comments
+<span class="k">-</span><span class="w"> </span>Public or private harassment
+<span class="k">-</span><span class="w"> </span>Publishing others&#39; private information
+
+<span class="gu">## Enforcement</span>
+
+Instances of abusive behavior may be reported to [email@example.com].
+</code></pre></div>
+
+<p><a href="https://www.contributor-covenant.org/">https://www.contributor-covenant.org/</a>에서 생성할 수 있습니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: GitHub가 자동으로 생성해주는 템플릿을 사용하세요. "Add file" -&gt; "Create new file" -&gt; 파일명 입력 시 제안이 나타납니다.</p>
+</blockquote>
+<h4 id="issue-template-pr-template">Issue Template과 PR Template 설정<a class="headerlink" href="#issue-template-pr-template" title="Permanent link">&para;</a></h4>
+<p><strong>Issue Template 생성</strong></p>
+<p><code>.github/ISSUE_TEMPLATE/bug_report.md</code>:</p>
+<div class="codehilite"><pre><span></span><code>---
+name: Bug Report
+about: Report a bug
+title: &#39;[BUG] &#39;
+labels: bug
+<span class="gu">assignees: &#39;&#39;</span>
+<span class="gu">---</span>
+
+<span class="gu">## Describe the Bug</span>
+
+A clear description of what the bug is.
+
+<span class="gu">## To Reproduce</span>
+
+Steps to reproduce:
+<span class="k">1.</span> Go to &#39;...&#39;
+<span class="k">2.</span> Click on &#39;...&#39;
+<span class="k">3.</span> See error
+
+<span class="gu">## Expected Behavior</span>
+
+What you expected to happen.
+
+<span class="gu">## Screenshots</span>
+
+If applicable, add screenshots.
+
+<span class="gu">## Environment</span>
+
+<span class="k">-</span><span class="w"> </span>OS: [e.g. Windows 10]
+<span class="k">-</span><span class="w"> </span>Version: [e.g. 1.2.3]
+</code></pre></div>
+
+<p><code>.github/ISSUE_TEMPLATE/feature_request.md</code>:</p>
+<div class="codehilite"><pre><span></span><code>---
+name: Feature Request
+about: Suggest a feature
+title: &#39;[FEATURE] &#39;
+labels: enhancement
+<span class="gu">assignees: &#39;&#39;</span>
+<span class="gu">---</span>
+
+<span class="gu">## Problem Statement</span>
+
+What problem does this feature solve?
+
+<span class="gu">## Proposed Solution</span>
+
+Describe the solution you&#39;d like.
+
+<span class="gu">## Alternatives</span>
+
+Other solutions you&#39;ve considered.
+</code></pre></div>
+
+<p><strong>PR Template 생성</strong></p>
+<p><code>.github/PULL_REQUEST_TEMPLATE.md</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## Description</span>
+
+Summary of changes.
+
+<span class="gu">## Related Issue</span>
+
+Closes <span class="ni">#123</span>
+
+<span class="gu">## Type of Change</span>
+
+<span class="k">- [ ]</span> Bug fix
+<span class="k">- [ ]</span> New feature
+<span class="k">- [ ]</span> Breaking change
+<span class="k">- [ ]</span> Documentation update
+
+<span class="gu">## Checklist</span>
+
+<span class="k">- [ ]</span> Tests pass locally
+<span class="k">- [ ]</span> Code follows style guidelines
+<span class="k">- [ ]</span> Documentation updated
+<span class="k">- [ ]</span> No new warnings
+</code></pre></div>
+
+<p><strong>GitHub UI에서 설정하기</strong></p>
+<p>Settings -&gt; Features -&gt; Issues -&gt; Set up templates 클릭</p>
+<blockquote>
+<p><strong>팁</strong>: Issue Form(YAML 형식)을 사용하면 구조화된 입력 폼을 만들 수 있습니다.</p>
+</blockquote>
+<h4 id="_25">커뮤니티 빌딩과 기여자 관리<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h4>
+<p><strong>초기 기여자 확보하기</strong></p>
+<ol>
+<li><strong>README 작성</strong>: 명확한 설명과 예제</li>
+<li><strong>Good First Issue 라벨</strong>: 초보자 친화적 이슈 표시</li>
+<li><strong>Hacktoberfest 참여</strong>: 10월에 진행되는 오픈소스 축제</li>
+<li><strong>SNS 홍보</strong>: Twitter, Reddit, Hacker News 등</li>
+<li><strong>Show HN 게시</strong>: <a href="https://news.ycombinator.com/">https://news.ycombinator.com/</a></li>
+</ol>
+<p><strong>기여자 응대하기</strong></p>
+<ol>
+<li><strong>빠른 응답</strong>: 이슈와 PR에 24-48시간 내 응답</li>
+<li><strong>정중한 태도</strong>: 모든 기여에 감사 표시</li>
+<li><strong>명확한 피드백</strong>: 개선이 필요한 부분 구체적으로 설명</li>
+<li><strong>멘토링</strong>: 초보자에게는 친절한 가이드 제공</li>
+</ol>
+<p><strong>기여자 인정하기</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># README.md에 Contributors 섹션 추가</span>
+
+<span class="gu">## Contributors</span>
+
+Thanks to these wonderful people:
+
+<span class="k">-</span><span class="w"> </span>[<span class="nt">@username1</span>](<span class="na">https://github.com/username1</span>)
+<span class="k">-</span><span class="w"> </span>[<span class="nt">@username2</span>](<span class="na">https://github.com/username2</span>)
+</code></pre></div>
+
+<p>또는 <a href="https://allcontributors.org/">All Contributors</a> 사용:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>npx<span class="w"> </span>all-contributors<span class="w"> </span>add<span class="w"> </span>username<span class="w"> </span>code,doc
+</code></pre></div>
+
+<p><strong>커뮤니티 채널 운영</strong></p>
+<ul>
+<li><strong>GitHub Discussions</strong>: Q&amp;A, 공지, 아이디어 토론</li>
+<li><strong>Discord / Slack</strong>: 실시간 소통</li>
+<li><strong>Stack Overflow</strong>: 태그 생성</li>
+</ul>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 처음에는 GitHub Issues + Discussions로 시작하고, 커뮤니티가 크면 Discord 등 추가하세요.</p>
+</blockquote>
+<h4 id="semantic-versioning">Semantic Versioning과 릴리스 프로세스<a class="headerlink" href="#semantic-versioning" title="Permanent link">&para;</a></h4>
+<p><strong>Semantic Versioning (SemVer)</strong></p>
+<p>버전 번호는 <code>MAJOR.MINOR.PATCH</code> 형식을 따릅니다.</p>
+<div class="codehilite"><pre><span></span><code>v1.2.3
+ │ │ │
+ │ │ └─ PATCH: 버그 수정 (하위 호환)
+ │ └─── MINOR: 새 기능 추가 (하위 호환)
+ └───── MAJOR: 호환되지 않는 변경
+</code></pre></div>
+
+<p><strong>예시</strong></p>
+<ul>
+<li><code>1.0.0</code>: 첫 정식 릴리스</li>
+<li><code>1.1.0</code>: 새 기능 추가</li>
+<li><code>1.1.1</code>: 버그 수정</li>
+<li><code>2.0.0</code>: 호환되지 않는 변경 (Breaking Change)</li>
+</ul>
+<p><strong>Pre-release 버전</strong></p>
+<ul>
+<li><code>1.0.0-alpha.1</code>: 알파 버전</li>
+<li><code>1.0.0-beta.1</code>: 베타 버전</li>
+<li><code>1.0.0-rc.1</code>: Release Candidate</li>
+</ul>
+<p><strong>릴리스 프로세스</strong></p>
+<p><strong>1단계: 변경 사항 정리</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># CHANGELOG.md 업데이트</span>
+<span class="c1">## [1.2.0] - 2025-02-17</span>
+
+<span class="c1">### Added</span>
+-<span class="w"> </span>Korean<span class="w"> </span>translation<span class="w"> </span>support<span class="w"> </span><span class="o">(</span><span class="c1">#123)</span>
+-<span class="w"> </span>Dark<span class="w"> </span>mode<span class="w"> </span>theme<span class="w"> </span><span class="o">(</span><span class="c1">#125)</span>
+
+<span class="c1">### Fixed</span>
+-<span class="w"> </span>Crash<span class="w"> </span>when<span class="w"> </span>input<span class="w"> </span>is<span class="w"> </span>empty<span class="w"> </span><span class="o">(</span><span class="c1">#124)</span>
+
+<span class="c1">### Changed</span>
+-<span class="w"> </span>Updated<span class="w"> </span>dependencies
+</code></pre></div>
+
+<p><strong>2단계: 버전 업데이트</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># package.json (Node.js)</span>
+$<span class="w"> </span>npm<span class="w"> </span>version<span class="w"> </span>minor<span class="w">  </span><span class="c1"># 1.1.0 -&gt; 1.2.0</span>
+
+<span class="c1"># Python pyproject.toml</span>
+<span class="nv">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.2.0&quot;</span>
+</code></pre></div>
+
+<p><strong>3단계: Tag 생성</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.2.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release v1.2.0&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.2.0
+</code></pre></div>
+
+<p><strong>4단계: GitHub Release 생성</strong></p>
+<p>GitHub UI 또는 CLI:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v1.2.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;v1.2.0&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--notes<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>cat<span class="w"> </span>CHANGELOG.md<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;/## \[1.2.0\]/,/## \[1.1.0\]/p&#39;</span><span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p><strong>자동 Release Notes</strong></p>
+<p>GitHub Actions로 자동화:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Release</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;v*&#39;</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">release</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create Release</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">softprops/action-gh-release@v1</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">generate_release_notes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+<p><strong>패키지 배포</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># npm 배포</span>
+$<span class="w"> </span>npm<span class="w"> </span>publish
+
+<span class="c1"># PyPI 배포</span>
+$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>build
+$<span class="w"> </span>twine<span class="w"> </span>upload<span class="w"> </span>dist/*
+
+<span class="c1"># Docker Hub 배포</span>
+$<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>username/my-tool:1.2.0<span class="w"> </span>.
+$<span class="w"> </span>docker<span class="w"> </span>push<span class="w"> </span>username/my-tool:1.2.0
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 릴리스는 자주, 작은 단위로 진행하세요. 큰 변경을 모아서 릴리스하면 버그 추적이 어렵습니다.</p>
+</blockquote>
+<h3 id="_26">절 요약<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
+<ul>
+<li>오픈소스 프로젝트 시작 시 README, LICENSE, CONTRIBUTING, CODE_OF_CONDUCT가 필수입니다.</li>
+<li>Issue Template과 PR Template로 구조화된 입력을 받을 수 있습니다.</li>
+<li>초기 기여자 확보를 위해 Good First Issue, Hacktoberfest 등을 활용합니다.</li>
+<li>Semantic Versioning(MAJOR.MINOR.PATCH)으로 버전을 관리합니다.</li>
+<li>GitHub Release와 패키지 배포로 릴리스를 완료합니다.</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: Fork한 저장소가 원본보다 뒤처졌습니다. 어떻게 동기화하나요?</strong></p>
+<p>A1: <code>git fetch upstream &amp;&amp; git merge upstream/main</code>으로 로컬에서 동기화한 후 <code>git push origin main</code>으로 Fork를 업데이트하세요. 또는 GitHub UI의 "Sync fork" 버튼을 사용할 수 있습니다.</p>
+<p><strong>Q2: PR을 만들었는데 CI 검사가 실패했습니다. 어떻게 하나요?</strong></p>
+<p>A2: PR 페이지에서 "Details"를 클릭하여 실패 원인을 확인하고, 로컬에서 수정 후 같은 브랜치에 커밋하여 push하면 CI가 자동으로 재실행됩니다.</p>
+<p><strong>Q3: 라이선스가 없는 GitHub 코드를 사용해도 되나요?</strong></p>
+<p>A3: 안 됩니다. 라이선스가 없으면 기본적으로 저작권법이 적용되어 저작권자의 명시적 허락 없이 사용, 수정, 배포가 금지됩니다.</p>
+<p><strong>Q4: MIT 프로젝트에 GPL 라이브러리를 사용할 수 있나요?</strong></p>
+<p>A4: GPL 라이브러리를 포함하면 전체 프로젝트가 GPL이 되어야 합니다. MIT를 유지하려면 GPL 라이브러리를 사용할 수 없습니다.</p>
+<p><strong>Q5: 오픈소스 프로젝트를 상업적으로 판매할 수 있나요?</strong></p>
+<p>A5: MIT, Apache 등 Permissive 라이선스는 가능하지만, GPL은 소스 코드를 공개해야 합니다. 라이선스를 반드시 확인하세요.</p>
+<p><strong>Q6: Good First Issue가 없는 프로젝트에는 어떻게 기여하나요?</strong></p>
+<p>A6: Issues 탭에서 최근에 생성된 간단한 버그를 찾거나, 문서 개선 (오타 수정, 예제 추가)을 제안하세요.</p>
+<p><strong>Q7: 리뷰어가 응답하지 않습니다. 어떻게 하나요?</strong></p>
+<p>A7: 1주일 정도 기다린 후 정중하게 ping(댓글로 @멘션) 해보세요. 프로젝트가 활발하지 않다면 다른 프로젝트를 고려하세요.</p>
+<p><strong>Q8: Semantic Versioning에서 0.x.x 버전은 무엇을 의미하나요?</strong></p>
+<p>A8: 초기 개발 단계로, 언제든 호환되지 않는 변경이 발생할 수 있습니다. 1.0.0이 첫 정식 릴리스입니다.</p>
+<hr />
+<h2 id="_27">장 요약<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 오픈소스 생태계에 참여하는 방법을 종합적으로 배웠습니다.
+Fork 기반 워크플로우로 프로젝트에 기여하고, CONTRIBUTING.md와 Code of Conduct를 읽고, 첫 PR을 작성하며, 오픈소스 라이선스의 종류와 의무를 이해했습니다.
+또한 자신의 오픈소스 프로젝트를 시작하고 운영하는 방법까지 익혔습니다.</p>
+<p>오픈소스는 단순히 무료 코드가 아니라, 전 세계 개발자들이 협력하여 만드는 공동체입니다.
+첫 기여는 작은 문서 수정일지라도, 그것이 오픈소스 여정의 시작입니다.</p>
+<h3 id="_28">핵심 키워드<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
+<p><code>Fork</code>, <code>Upstream</code>, <code>CONTRIBUTING.md</code>, <code>Code of Conduct</code>, <code>Good First Issue</code>, <code>오픈소스 라이선스</code>, <code>MIT</code>, <code>Apache 2.0</code>, <code>GPL</code>, <code>LGPL</code>, <code>AGPL</code>, <code>Permissive</code>, <code>Copyleft</code>, <code>Semantic Versioning</code>, <code>Release</code>, <code>커뮤니티 빌딩</code></p>
+<h3 id="_29">다음 장 미리보기<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 엔터프라이즈 환경에서 Git과 GitHub를 활용하는 방법을 배웁니다.
+GitHub Organization과 Team 구성, SAML SSO 인증, 감사 로그, 규정 준수, 다른 플랫폼에서 GitHub으로의 마이그레이션, 그리고 GitHub Copilot 등 AI 도구 통합까지 다룹니다.
+기업 수준의 협업 시스템을 구축하는 실무 지식을 얻게 됩니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_12.html" class="nav-prev">&larr; 모노레포와 대규모 저장소 관리</a><a href="index.html" class="nav-home">목차</a><a href="ch_14.html" class="nav-next">엔터프라이즈 Git/GitHub 활용 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

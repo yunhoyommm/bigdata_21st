@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02장: Git 기본 명령어 마스터하기 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#add-commit">변경 사항 추적하기: add와 commit</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#status-log">상태 확인하기: status와 log</a><ul>
+<li><a href="#_5">도입</a></li>
+<li><a href="#_6">핵심 개념 설명</a></li>
+<li><a href="#_7">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#diff">변경 내용 비교하기: diff</a><ul>
+<li><a href="#_8">도입</a></li>
+<li><a href="#_9">핵심 개념 설명</a></li>
+<li><a href="#_10">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#restore-reset">실수 되돌리기: restore와 reset</a><ul>
+<li><a href="#_11">도입</a></li>
+<li><a href="#_12">핵심 개념 설명</a></li>
+<li><a href="#_14">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#rm-mv-gitignore">파일 관리: rm, mv, .gitignore</a><ul>
+<li><a href="#_15">도입</a></li>
+<li><a href="#_16">핵심 개념 설명</a></li>
+<li><a href="#_17">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_18">장 요약</a><ul>
+<li><a href="#_19">핵심 키워드</a></li>
+<li><a href="#_20">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>02장: Git 기본 명령어 마스터하기</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-입문">입문</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="git">Git 기본 명령어 마스터하기<a class="headerlink" href="#git" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- git add와 git commit으로 변경 사항을 기록할 수 있다
+- Conventional Commits 규약에 따라 의미 있는 커밋 메시지를 작성할 수 있다
+- git status, git log, git diff로 저장소 상태를 정확히 파악할 수 있다
+- git restore와 git reset으로 실수를 안전하게 되돌릴 수 있다
+- .gitignore를 올바르게 설정하여 불필요한 파일 추적을 방지할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="add-commit">변경 사항 추적하기: add와 commit<a class="headerlink" href="#add-commit" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>Git을 설치하고 저장소를 만들었다면 이제 본격적으로 작업을 기록할 차례입니다. 이 절에서는 Git의 핵심인 add와 commit을 배웁니다. 이 두 명령어만 제대로 이해해도 Git 사용의 절반은 마스터한 것입니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="git-add">git add: 스테이징 영역에 파일 추가<a class="headerlink" href="#git-add" title="Permanent link">&para;</a></h4>
+<p><strong>git add</strong>는 작업 디렉토리의 변경 사항을 스테이징 영역(Staging Area)으로 이동시키는 명령어입니다. 커밋에 포함시키고 싶은 파일을 선별하는 과정이라고 생각하면 됩니다.</p>
+<p>장을 보고 돌아와서 냉장고에 넣기 전에 식탁에 물건을 올려놓는 것과 같습니다. 무엇을 냉장고(저장소)에 넣을지 정리하는 중간 단계입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 특정 파일만 스테이징</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+
+<span class="c1"># 여러 파일 한 번에 스테이징</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>file1.txt<span class="w"> </span>file2.txt
+
+<span class="c1"># 현재 디렉토리의 모든 변경 사항 스테이징</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+
+<span class="c1"># 전체 저장소의 모든 변경 사항 스테이징 (비추천: 의도치 않은 파일 포함 가능)</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>-A
+</code></pre></div>
+
+<h4 id="git-add-p">부분 스테이징: git add -p<a class="headerlink" href="#git-add-p" title="Permanent link">&para;</a></h4>
+<p>하나의 파일에서 일부 변경만 스테이징하고 싶을 때는 <code>-p</code> 옵션을 사용합니다. Git이 변경 부분을 하나씩 보여주며 스테이징 여부를 물어봅니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>-p<span class="w"> </span>myfile.txt
+</code></pre></div>
+
+<p>이 명령을 실행하면 <code>y</code>(yes), <code>n</code>(no), <code>s</code>(split), <code>q</code>(quit) 등의 옵션을 선택할 수 있습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 부분 스테이징은 하나의 파일에서 서로 관련 없는 변경을 했을 때 각각 다른 커밋으로 분리하는 데 유용합니다.</p>
+</blockquote>
+<h4 id="git-commit">git commit: 변경 사항 저장<a class="headerlink" href="#git-commit" title="Permanent link">&para;</a></h4>
+<p><strong>git commit</strong>은 스테이징 영역에 있는 변경 사항을 저장소(Repository)에 영구적으로 기록하는 명령어입니다. 커밋(Commit)은 프로젝트의 스냅샷(Snapshot)이며, 각 커밋은 고유한 SHA-1 해시 값으로 식별됩니다.</p>
+<p>게임의 세이브 포인트를 만드는 것과 같습니다. 중요한 진행 상황마다 세이브하면 언제든 그 시점으로 돌아갈 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 커밋 메시지와 함께 커밋 (권장)</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 로그인 기능 추가&quot;</span>
+
+<span class="c1"># 에디터를 열어 긴 커밋 메시지 작성</span>
+$<span class="w"> </span>git<span class="w"> </span>commit
+
+<span class="c1"># add와 commit을 한 번에 (이미 추적 중인 파일만 해당)</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </span><span class="s2">&quot;fix: 로그인 버그 수정&quot;</span>
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+sequenceDiagram
+    participant User as 개발자
+    participant WD as 작업 디렉토리
+    participant SA as 스테이징 영역
+    participant Repo as 저장소(.git)
+
+    User->>WD: 파일 수정<br/>(README.md 편집)
+    Note over WD: Modified 상태
+
+    User->>WD: git add README.md
+    WD->>SA: 파일 복사
+    Note over SA: Staged 상태
+
+    User->>SA: git commit -m "docs: README 업데이트"
+    SA->>Repo: 스냅샷 생성
+    Note over Repo: 커밋 객체 생성<br/>(SHA-1 해시)
+
+    Repo-->>User: 커밋 완료
+    Note over WD,Repo: 모든 영역 동기화됨<br/>(Clean 상태)
+
+    rect rgb(225, 245, 254)
+        Note over User,Repo: git add: 변경 사항을 스테이징 영역에 추가
+    end
+
+    rect rgb(232, 245, 233)
+        Note over User,Repo: git commit: 스테이징된 변경을 저장소에 영구 기록
+    end
+
+</div>
+<figcaption>git add와 git commit 데이터 흐름</figcaption>
+</figure>
+
+<blockquote>
+<p><strong>주의</strong>: <code>git commit -am</code>은 이미 추적 중인 파일의 수정 사항만 커밋하며, 새로 생성한 파일(Untracked)은 포함되지 않습니다.</p>
+</blockquote>
+<h4 id="_3">좋은 커밋 메시지 작성법<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p>커밋 메시지는 미래의 나와 팀원을 위한 기록입니다. 다음 원칙을 따르면 좋습니다.</p>
+<ol>
+<li><strong>첫 줄은 50자 이내로 요약</strong>: 무엇을 했는지 간결하게</li>
+<li><strong>명령형으로 작성</strong>: "추가했음"이 아니라 "추가"</li>
+<li><strong>왜(Why)를 설명</strong>: 무엇(What)보다 이유(Why)가 중요합니다</li>
+<li><strong>본문은 72자마다 줄바꿈</strong>: 가독성 향상</li>
+</ol>
+<p>예시:</p>
+<div class="codehilite"><pre><span></span><code>feat: 사용자 프로필 이미지 업로드 기능 추가
+
+회원가입 시 프로필 이미지를 선택적으로 업로드할 수 있도록
+multipart/form-data 처리를 추가했습니다.
+파일 크기는 5MB로 제한하며, JPG/PNG 형식만 허용합니다.
+
+관련 이슈: #123
+</code></pre></div>
+
+<h4 id="conventional-commits">Conventional Commits 규약 소개<a class="headerlink" href="#conventional-commits" title="Permanent link">&para;</a></h4>
+<p><strong>Conventional Commits</strong>는 커밋 메시지에 일정한 형식을 적용하는 규약입니다. 타입 접두사를 사용하여 변경의 종류를 명시합니다.</p>
+<p>주요 타입:
+- <code>feat:</code> - 새로운 기능 추가
+- <code>fix:</code> - 버그 수정
+- <code>docs:</code> - 문서 수정
+- <code>style:</code> - 코드 포맷팅 (기능 변경 없음)
+- <code>refactor:</code> - 코드 리팩터링
+- <code>test:</code> - 테스트 추가/수정
+- <code>chore:</code> - 빌드 설정, 도구 변경</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 다크 모드 토글 버튼 추가&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: 로그아웃 시 세션 정리 안 되는 버그 수정&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: README에 설치 가이드 추가&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 팀에서 Conventional Commits를 도입하면 자동 Changelog 생성, 의미 있는 버전 관리(Semantic Versioning)가 가능해집니다.</p>
+</blockquote>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git add</code>는 변경 사항을 스테이징 영역에 추가합니다</li>
+<li><code>git add -p</code>로 파일의 일부만 선택적으로 스테이징할 수 있습니다</li>
+<li><code>git commit</code>은 스테이징 영역의 변경을 저장소에 영구 기록합니다</li>
+<li>좋은 커밋 메시지는 요약적이고, 명령형이며, 이유를 설명합니다</li>
+<li>Conventional Commits는 <code>feat:</code>, <code>fix:</code> 같은 접두사로 변경 종류를 명시하는 규약입니다</li>
+</ul>
+<hr />
+<h2 id="status-log">상태 확인하기: status와 log<a class="headerlink" href="#status-log" title="Permanent link">&para;</a></h2>
+<h3 id="_5">도입<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>Git으로 작업하다 보면 "지금 어떤 파일이 변경됐지?", "이전에 무슨 작업을 했지?"라는 궁금증이 생깁니다. 이때 사용하는 것이 status와 log입니다. 현재와 과거를 명확히 파악할 수 있어야 안전하게 작업할 수 있습니다.</p>
+<h3 id="_6">핵심 개념 설명<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="git-status">git status: 현재 상태 확인<a class="headerlink" href="#git-status" title="Permanent link">&para;</a></h4>
+<p><strong>git status</strong>는 현재 작업 디렉토리와 스테이징 영역의 상태를 보여주는 명령어입니다. Git을 사용하면서 가장 자주 입력하게 될 명령어입니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>status
+</code></pre></div>
+
+<p>출력 예시:</p>
+<div class="codehilite"><pre><span></span><code>On branch main
+Changes to be committed:
+  (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)
+        modified:   README.md
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)
+        modified:   app.js
+
+Untracked files:
+  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)
+        config.json
+</code></pre></div>
+
+<p>이 출력은 세 가지 영역을 보여줍니다:
+1. <strong>Changes to be committed</strong> - 스테이징 영역 (다음 커밋에 포함될 파일)
+2. <strong>Changes not staged for commit</strong> - 수정되었지만 아직 스테이징되지 않은 파일
+3. <strong>Untracked files</strong> - Git이 추적하지 않는 새 파일</p>
+<p>간결한 출력을 원한다면 <code>-s</code> 옵션을 사용합니다:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>status<span class="w"> </span>-s
+M<span class="w">  </span>README.md
+<span class="w"> </span>M<span class="w"> </span>app.js
+??<span class="w"> </span>config.json
+</code></pre></div>
+
+<ul>
+<li><code>M</code>(왼쪽) - 스테이징 영역에서 수정됨</li>
+<li><code>M</code>(오른쪽) - 작업 디렉토리에서 수정됨</li>
+<li><code>??</code> - 추적되지 않는 파일</li>
+</ul>
+<h4 id="untracked-unmodified-modified-staged">파일의 네 가지 상태(Untracked, Unmodified, Modified, Staged)<a class="headerlink" href="#untracked-unmodified-modified-staged" title="Permanent link">&para;</a></h4>
+<p>Git에서 파일은 네 가지 상태 중 하나에 속합니다.</p>
+<ol>
+<li><strong>Untracked(추적 안 됨)</strong>: Git이 아직 관리하지 않는 새 파일</li>
+<li><strong>Unmodified(수정 안 됨)</strong>: 저장소에 커밋되었고 수정되지 않은 파일</li>
+<li><strong>Modified(수정됨)</strong>: 수정되었지만 아직 스테이징되지 않은 파일</li>
+<li><strong>Staged(스테이징됨)</strong>: 다음 커밋에 포함될 파일</li>
+</ol>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+stateDiagram-v2
+    [*] --> Untracked: 새 파일 생성
+    Untracked --> Staged: git add
+
+    Staged --> Unmodified: git commit
+
+    Unmodified --> Modified: 파일 수정
+    Unmodified --> Untracked: git rm
+
+    Modified --> Staged: git add
+    Modified --> Unmodified: git restore
+
+    Staged --> Modified: git restore --staged
+
+    note right of Untracked
+        추적되지 않는 파일
+        .gitignore 대상
+    end note
+
+    note right of Staged
+        커밋 준비 완료
+        스테이징 영역에 존재
+    end note
+
+    note right of Unmodified
+        마지막 커밋과 동일
+        변경 사항 없음
+    end note
+
+    note right of Modified
+        마지막 커밋 이후 수정됨
+        아직 스테이징 안 됨
+    end note
+
+
+</div>
+<figcaption>Git 파일 상태 라이프사이클</figcaption>
+</figure>
+
+<p>파일 상태의 전환:
+- 새 파일 생성 → Untracked
+- <code>git add</code> → Staged
+- <code>git commit</code> → Unmodified
+- 파일 수정 → Modified
+- <code>git add</code> → Staged (다시)</p>
+<blockquote>
+<p><strong>팁</strong>: <code>git status</code>를 습관적으로 자주 확인하세요. 현재 상태를 모르고 작업하면 의도치 않은 파일을 커밋하거나 필요한 파일을 빠뜨릴 수 있습니다.</p>
+</blockquote>
+<h4 id="git-log">git log: 커밋 히스토리 조회<a class="headerlink" href="#git-log" title="Permanent link">&para;</a></h4>
+<p><strong>git log</strong>는 저장소의 커밋 히스토리를 시간 역순으로 보여주는 명령어입니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log
+</code></pre></div>
+
+<p>출력 예시:</p>
+<div class="codehilite"><pre><span></span><code>commit 7f3a9e8c1d2b4f5e6a7c8b9d0e1f2a3b4c5d6e7f
+Author: Kim Developer &lt;kim@example.com&gt;
+Date:   Mon Jan 15 14:30:25 2025 +0900
+
+    feat: 사용자 로그인 기능 추가
+
+commit a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+Author: Lee Programmer &lt;lee@example.com&gt;
+Date:   Sun Jan 14 10:15:00 2025 +0900
+
+    fix: 회원가입 폼 검증 버그 수정
+</code></pre></div>
+
+<h4 id="git-log-oneline-graph-all">git log 유용한 옵션 (--oneline, --graph, --all)<a class="headerlink" href="#git-log-oneline-graph-all" title="Permanent link">&para;</a></h4>
+<p>기본 <code>git log</code>는 정보가 많아 한눈에 보기 어렵습니다. 다양한 옵션으로 가독성을 높일 수 있습니다.</p>
+<p><strong>--oneline</strong>: 한 줄로 간결하게 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline
+7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>사용자<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+a1b2c3d<span class="w"> </span>fix:<span class="w"> </span>회원가입<span class="w"> </span>폼<span class="w"> </span>검증<span class="w"> </span>버그<span class="w"> </span>수정
+</code></pre></div>
+
+<p><strong>--graph</strong>: 브랜치와 병합을 시각적으로 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>--graph
+*<span class="w"> </span>7f3a9e8<span class="w"> </span>feat:<span class="w"> </span>사용자<span class="w"> </span>로그인<span class="w"> </span>기능<span class="w"> </span>추가
+*<span class="w">   </span>a1b2c3d<span class="w"> </span>Merge<span class="w"> </span>branch<span class="w"> </span><span class="s1">&#39;feature/signup&#39;</span>
+<span class="p">|</span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>*<span class="w"> </span>b2c3d4e<span class="w"> </span>feat:<span class="w"> </span>회원가입<span class="w"> </span>기능<span class="w"> </span>완성
+<span class="p">|</span>/
+*<span class="w"> </span>c3d4e5f<span class="w"> </span>docs:<span class="w"> </span>README<span class="w"> </span>업데이트
+</code></pre></div>
+
+<p><strong>--all</strong>: 모든 브랜치의 커밋 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>--graph<span class="w"> </span>--all
+</code></pre></div>
+
+<p><strong>-n</strong>: 최근 n개의 커밋만 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>-3
+</code></pre></div>
+
+<p><strong>--author</strong>: 특정 작성자의 커밋만 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--author<span class="o">=</span><span class="s2">&quot;Kim&quot;</span>
+</code></pre></div>
+
+<p><strong>--since / --until</strong>: 특정 기간의 커밋 표시</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--since<span class="o">=</span><span class="s2">&quot;2 weeks ago&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--since<span class="o">=</span><span class="s2">&quot;2025-01-01&quot;</span><span class="w"> </span>--until<span class="o">=</span><span class="s2">&quot;2025-01-31&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: <code>git log --oneline --graph --all --decorate</code>를 자주 사용한다면 Git alias로 등록하세요.
+<code>bash
+$ git config --global alias.lg "log --oneline --graph --all --decorate"
+$ git lg</code></p>
+</blockquote>
+<h3 id="_7">절 요약<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git status</code>는 현재 작업 디렉토리와 스테이징 영역의 상태를 보여줍니다</li>
+<li>Git 파일은 Untracked, Unmodified, Modified, Staged 네 가지 상태를 가집니다</li>
+<li><code>git log</code>는 커밋 히스토리를 시간 역순으로 보여줍니다</li>
+<li><code>--oneline</code>, <code>--graph</code>, <code>--all</code> 옵션으로 로그를 보기 쉽게 표시할 수 있습니다</li>
+<li>자주 사용하는 복잡한 명령은 Git alias로 등록하면 편리합니다</li>
+</ul>
+<hr />
+<h2 id="diff">변경 내용 비교하기: diff<a class="headerlink" href="#diff" title="Permanent link">&para;</a></h2>
+<h3 id="_8">도입<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>"이 파일에서 정확히 무엇이 바뀌었을까?" 궁금할 때가 있습니다. git status는 어떤 파일이 변경되었는지 알려주지만, 구체적인 내용은 보여주지 않습니다. 이때 사용하는 것이 git diff입니다.</p>
+<h3 id="_9">핵심 개념 설명<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<h4 id="git-diff">git diff: 작업 디렉토리와 스테이징 영역 비교<a class="headerlink" href="#git-diff" title="Permanent link">&para;</a></h4>
+<p><strong>git diff</strong>는 작업 디렉토리의 변경 사항과 스테이징 영역(또는 마지막 커밋)을 비교하여 차이점을 보여줍니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 작업 디렉토리와 스테이징 영역 비교</span>
+$<span class="w"> </span>git<span class="w"> </span>diff
+</code></pre></div>
+
+<p>출력 예시:</p>
+<div class="codehilite"><pre><span></span><code><span class="gh">diff --git a/app.js b/app.js</span>
+<span class="gh">index 1234567..abcdefg 100644</span>
+<span class="gd">--- a/app.js</span>
+<span class="gi">+++ b/app.js</span>
+<span class="gu">@@ -10,7 +10,7 @@ function login(username, password) {</span>
+<span class="w"> </span>    return false;
+<span class="w"> </span>  }
+
+<span class="gd">-  const token = generateToken(username);</span>
+<span class="gi">+  const token = generateSecureToken(username);</span>
+<span class="w"> </span>  saveSession(token);
+<span class="w"> </span>  return true;
+<span class="w"> </span>}
+</code></pre></div>
+
+<p>이 출력의 의미:
+- <code>-</code>로 시작하는 줄: 삭제된 내용 (빨간색)
+- <code>+</code>로 시작하는 줄: 추가된 내용 (초록색)
+- <code>@@ -10,7 +10,7 @@</code>: 변경이 발생한 줄 번호</p>
+<h4 id="git-diff-staged">git diff --staged: 스테이징 영역과 마지막 커밋 비교<a class="headerlink" href="#git-diff-staged" title="Permanent link">&para;</a></h4>
+<p>스테이징한 내용이 무엇인지 확인하려면 <code>--staged</code> 옵션을 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>diff<span class="w"> </span>--staged
+</code></pre></div>
+
+<p>또는 <code>--cached</code> (같은 의미):</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>diff<span class="w"> </span>--cached
+</code></pre></div>
+
+<h4 id="diff_1">diff 출력 읽는 법<a class="headerlink" href="#diff_1" title="Permanent link">&para;</a></h4>
+<p>diff 출력은 처음에는 어렵게 느껴질 수 있지만, 몇 가지 규칙만 알면 쉽습니다.</p>
+<p><strong>헤더 부분</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="gh">diff --git a/file.txt b/file.txt</span>
+<span class="gh">index 1234567..abcdefg 100644</span>
+<span class="gd">--- a/file.txt</span>
+<span class="gi">+++ b/file.txt</span>
+</code></pre></div>
+
+<ul>
+<li><code>---</code> : 변경 전 파일</li>
+<li><code>+++</code> : 변경 후 파일</li>
+</ul>
+<p><strong>헝크(Hunk) 헤더</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">@@ -10,7 +10,8 @@</span>
+</code></pre></div>
+
+<ul>
+<li><code>-10,7</code> : 변경 전 파일의 10번째 줄부터 7줄</li>
+<li><code>+10,8</code> : 변경 후 파일의 10번째 줄부터 8줄</li>
+</ul>
+<p><strong>변경 내용</strong>:
+- 앞에 아무것도 없는 줄: 변경 없음 (문맥 표시)
+- <code>-</code>로 시작: 삭제된 줄
+- <code>+</code>로 시작: 추가된 줄</p>
+<h4 id="diff_2">외부 diff 도구 설정<a class="headerlink" href="#diff_2" title="Permanent link">&para;</a></h4>
+<p>터미널의 diff 출력이 불편하다면 GUI diff 도구를 설정할 수 있습니다.</p>
+<p><strong>VS Code를 diff 도구로 설정</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>diff.tool<span class="w"> </span>vscode
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>difftool.vscode.cmd<span class="w"> </span><span class="s1">&#39;code --wait --diff $LOCAL $REMOTE&#39;</span>
+</code></pre></div>
+
+<p>사용:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>difftool
+</code></pre></div>
+
+<p><strong>다른 도구들</strong>:
+- <strong>Windows</strong>: kdiff3, WinMerge
+- <strong>macOS</strong>: FileMerge (Xcode), Beyond Compare
+- <strong>Linux</strong>: meld, kdiff3</p>
+<blockquote>
+<p><strong>팁</strong>: 작은 변경은 터미널의 <code>git diff</code>가 빠르고, 큰 변경은 GUI 도구가 편리합니다. 상황에 맞게 선택하세요.</p>
+</blockquote>
+<h3 id="_10">절 요약<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git diff</code>는 작업 디렉토리와 스테이징 영역의 차이를 보여줍니다</li>
+<li><code>git diff --staged</code>는 스테이징 영역과 마지막 커밋의 차이를 보여줍니다</li>
+<li>diff 출력에서 <code>-</code>는 삭제, <code>+</code>는 추가를 의미합니다</li>
+<li>GUI diff 도구를 설정하면 복잡한 변경을 더 쉽게 파악할 수 있습니다</li>
+</ul>
+<hr />
+<h2 id="restore-reset">실수 되돌리기: restore와 reset<a class="headerlink" href="#restore-reset" title="Permanent link">&para;</a></h2>
+<h3 id="_11">도입<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>프로그래밍을 하다 보면 실수는 피할 수 없습니다. 잘못된 코드를 작성하거나, 필요 없는 파일을 스테이징하거나, 너무 서둘러 커밋을 만들 수 있습니다. 다행히 Git은 다양한 실수를 되돌릴 방법을 제공합니다.</p>
+<h3 id="_12">핵심 개념 설명<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<h4 id="git-restore">git restore: 작업 디렉토리 변경 취소<a class="headerlink" href="#git-restore" title="Permanent link">&para;</a></h4>
+<p><strong>git restore</strong>는 작업 디렉토리의 변경 사항을 버리고 마지막 커밋 상태로 되돌리는 명령어입니다. Git 2.23 이상에서 사용할 수 있습니다.</p>
+<p>문서 편집 중 실행 취소(Ctrl+Z)를 누르는 것과 같습니다. 잘못 수정한 내용을 이전 상태로 되돌릴 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 특정 파일의 변경 취소</span>
+$<span class="w"> </span>git<span class="w"> </span>restore<span class="w"> </span>app.js
+
+<span class="c1"># 여러 파일 한 번에 복원</span>
+$<span class="w"> </span>git<span class="w"> </span>restore<span class="w"> </span>file1.txt<span class="w"> </span>file2.txt
+
+<span class="c1"># 현재 디렉토리의 모든 파일 복원</span>
+$<span class="w"> </span>git<span class="w"> </span>restore<span class="w"> </span>.
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: <code>git restore</code>는 변경 사항을 완전히 삭제합니다. 복구할 수 없으므로 신중하게 사용하세요.</p>
+</blockquote>
+<h4 id="git-restore-staged">git restore --staged: 스테이징 취소<a class="headerlink" href="#git-restore-staged" title="Permanent link">&para;</a></h4>
+<p>실수로 스테이징한 파일을 스테이징 영역에서 제거하려면 <code>--staged</code> 옵션을 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 스테이징 취소 (파일 내용은 유지)</span>
+$<span class="w"> </span>git<span class="w"> </span>restore<span class="w"> </span>--staged<span class="w"> </span>config.json
+
+<span class="c1"># 모든 스테이징 취소</span>
+$<span class="w"> </span>git<span class="w"> </span>restore<span class="w"> </span>--staged<span class="w"> </span>.
+</code></pre></div>
+
+<p>이 명령은 파일을 스테이징 영역에서만 제거하며, 작업 디렉토리의 변경 내용은 그대로 유지됩니다.</p>
+<h4 id="git-reset-soft-mixed-hard">git reset의 세 가지 모드 (--soft, --mixed, --hard)<a class="headerlink" href="#git-reset-soft-mixed-hard" title="Permanent link">&para;</a></h4>
+<p><strong>git reset</strong>은 HEAD의 위치를 변경하여 커밋 히스토리를 조작하는 강력한 명령어입니다. 세 가지 모드가 있으며 각각 영향 범위가 다릅니다.</p>
+<p>시간 여행과 같습니다. <code>--soft</code>는 시간만 되돌리고 짐은 그대로, <code>--mixed</code>는 시간을 되돌리고 짐을 풀어놓고, <code>--hard</code>는 시간을 되돌리고 짐까지 모두 버립니다.</p>
+<p><strong>1. git reset --soft</strong>: 커밋만 취소 (스테이징 영역과 작업 디렉토리 유지)</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>--soft<span class="w"> </span>HEAD~1
+</code></pre></div>
+
+<p>마지막 커밋을 취소하지만 변경 사항은 스테이징 영역에 남아있습니다. 커밋 메시지만 수정하고 싶을 때 유용합니다.</p>
+<p><strong>2. git reset --mixed</strong> (기본값): 커밋 + 스테이징 취소 (작업 디렉토리 유지)</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>HEAD~1
+<span class="c1"># 또는</span>
+$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>--mixed<span class="w"> </span>HEAD~1
+</code></pre></div>
+
+<p>마지막 커밋을 취소하고 스테이징도 해제하지만, 변경 사항은 작업 디렉토리에 남아있습니다. 커밋을 다시 정리하고 싶을 때 사용합니다.</p>
+<p><strong>3. git reset --hard</strong>: 모두 취소 (커밋, 스테이징, 작업 디렉토리 변경 모두 삭제)</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>--hard<span class="w"> </span>HEAD~1
+</code></pre></div>
+
+<p>마지막 커밋과 모든 변경 사항을 완전히 삭제합니다. 매우 위험한 명령이므로 신중히 사용해야 합니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TD
+    Start["git reset의<br/>세 가지 모드"]
+
+    Soft["--soft<br/>(가장 안전)"]
+    Mixed["--mixed<br/>(기본값)"]
+    Hard["--hard<br/>(위험)"]
+
+    Start --> Soft
+    Start --> Mixed
+    Start --> Hard
+
+    subgraph SoftEffect["--soft 영향 범위"]
+        S_WD["작업 디렉토리: 유지"]
+        S_SA["스테이징 영역: 유지"]
+        S_REPO["저장소(HEAD): 이동"]
+
+        style S_WD fill:#e8f5e9,stroke:#388e3c
+        style S_SA fill:#e8f5e9,stroke:#388e3c
+        style S_REPO fill:#fce4ec,stroke:#c2185b
+    end
+
+    subgraph MixedEffect["--mixed 영향 범위"]
+        M_WD["작업 디렉토리: 유지"]
+        M_SA["스테이징 영역: 초기화"]
+        M_REPO["저장소(HEAD): 이동"]
+
+        style M_WD fill:#e8f5e9,stroke:#388e3c
+        style M_SA fill:#fce4ec,stroke:#c2185b
+        style M_REPO fill:#fce4ec,stroke:#c2185b
+    end
+
+    subgraph HardEffect["--hard 영향 범위"]
+        H_WD["작업 디렉토리: 초기화"]
+        H_SA["스테이징 영역: 초기화"]
+        H_REPO["저장소(HEAD): 이동"]
+
+        style H_WD fill:#fce4ec,stroke:#c2185b
+        style H_SA fill:#fce4ec,stroke:#c2185b
+        style H_REPO fill:#fce4ec,stroke:#c2185b
+    end
+
+    Soft --> SoftEffect
+    Mixed --> MixedEffect
+    Hard --> HardEffect
+
+    Note1["커밋을 취소하되<br/>변경 사항 유지"]
+    Note2["스테이징만 취소<br/>파일은 유지"]
+    Note3["모든 변경 사항 폐기<br/>(주의 필요)"]
+
+    SoftEffect --> Note1
+    MixedEffect --> Note2
+    HardEffect --> Note3
+
+    style Start fill:#f3e5f5,stroke:#7b1fa2
+    style Soft fill:#e1f5fe,stroke:#0288d1
+    style Mixed fill:#fff3e0,stroke:#f57c00
+    style Hard fill:#fce4ec,stroke:#c2185b
+    style Note1 fill:#e8f5e9
+    style Note2 fill:#fff3e0
+    style Note3 fill:#fce4ec
+
+</div>
+<figcaption>git reset의 세 가지 모드 비교</figcaption>
+</figure>
+
+<p><strong>HEAD~1의 의미</strong>:
+- <code>HEAD</code>: 현재 커밋
+- <code>HEAD~1</code> 또는 <code>HEAD^</code>: 바로 이전 커밋
+- <code>HEAD~2</code>: 2개 이전 커밋
+- <code>HEAD~5</code>: 5개 이전 커밋</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 커밋 히스토리를 수정할 때는 항상 <code>git log</code>로 현재 위치를 먼저 확인하세요.</p>
+</blockquote>
+<h4 id="_13">위험한 명령어 안전하게 사용하기<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p><code>git reset --hard</code>와 <code>git restore</code>는 변경 사항을 삭제하므로 위험합니다. 다음 수칙을 지키세요:</p>
+<ol>
+<li><strong>항상 <code>git status</code>로 현재 상태 확인</strong></li>
+<li><strong>중요한 변경은 미리 커밋하거나 stash</strong> (stash는 7장에서 배움)</li>
+<li><strong><code>git reset --hard</code> 전에 현재 커밋 해시를 메모</strong></li>
+<li><strong>실수했다면 reflog로 복구 가능</strong> (7장에서 배움)</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 안전한 작업 순서</span>
+$<span class="w"> </span>git<span class="w"> </span>status<span class="w">                  </span><span class="c1"># 현재 상태 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>-5<span class="w">        </span><span class="c1"># 최근 커밋 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>--hard<span class="w"> </span>HEAD~1<span class="w">     </span><span class="c1"># 리셋 실행</span>
+$<span class="w"> </span>git<span class="w"> </span>reflog<span class="w">                  </span><span class="c1"># 실수했을 때 복구용</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: <code>git reset --hard</code>는 로컬 저장소에만 영향을 미칩니다. 이미 원격에 push한 커밋을 reset하면 팀원에게 문제가 생길 수 있으므로, 공유된 커밋은 절대 reset하지 마세요.</p>
+</blockquote>
+<h3 id="_14">절 요약<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git restore &lt;file&gt;</code>은 작업 디렉토리의 변경을 취소합니다</li>
+<li><code>git restore --staged &lt;file&gt;</code>은 스테이징을 취소합니다</li>
+<li><code>git reset --soft</code>는 커밋만 취소 (스테이징 유지)</li>
+<li><code>git reset --mixed</code>는 커밋과 스테이징 취소 (작업 디렉토리 유지)</li>
+<li><code>git reset --hard</code>는 모든 변경을 삭제 (매우 위험)</li>
+<li>위험한 명령은 항상 현재 상태를 확인한 후 신중하게 사용하세요</li>
+</ul>
+<hr />
+<h2 id="rm-mv-gitignore">파일 관리: rm, mv, .gitignore<a class="headerlink" href="#rm-mv-gitignore" title="Permanent link">&para;</a></h2>
+<h3 id="_15">도입<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<p>프로젝트를 진행하다 보면 파일을 삭제하거나 이름을 바꾸는 일이 생깁니다. 또한 로그 파일이나 빌드 산출물처럼 Git이 추적하지 않아야 할 파일도 있습니다. 이 절에서는 Git에서 파일을 관리하는 방법을 배웁니다.</p>
+<h3 id="_16">핵심 개념 설명<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<h4 id="git-rm">git rm: 파일 삭제와 추적 해제<a class="headerlink" href="#git-rm" title="Permanent link">&para;</a></h4>
+<p><strong>git rm</strong>은 파일을 삭제하고 그 삭제를 스테이징하는 명령어입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 파일 삭제 (작업 디렉토리와 Git에서 모두 제거)</span>
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>old_file.txt
+
+<span class="c1"># 여러 파일 한 번에 삭제</span>
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>file1.txt<span class="w"> </span>file2.txt
+
+<span class="c1"># 디렉토리 전체 삭제 (재귀적으로)</span>
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>-r<span class="w"> </span>old_directory/
+</code></pre></div>
+
+<p>파일을 직접 삭제(<code>rm old_file.txt</code>)한 경우, Git은 이를 "삭제된 파일"로 인식하지만 자동으로 스테이징하지 않습니다. <code>git add old_file.txt</code> 또는 <code>git rm old_file.txt</code>로 삭제를 스테이징해야 합니다.</p>
+<p><strong>추적만 해제하고 파일은 유지</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Git 추적에서만 제거 (로컬 파일은 유지)</span>
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>--cached<span class="w"> </span>secret.txt
+</code></pre></div>
+
+<p>이 옵션은 실수로 민감한 파일을 커밋했을 때 유용합니다. 파일은 로컬에 남아있지만 Git은 더 이상 추적하지 않습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: <code>--cached</code> 옵션으로 추적을 해제한 후에는 <code>.gitignore</code>에 파일을 추가하여 실수로 다시 추가되는 것을 방지하세요.</p>
+</blockquote>
+<h4 id="git-mv">git mv: 파일 이름 변경/이동<a class="headerlink" href="#git-mv" title="Permanent link">&para;</a></h4>
+<p><strong>git mv</strong>는 파일의 이름을 바꾸거나 다른 디렉토리로 이동하는 명령어입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 파일 이름 변경</span>
+$<span class="w"> </span>git<span class="w"> </span>mv<span class="w"> </span>old_name.txt<span class="w"> </span>new_name.txt
+
+<span class="c1"># 파일을 다른 디렉토리로 이동</span>
+$<span class="w"> </span>git<span class="w"> </span>mv<span class="w"> </span>file.txt<span class="w"> </span>src/file.txt
+
+<span class="c1"># 이름을 바꾸며 이동</span>
+$<span class="w"> </span>git<span class="w"> </span>mv<span class="w"> </span>old.txt<span class="w"> </span>src/new.txt
+</code></pre></div>
+
+<p><code>git mv</code>는 다음 세 명령을 한 번에 실행하는 것과 같습니다:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mv<span class="w"> </span>old_name.txt<span class="w"> </span>new_name.txt
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>old_name.txt
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>new_name.txt
+</code></pre></div>
+
+<p>Git은 내부적으로 파일 이름 변경을 "기존 파일 삭제 + 새 파일 추가"로 처리하지만, 내용이 유사하면 "이름 변경(rename)"으로 자동 감지합니다.</p>
+<h4 id="gitignore">.gitignore 작성법과 패턴 문법<a class="headerlink" href="#gitignore" title="Permanent link">&para;</a></h4>
+<p><strong>.gitignore</strong>는 Git이 추적하지 않아야 할 파일 패턴을 지정하는 설정 파일입니다. 빌드 산출물, 로그, 환경 설정, 민감 정보 등을 제외하는 데 사용합니다.</p>
+<p>청소할 때 "이것은 건드리지 마세요" 목록과 같습니다. 목록에 있는 것은 Git이 무시합니다.</p>
+<p><strong>.gitignore 기본 문법</strong>:</p>
+<div class="codehilite"><pre><span></span><code># 주석입니다
+
+# 특정 파일 무시
+secret.txt
+config.json
+
+# 특정 확장자 무시
+*.log
+*.tmp
+
+# 디렉토리 전체 무시 (끝에 / 필수)
+build/
+node_modules/
+__pycache__/
+
+# 특정 디렉토리의 특정 파일만 무시
+logs/*.log
+
+# 예외 규칙 (! 사용)
+*.log
+!important.log
+
+# 모든 하위 디렉토리의 특정 파일 무시
+**/temp
+</code></pre></div>
+
+<p><strong>Windows/macOS/Linux 환경별 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code># Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Linux
+*~
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+
+# 언어/프레임워크별
+node_modules/    # Node.js
+venv/            # Python
+bin/             # Java/C#
+obj/             # C#
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 프로젝트 시작 시 <a href="https://www.toptal.com/developers/gitignore">gitignore.io</a>에서 언어/도구에 맞는 .gitignore 템플릿을 생성하세요.</p>
+</blockquote>
+<h4 id="gitignore_1">이미 추적 중인 파일을 .gitignore에 추가하기<a class="headerlink" href="#gitignore_1" title="Permanent link">&para;</a></h4>
+<p>이미 Git이 추적 중인 파일을 .gitignore에 추가해도 무시되지 않습니다. 다음 절차로 처리해야 합니다:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. .gitignore에 파일 패턴 추가</span>
+$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;secret.txt&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.gitignore
+
+<span class="c1"># 2. Git 추적에서 제거 (로컬 파일은 유지)</span>
+$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>--cached<span class="w"> </span>secret.txt
+
+<span class="c1"># 3. 변경 사항 커밋</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.gitignore
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;chore: secret.txt를 .gitignore에 추가&quot;</span>
+</code></pre></div>
+
+<p><strong>전체 디렉토리를 추적 해제</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>rm<span class="w"> </span>-r<span class="w"> </span>--cached<span class="w"> </span>logs/
+$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;logs/&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.gitignore
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.gitignore
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;chore: logs 디렉토리 추적 해제&quot;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: 민감한 정보(API 키, 비밀번호 등)가 포함된 파일을 이미 원격에 push했다면, 단순히 추적 해제하는 것으로는 부족합니다. Git 히스토리에서 완전히 제거해야 하며, 비밀번호는 즉시 변경하세요. (10장에서 자세히 배움)</p>
+</blockquote>
+<h3 id="_17">절 요약<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git rm &lt;file&gt;</code>은 파일을 삭제하고 스테이징합니다</li>
+<li><code>git rm --cached &lt;file&gt;</code>은 추적만 해제하고 로컬 파일은 유지합니다</li>
+<li><code>git mv &lt;old&gt; &lt;new&gt;</code>는 파일 이름을 변경하거나 이동합니다</li>
+<li><code>.gitignore</code>에 패턴을 지정하여 Git이 무시할 파일을 설정합니다</li>
+<li>이미 추적 중인 파일은 <code>git rm --cached</code>로 추적 해제 후 .gitignore에 추가해야 합니다</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: 실수로 <code>git add .</code>를 했는데, 특정 파일만 스테이징 취소할 수 있나요?</strong></p>
+<p>A1: 네, <code>git restore --staged &lt;파일명&gt;</code>으로 특정 파일만 스테이징 취소할 수 있습니다. 모든 스테이징을 취소하려면 <code>git restore --staged .</code>를 사용하세요. 파일 내용은 변경되지 않고 스테이징만 해제됩니다.</p>
+<p><strong>Q2: 커밋 메시지를 잘못 작성했는데, 마지막 커밋 메시지만 수정할 수 있나요?</strong></p>
+<p>A2: 네, <code>git commit --amend</code> 명령으로 마지막 커밋 메시지를 수정할 수 있습니다. 에디터가 열리며 메시지를 수정한 후 저장하면 됩니다. 한 줄로 바로 수정하려면 <code>git commit --amend -m "새 메시지"</code>를 사용하세요. 단, 이미 원격에 push한 커밋은 amend하지 마세요.</p>
+<p><strong>Q3: .gitignore가 작동하지 않아요. 분명히 추가했는데 Git이 계속 파일을 추적합니다.</strong></p>
+<p>A3: 이미 추적 중인 파일은 .gitignore에 추가해도 무시되지 않습니다. <code>git rm --cached &lt;파일명&gt;</code>으로 추적을 해제한 후 커밋하세요. 또한 .gitignore 파일 자체가 Git에 커밋되어 있는지 확인하세요.</p>
+<p><strong>Q4: git diff에서 한글이 깨져요. 어떻게 해결하나요?</strong></p>
+<p>A4: Windows에서 발생하는 문제입니다. 다음 명령으로 해결할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.pager<span class="w"> </span><span class="s2">&quot;less -r&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.quotepath<span class="w"> </span><span class="nb">false</span>
+</code></pre></div>
+
+<p>또는 VS Code 같은 GUI 도구의 diff 기능을 사용하세요.</p>
+<p><strong>Q5: 실수로 <code>git reset --hard</code>를 했는데, 변경 사항을 복구할 수 있나요?</strong></p>
+<p>A5: 커밋된 내용이라면 <code>git reflog</code>로 복구할 수 있습니다 (7장에서 자세히 배움). 하지만 커밋하지 않은 작업 디렉토리의 변경은 복구가 불가능합니다. 중요한 변경은 항상 커밋하거나 stash하는 습관을 들이세요.</p>
+<hr />
+<h2 id="_18">장 요약<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 Git의 핵심 명령어들을 배웠습니다. <code>git add</code>와 <code>git commit</code>으로 변경을 기록하고, <code>git status</code>와 <code>git log</code>로 현재와 과거를 파악하며, <code>git diff</code>로 정확한 변경 내용을 확인했습니다. 또한 <code>git restore</code>와 <code>git reset</code>으로 실수를 되돌리는 방법과 <code>.gitignore</code>로 파일 추적을 관리하는 방법을 익혔습니다. 이제 일상적인 Git 작업을 자신 있게 수행할 수 있습니다.</p>
+<h3 id="_19">핵심 키워드<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<p><code>git add</code>, <code>git commit</code>, <code>git status</code>, <code>git log</code>, <code>git diff</code>, <code>git restore</code>, <code>git reset</code>, <code>.gitignore</code>, <code>Conventional Commits</code>, <code>파일 상태 라이프사이클</code>, <code>스테이징 영역</code></p>
+<h3 id="_20">다음 장 미리보기<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 Git의 강력한 기능인 브랜치(Branch)를 배웁니다. 브랜치를 사용하면 독립적인 작업 흐름을 만들어 여러 기능을 동시에 개발하고, 안전하게 병합할 수 있습니다. 평행 세계처럼 동작하는 브랜치의 세계로 들어가 봅시다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_01.html" class="nav-prev">&larr; Git과 버전 관리 시작하기</a><a href="index.html" class="nav-home">목차</a><a href="ch_03.html" class="nav-next">브랜치와 병합의 기초 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

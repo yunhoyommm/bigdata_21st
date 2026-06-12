@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09장: GitHub 프로젝트 관리 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#github-projects">GitHub Projects로 작업 관리하기</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#milestones">Milestones와 릴리스 관리</a><ul>
+<li><a href="#_5">도입</a></li>
+<li><a href="#_6">핵심 개념 설명</a></li>
+<li><a href="#_7">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#discussions">Discussions와 커뮤니티 소통</a><ul>
+<li><a href="#_8">도입</a></li>
+<li><a href="#_9">핵심 개념 설명</a></li>
+<li><a href="#_10">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#github-pages-wiki">GitHub Pages와 Wiki</a><ul>
+<li><a href="#_11">도입</a></li>
+<li><a href="#_12">핵심 개념 설명</a></li>
+<li><a href="#_14">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_15">자동화 워크플로우: 프로젝트 관리 자동화</a><ul>
+<li><a href="#_16">도입</a></li>
+<li><a href="#_17">핵심 개념 설명</a></li>
+<li><a href="#_20">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_21">장 요약</a><ul>
+<li><a href="#_22">핵심 키워드</a></li>
+<li><a href="#_23">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>09장: GitHub 프로젝트 관리</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-중급">중급</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="github">GitHub 프로젝트 관리<a class="headerlink" href="#github" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- GitHub Projects(V2)로 작업을 시각적으로 관리할 수 있다
+- Milestones로 릴리스 일정을 계획하고 추적할 수 있다
+- Release Notes를 작성하고 자동 Changelog를 설정할 수 있다
+- GitHub Pages로 프로젝트 문서 사이트를 배포할 수 있다
+- CODEOWNERS와 자동화 워크플로우로 반복 작업을 줄일 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="github-projects">GitHub Projects로 작업 관리하기<a class="headerlink" href="#github-projects" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>개발 프로젝트가 커질수록 수십, 수백 개의 Issue와 PR을 관리하는 것이 어려워집니다. "지금 어떤 작업이 진행 중이지?", "다음 릴리스에 무엇을 포함해야 하지?"라는 질문에 답하기 위해서는 체계적인 프로젝트 관리 도구가 필요합니다. GitHub Projects는 Issue와 PR을 시각적으로 관리할 수 있는 강력한 도구입니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="github-projectsv2">GitHub Projects(V2) 소개<a class="headerlink" href="#github-projectsv2" title="Permanent link">&para;</a></h4>
+<p><strong>GitHub Projects(V2)</strong>는 2022년에 새롭게 출시된 프로젝트 관리 도구로, 기존 Projects(Classic)을 대폭 개선한 버전입니다. Issue와 PR을 다양한 관점에서 시각화하고, 커스텀 필드를 추가하여 팀의 워크플로우에 맞게 조정할 수 있습니다.</p>
+<p>화이트보드에 포스트잇을 붙여 작업을 관리하는 칸반 보드와 같습니다. 각 포스트잇(Issue)을 'To Do', 'In Progress', 'Done' 열로 이동시키며 진행 상황을 추적합니다.</p>
+<h4 id="_3">프로젝트 생성과 뷰 설정<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p><strong>프로젝트 생성 방법</strong>:</p>
+<ol>
+<li><strong>저장소 레벨 프로젝트</strong>:</li>
+<li>저장소 페이지에서 <code>Projects</code> 탭 → <code>New project</code></li>
+<li>
+<p>해당 저장소의 Issue와 PR만 관리</p>
+</li>
+<li>
+<p><strong>사용자/조직 레벨 프로젝트</strong>:</p>
+</li>
+<li>프로필 또는 조직 페이지 → <code>Projects</code> → <code>New project</code></li>
+<li>
+<p>여러 저장소의 Issue와 PR을 통합 관리 가능</p>
+</li>
+<li>
+<p><strong>템플릿 선택</strong>:</p>
+</li>
+<li>Blank: 빈 프로젝트에서 시작</li>
+<li>Team backlog: 스프린트 관리용</li>
+<li>Roadmap: 타임라인 기반 계획</li>
+</ol>
+<p>GitHub CLI로 프로젝트 생성:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 조직 프로젝트 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>project<span class="w"> </span>create<span class="w"> </span>--owner<span class="w"> </span>myorg<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;Q1 2025 Sprint&quot;</span>
+
+<span class="c1"># 프로젝트 목록 확인</span>
+$<span class="w"> </span>gh<span class="w"> </span>project<span class="w"> </span>list<span class="w"> </span>--owner<span class="w"> </span>myorg
+</code></pre></div>
+
+<h4 id="vs-vs">보드 뷰 vs 테이블 뷰 vs 로드맵 뷰<a class="headerlink" href="#vs-vs" title="Permanent link">&para;</a></h4>
+<p>GitHub Projects는 같은 데이터를 다양한 관점에서 볼 수 있는 세 가지 주요 뷰를 제공합니다.</p>
+<p><strong>1. 보드 뷰(Board View)</strong>: 칸반 스타일</p>
+<p>칸반 보드 형태로 작업을 열(Column)로 구분하여 시각화합니다. 드래그 앤 드롭으로 작업을 이동시키며 상태를 변경할 수 있습니다.</p>
+<p>기본 열 구성 예시:
+- <strong>Backlog</strong>: 앞으로 할 작업
+- <strong>To Do</strong>: 다음 스프린트에 할 작업
+- <strong>In Progress</strong>: 현재 진행 중
+- <strong>In Review</strong>: 코드 리뷰 중
+- <strong>Done</strong>: 완료</p>
+<blockquote>
+<p><strong>팁</strong>: 열은 Issue의 Status 필드와 연동됩니다. Issue를 열 사이로 드래그하면 Status가 자동으로 변경됩니다.</p>
+</blockquote>
+<p><strong>2. 테이블 뷰(Table View)</strong>: 스프레드시트 스타일</p>
+<p>모든 Issue와 PR을 표 형태로 나열하며, 정렬, 필터링, 그룹화가 자유롭습니다. 스프레드시트처럼 셀을 직접 편집할 수 있습니다.</p>
+<p>주요 기능:
+- <strong>정렬</strong>: 우선순위, 담당자, 마감일 기준
+- <strong>필터링</strong>: 특정 라벨, 담당자, Sprint만 표시
+- <strong>그룹화</strong>: Status, Assignee, Milestone 별로 그룹화</p>
+<p><strong>3. 로드맵 뷰(Roadmap View)</strong>: 타임라인 스타일</p>
+<p>Issue의 시작일과 종료일을 시간축에 표시하여 프로젝트 일정을 한눈에 파악할 수 있습니다. 간트 차트(Gantt Chart)와 유사합니다.</p>
+<p>사용 시나리오:
+- 분기별 기능 개발 계획
+- 여러 팀의 작업 일정 조율
+- 릴리스 마일스톤 시각화</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    Project["GitHub Projects<br/>(동일한 데이터)"]
+
+    Board["Board View<br/>(칸반 보드)"]
+    Table["Table View<br/>(테이블)"]
+    Roadmap["Roadmap View<br/>(로드맵)"]
+
+    Project --> Board
+    Project --> Table
+    Project --> Roadmap
+
+    subgraph BoardDetail["Board View 특징"]
+        direction LR
+        B1["To Do"]
+        B2["In Progress"]
+        B3["Done"]
+
+        B1 --> B2
+        B2 --> B3
+
+        style B1 fill:#fce4ec,stroke:#c2185b
+        style B2 fill:#fff3e0,stroke:#f57c00
+        style B3 fill:#e8f5e9,stroke:#388e3c
+    end
+
+    subgraph TableDetail["Table View 특징"]
+        direction TB
+        T1["행: Issue/PR"]
+        T2["열: Status, Priority, Assignee 등"]
+        T3["정렬, 필터링, 그룹화"]
+
+        T1 --> T2
+        T2 --> T3
+
+        style T1 fill:#e1f5fe
+        style T2 fill:#fff3e0
+        style T3 fill:#e8f5e9
+    end
+
+    subgraph RoadmapDetail["Roadmap View 특징"]
+        direction TB
+        R1["시간축 타임라인"]
+        R2["마일스톤 기반 일정"]
+        R3["시작/종료 날짜 시각화"]
+
+        R1 --> R2
+        R2 --> R3
+
+        style R1 fill:#e1f5fe
+        style R2 fill:#fff3e0
+        style R3 fill:#f3e5f5
+    end
+
+    Board --> BoardDetail
+    Table --> TableDetail
+    Roadmap --> RoadmapDetail
+
+    Note["같은 데이터를<br/>다른 관점에서 시각화"]
+
+    BoardDetail --> Note
+    TableDetail --> Note
+    RoadmapDetail --> Note
+
+    style Project fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    style Board fill:#e1f5fe,stroke:#0288d1
+    style Table fill:#fff3e0,stroke:#f57c00
+    style Roadmap fill:#e8f5e9,stroke:#388e3c
+    style BoardDetail fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style TableDetail fill:#fff8e1,stroke:#f57c00,stroke-width:2px
+    style RoadmapDetail fill:#f1f8e9,stroke:#388e3c,stroke-width:2px
+    style Note fill:#f3e5f5
+
+</div>
+<figcaption>GitHub Projects의 세 가지 뷰</figcaption>
+</figure>
+
+<h4 id="status-priority-sprint">커스텀 필드 추가 (Status, Priority, Sprint)<a class="headerlink" href="#status-priority-sprint" title="Permanent link">&para;</a></h4>
+<p>기본 Issue 필드(Title, Assignee, Labels) 외에도 프로젝트별로 필요한 커스텀 필드를 추가할 수 있습니다.</p>
+<p><strong>주요 커스텀 필드 타입</strong>:</p>
+<ol>
+<li><strong>Text</strong>: 짧은 텍스트 (예: Sprint 이름)</li>
+<li><strong>Number</strong>: 숫자 (예: Story Point, 예상 시간)</li>
+<li><strong>Date</strong>: 날짜 (예: 마감일, 시작일)</li>
+<li><strong>Single select</strong>: 드롭다운 선택 (예: Priority, Status)</li>
+<li><strong>Iteration</strong>: 스프린트 주기</li>
+</ol>
+<p><strong>Status 필드 추가 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code>프로젝트 설정 → + Add field → Single select
+- 이름: Status
+- 옵션:
+  - Backlog (회색)
+  - To Do (노란색)
+  - In Progress (파란색)
+  - In Review (주황색)
+  - Done (초록색)
+</code></pre></div>
+
+<p><strong>Priority 필드 추가</strong>:</p>
+<div class="codehilite"><pre><span></span><code>옵션:
+- P0: Critical (빨간색)
+- P1: High (주황색)
+- P2: Medium (노란색)
+- P3: Low (회색)
+</code></pre></div>
+
+<p><strong>Sprint 필드 추가 (Iteration)</strong>:</p>
+<div class="codehilite"><pre><span></span><code>- 반복 주기: 2주
+- 시작일: 2025-01-06
+- 반복 횟수: 6개 (Q1)
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 필드를 너무 많이 추가하면 관리가 복잡해집니다. 팀에 꼭 필요한 3-5개 필드만 추가하세요.</p>
+</blockquote>
+<h4 id="issues-pr">Issues와 PR을 프로젝트에 연결<a class="headerlink" href="#issues-pr" title="Permanent link">&para;</a></h4>
+<p><strong>Issue 추가 방법</strong>:</p>
+<ol>
+<li><strong>프로젝트 내에서 직접 추가</strong>:</li>
+<li>프로젝트 보드에서 <code>+ Add item</code> → Issue 제목 입력 → Enter</li>
+<li>
+<p>자동으로 해당 저장소에 Issue 생성됨</p>
+</li>
+<li>
+<p><strong>기존 Issue 연결</strong>:</p>
+</li>
+<li>프로젝트 보드에서 <code>+ Add item</code> → <code>#</code> 입력 → Issue 번호 선택</li>
+<li>
+<p>여러 저장소의 Issue를 검색하여 추가 가능</p>
+</li>
+<li>
+<p><strong>Issue 페이지에서 연결</strong>:</p>
+</li>
+<li>Issue 우측 사이드바 → <code>Projects</code> → 프로젝트 선택</li>
+</ol>
+<p><strong>GitHub CLI로 Issue 추가</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 프로젝트에 Issue 추가</span>
+$<span class="w"> </span>gh<span class="w"> </span>project<span class="w"> </span>item-add<span class="w"> </span><span class="m">1</span><span class="w"> </span>--owner<span class="w"> </span>myorg<span class="w"> </span>--url<span class="w"> </span>https://github.com/myorg/repo/issues/42
+
+<span class="c1"># 현재 저장소의 Issue를 프로젝트에 추가</span>
+$<span class="w"> </span>gh<span class="w"> </span>issue<span class="w"> </span>list<span class="w"> </span>--json<span class="w"> </span>number,url<span class="w"> </span>--jq<span class="w"> </span><span class="s1">&#39;.[].url&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>gh<span class="w"> </span>project<span class="w"> </span>item-add<span class="w"> </span><span class="m">1</span><span class="w"> </span>--owner<span class="w"> </span>myorg<span class="w"> </span>--url<span class="w"> </span><span class="o">{}</span>
+</code></pre></div>
+
+<p><strong>자동화 설정</strong>:</p>
+<p>Projects 설정에서 자동화 규칙을 설정할 수 있습니다:
+- <strong>Issue 생성 시</strong>: 자동으로 Backlog 열에 추가
+- <strong>PR 생성 시</strong>: In Progress 열에 추가
+- <strong>PR 머지 시</strong>: Done 열로 이동
+- <strong>Issue 종료 시</strong>: Done 열로 이동</p>
+<blockquote>
+<p><strong>주의</strong>: 자동화는 프로젝트 설정에서 활성화해야 동작합니다. Workflows → Built-in workflows에서 설정하세요.</p>
+</blockquote>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>GitHub Projects(V2)는 Issue와 PR을 시각적으로 관리하는 도구입니다</li>
+<li>보드, 테이블, 로드맵 세 가지 뷰로 데이터를 다르게 볼 수 있습니다</li>
+<li>Status, Priority, Sprint 같은 커스텀 필드를 추가하여 팀 워크플로우에 맞출 수 있습니다</li>
+<li>Issue는 프로젝트에 수동 또는 자동으로 연결할 수 있습니다</li>
+</ul>
+<hr />
+<h2 id="milestones">Milestones와 릴리스 관리<a class="headerlink" href="#milestones" title="Permanent link">&para;</a></h2>
+<h3 id="_5">도입<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>소프트웨어 개발은 작은 단계들을 거쳐 큰 목표를 달성하는 과정입니다. "v1.0 릴리스에 어떤 기능이 포함되어야 하지?", "다음 분기까지 완료해야 할 작업은 무엇이지?"라는 질문에 답하기 위해 Milestones와 Releases를 사용합니다.</p>
+<h3 id="_6">핵심 개념 설명<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="milestone">Milestone으로 이정표 설정<a class="headerlink" href="#milestone" title="Permanent link">&para;</a></h4>
+<p><strong>Milestone(마일스톤)</strong>은 프로젝트의 중요한 이정표를 나타내는 Issue의 그룹입니다. 보통 릴리스 버전, 스프린트, 분기별 목표에 해당합니다.</p>
+<p>앨범 제작 과정과 같습니다. 여러 곡(Issue)을 녹음하고, 앨범(Milestone)으로 묶어 발매(Release)합니다.</p>
+<p><strong>Milestone 생성 방법</strong>:</p>
+<ol>
+<li>저장소 페이지 → <code>Issues</code> 탭 → <code>Milestones</code> → <code>New milestone</code></li>
+<li>정보 입력:</li>
+<li><strong>Title</strong>: <code>v1.0.0 - 첫 공식 릴리스</code></li>
+<li><strong>Due date</strong>: <code>2025-03-31</code></li>
+<li><strong>Description</strong>: 이 릴리스의 목표와 주요 기능 설명</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># GitHub CLI로 Milestone 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>api<span class="w"> </span>repos/:owner/:repo/milestones<span class="w"> </span>-f<span class="w"> </span><span class="nv">title</span><span class="o">=</span><span class="s2">&quot;v1.0.0&quot;</span><span class="w"> </span>-f<span class="w"> </span><span class="nv">due_on</span><span class="o">=</span><span class="s2">&quot;2025-03-31T23:59:59Z&quot;</span><span class="w"> </span>-f<span class="w"> </span><span class="nv">description</span><span class="o">=</span><span class="s2">&quot;첫 공식 릴리스&quot;</span>
+</code></pre></div>
+
+<p><strong>Milestone 네이밍 규칙</strong>:
+- <strong>버전 기반</strong>: <code>v1.0.0</code>, <code>v1.1.0</code>, <code>v2.0.0</code>
+- <strong>날짜 기반</strong>: <code>2025 Q1</code>, <code>Sprint 23</code>
+- <strong>기능 기반</strong>: <code>모바일 지원</code>, <code>다크 모드 출시</code></p>
+<h4 id="milestone-issue">Milestone과 Issue 연결<a class="headerlink" href="#milestone-issue" title="Permanent link">&para;</a></h4>
+<p>Issue 생성 또는 편집 시 우측 사이드바에서 Milestone을 선택합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 새 Issue를 Milestone과 함께 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>issue<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;사용자 로그인 기능&quot;</span><span class="w"> </span>--milestone<span class="w"> </span><span class="s2">&quot;v1.0.0&quot;</span>
+
+<span class="c1"># 기존 Issue에 Milestone 할당</span>
+$<span class="w"> </span>gh<span class="w"> </span>issue<span class="w"> </span>edit<span class="w"> </span><span class="m">42</span><span class="w"> </span>--milestone<span class="w"> </span><span class="s2">&quot;v1.0.0&quot;</span>
+</code></pre></div>
+
+<p><strong>Milestone 진행 상황 추적</strong>:</p>
+<p>Milestone 페이지에서 진행률을 시각적으로 확인할 수 있습니다:
+- <strong>Open issues</strong>: 남은 작업
+- <strong>Closed issues</strong>: 완료된 작업
+- <strong>Progress bar</strong>: 완료율 (예: 12 / 20 = 60%)</p>
+<blockquote>
+<p><strong>팁</strong>: Milestone 마감일이 다가오면 GitHub가 자동으로 알림을 보냅니다. 팀이 일정을 지킬 수 있도록 도와줍니다.</p>
+</blockquote>
+<h4 id="release-release-notes">Release 생성과 Release Notes 작성<a class="headerlink" href="#release-release-notes" title="Permanent link">&para;</a></h4>
+<p><strong>Release(릴리스)</strong>는 소프트웨어의 특정 버전을 배포 가능한 상태로 패키징하는 것입니다. Git Tag에 설명, 바이너리, Changelog를 추가한 배포 패키지입니다.</p>
+<p><strong>Release 생성 단계</strong>:</p>
+<ol>
+<li><strong>Tag 생성</strong>:</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Annotated Tag 생성 (권장)</span>
+$<span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.0.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;첫 공식 릴리스&quot;</span>
+
+<span class="c1"># 원격에 push</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v1.0.0
+</code></pre></div>
+
+<ol>
+<li><strong>GitHub에서 Release 생성</strong>:</li>
+<li>저장소 → <code>Releases</code> → <code>Draft a new release</code></li>
+<li>Tag 선택: <code>v1.0.0</code></li>
+<li>Release title: <code>v1.0.0 - First Official Release</code></li>
+<li>Description: Release Notes 작성 (아래 참조)</li>
+</ol>
+<p><strong>GitHub CLI로 Release 생성</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v1.0.0<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;v1.0.0&quot;</span><span class="w"> </span>--notes<span class="w"> </span><span class="s2">&quot;첫 공식 릴리스</span>
+
+<span class="s2">## 주요 기능</span>
+<span class="s2">- 사용자 로그인/회원가입</span>
+<span class="s2">- 프로필 이미지 업로드</span>
+<span class="s2">- 다크 모드 지원</span>
+
+<span class="s2">## 버그 수정</span>
+<span class="s2">- #42: 로그아웃 버그 수정</span>
+<span class="s2">- #45: 모바일 레이아웃 깨짐 수정</span>
+
+<span class="s2">## 알려진 이슈</span>
+<span class="s2">- iOS Safari에서 간헐적 로딩 지연</span>
+<span class="s2">&quot;</span>
+</code></pre></div>
+
+<p><strong>Release Notes 작성 가이드</strong>:</p>
+<p>좋은 Release Notes는 사용자에게 변경 사항을 명확히 전달합니다.</p>
+<p>구조:</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># v1.0.0 - 릴리스 제목</span>
+
+<span class="gu">## 🎉 주요 기능 (Features)</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**로그인 시스템**</span>: OAuth 2.0 기반 소셜 로그인 지원 (#12, <span class="ni">#34</span>)
+<span class="k">-</span><span class="w"> </span><span class="gs">**다크 모드**</span>: 시스템 설정에 따라 자동 전환 (#56)
+
+<span class="gu">## 🐛 버그 수정 (Bug Fixes)</span>
+<span class="k">-</span><span class="w"> </span>회원가입 폼 검증 오류 수정 (#42)
+<span class="k">-</span><span class="w"> </span>이미지 업로드 실패 문제 해결 (#45)
+
+<span class="gu">## ⚡ 성능 개선 (Performance)</span>
+<span class="k">-</span><span class="w"> </span>초기 로딩 속도 30% 개선
+<span class="k">-</span><span class="w"> </span>번들 크기 15% 감소
+
+<span class="gu">## 📚 문서 (Documentation)</span>
+<span class="k">-</span><span class="w"> </span>API 문서 업데이트
+<span class="k">-</span><span class="w"> </span>설치 가이드 추가
+
+<span class="gu">## ⚠️ 주의사항 (Breaking Changes)</span>
+<span class="k">-</span><span class="w"> </span>API 엔드포인트 변경: <span class="sb">`/user`</span> → <span class="sb">`/api/v1/user`</span>
+<span class="k">-</span><span class="w"> </span>최소 Node.js 버전: 18.x
+
+<span class="gu">## 📦 의존성 (Dependencies)</span>
+<span class="k">-</span><span class="w"> </span>React 18.2.0 → 18.3.0
+<span class="k">-</span><span class="w"> </span>TypeScript 5.0.0 → 5.3.0
+
+<span class="gs">**전체 Changelog**</span>: https://github.com/owner/repo/compare/v0.9.0...v1.0.0
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 사용자 관점에서 작성하세요. "리팩터링" 같은 내부 변경보다 "로딩 속도 개선" 같은 사용자 혜택을 강조하세요.</p>
+</blockquote>
+<h4 id="changelog">자동 Changelog 생성<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h4>
+<p>GitHub는 이전 Release 이후의 모든 PR과 커밋을 바탕으로 Changelog를 자동 생성할 수 있습니다.</p>
+<p><strong>자동 생성 활성화</strong>:
+- Release 작성 화면에서 <code>Generate release notes</code> 버튼 클릭
+- 이전 Tag와 현재 Tag 사이의 모든 PR이 자동으로 목록화됩니다</p>
+<p><strong><code>.github/release.yml</code> 설정</strong>:</p>
+<p>Changelog 생성 규칙을 커스터마이즈할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">changelog</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">exclude</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ignore-for-release</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dependencies</span>
+<span class="w">  </span><span class="nt">categories</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">🎉 주요 기능</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">feature</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enhancement</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">🐛 버그 수정</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bug</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fix</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">📚 문서</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">documentation</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">🔧 기타 변경</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+</code></pre></div>
+
+<p>이 설정을 사용하면 PR 라벨에 따라 Changelog가 자동으로 카테고리별로 분류됩니다.</p>
+<h4 id="pre-release-latest">Pre-release와 Latest 관리<a class="headerlink" href="#pre-release-latest" title="Permanent link">&para;</a></h4>
+<p><strong>Pre-release(사전 릴리스)</strong>:</p>
+<p>정식 릴리스 전에 테스터나 얼리 어답터에게 공개하는 버전입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Pre-release 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v1.0.0-beta.1<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;v1.0.0 Beta 1&quot;</span><span class="w"> </span>--notes<span class="w"> </span><span class="s2">&quot;베타 테스트 버전&quot;</span><span class="w"> </span>--prerelease
+
+<span class="c1"># Latest 플래그 없이 생성 (자동으로 latest가 되지 않음)</span>
+$<span class="w"> </span>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v1.0.0-rc.1<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;Release Candidate 1&quot;</span><span class="w"> </span>--notes<span class="w"> </span><span class="s2">&quot;최종 테스트 버전&quot;</span><span class="w"> </span>--prerelease
+</code></pre></div>
+
+<p>Release 페이지에서:
+- Pre-release는 "Pre-release" 배지가 표시됩니다
+- Latest release는 페이지 상단에 고정됩니다</p>
+<p><strong>Semantic Versioning(SemVer)</strong>:</p>
+<p>버전 번호는 <code>MAJOR.MINOR.PATCH</code> 형식을 따릅니다:
+- <strong>MAJOR</strong>: 하위 호환 불가 변경 (1.0.0 → 2.0.0)
+- <strong>MINOR</strong>: 하위 호환 가능 기능 추가 (1.0.0 → 1.1.0)
+- <strong>PATCH</strong>: 버그 수정 (1.0.0 → 1.0.1)</p>
+<p>Pre-release 표기:
+- <strong>Alpha</strong>: <code>1.0.0-alpha.1</code> (내부 테스트)
+- <strong>Beta</strong>: <code>1.0.0-beta.1</code> (공개 베타)
+- <strong>Release Candidate</strong>: <code>1.0.0-rc.1</code> (최종 후보)</p>
+<blockquote>
+<p><strong>주의</strong>: Pre-release는 안정성이 보장되지 않으므로 프로덕션 환경에서 사용하지 마세요.</p>
+</blockquote>
+<h3 id="_7">절 요약<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Milestone은 Issue를 릴리스, 스프린트, 목표별로 그룹화합니다</li>
+<li>Release는 Tag에 설명과 바이너리를 추가한 배포 패키지입니다</li>
+<li>Release Notes는 사용자 관점에서 변경 사항을 명확히 전달해야 합니다</li>
+<li>GitHub의 자동 Changelog 생성과 <code>.github/release.yml</code>로 효율을 높일 수 있습니다</li>
+<li>Pre-release로 베타 버전을 관리하고, Semantic Versioning을 따라야 합니다</li>
+</ul>
+<hr />
+<h2 id="discussions">Discussions와 커뮤니티 소통<a class="headerlink" href="#discussions" title="Permanent link">&para;</a></h2>
+<h3 id="_8">도입<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>Issue는 구체적인 버그나 작업을 추적하는 데 적합하지만, 일반적인 질문이나 아이디어 논의에는 과도합니다. "이 기능이 필요할까요?"라는 질문을 Issue로 만들면 Issue 목록이 혼잡해집니다. 이때 사용하는 것이 GitHub Discussions입니다.</p>
+<h3 id="_9">핵심 개념 설명<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<h4 id="discussions_1">Discussions 활성화와 카테고리 설정<a class="headerlink" href="#discussions_1" title="Permanent link">&para;</a></h4>
+<p><strong>Discussions</strong>는 커뮤니티와 자유롭게 소통할 수 있는 포럼 기능입니다. Q&amp;A, 공지사항, 아이디어 토론 등 Issue보다 가벼운 주제에 적합합니다.</p>
+<p><strong>활성화 방법</strong>:</p>
+<ol>
+<li>저장소 → <code>Settings</code> → <code>Features</code> → <code>Discussions</code> 체크</li>
+<li>자동으로 <code>Discussions</code> 탭이 생성됩니다</li>
+</ol>
+<p><strong>기본 카테고리</strong>:
+- <strong>Announcements</strong>: 공지사항 (관리자만 작성 가능)
+- <strong>General</strong>: 일반 토론
+- <strong>Ideas</strong>: 기능 제안
+- <strong>Q&amp;A</strong>: 질문과 답변
+- <strong>Show and tell</strong>: 프로젝트 소개</p>
+<p><strong>커스텀 카테고리 추가</strong>:</p>
+<p>Settings → Discussions → Categories → New category</p>
+<p>예시:
+- <strong>Troubleshooting</strong>: 문제 해결 도움
+- <strong>Feature Requests</strong>: 기능 요청 (투표 가능)
+- <strong>Off-topic</strong>: 자유 주제</p>
+<blockquote>
+<p><strong>팁</strong>: 카테고리별로 이모지를 설정하면 시각적으로 구분하기 쉽습니다.</p>
+</blockquote>
+<h4 id="qa">공지, Q&amp;A, 아이디어 토론 활용<a class="headerlink" href="#qa" title="Permanent link">&para;</a></h4>
+<p><strong>1. Announcements(공지사항)</strong>:</p>
+<p>주요 릴리스, 중요한 변경 사항을 알립니다.</p>
+<p>예시:</p>
+<div class="codehilite"><pre><span></span><code><span class="gh"># 🎉 v2.0.0 릴리스 발표</span>
+
+새로운 메이저 버전이 출시되었습니다!
+
+<span class="gu">## 주요 변경사항</span>
+<span class="k">-</span><span class="w"> </span>완전히 새로운 UI
+<span class="k">-</span><span class="w"> </span>성능 50% 개선
+<span class="k">-</span><span class="w"> </span>API v2 도입
+
+<span class="gu">## 마이그레이션 가이드</span>
+기존 사용자는 [<span class="nt">마이그레이션 가이드</span>](<span class="na">링크</span>)를 참고하세요.
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: Announcements는 Pin(고정)하여 Discussion 페이지 상단에 항상 표시되도록 하세요.</p>
+</blockquote>
+<p><strong>2. Q&amp;A(질문과 답변)</strong>:</p>
+<p>Q&amp;A 카테고리는 Stack Overflow 스타일로 동작합니다. 질문자가 답변을 "Accepted Answer"로 표시할 수 있습니다.</p>
+<p>워크플로우:
+1. 사용자가 질문 작성
+2. 커뮤니티가 답변
+3. 질문자가 해결된 답변에 ✅ 표시
+4. 나중에 같은 문제를 겪은 사람이 검색하여 참고</p>
+<div class="codehilite"><pre><span></span><code><span class="gs">**Q**</span>: API 인증 토큰을 어떻게 갱신하나요?
+
+<span class="gs">**A**</span> (Accepted): 토큰은 만료 1시간 전에 <span class="sb">`/api/refresh`</span> 엔드포인트로 갱신할 수 있습니다.
+</code></pre></div>
+
+<p><strong>3. Ideas(아이디어)</strong>:</p>
+<p>기능 제안을 받고 커뮤니티 투표로 우선순위를 정합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="gs">**제안**</span>: 다크 모드 자동 전환 기능
+
+시스템 설정에 따라 자동으로 라이트/다크 모드를 전환하는 기능이 있으면 좋겠습니다.
+
+👍 찬성 투표를 눌러주세요!
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: GitHub의 Upvote 기능으로 인기 있는 아이디어를 파악하고, 로드맵에 반영하세요.</p>
+</blockquote>
+<h4 id="issue-vs-discussion">Issue vs Discussion: 언제 무엇을 쓸 것인가<a class="headerlink" href="#issue-vs-discussion" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>특성</th>
+<th>Issue</th>
+<th>Discussion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>목적</strong></td>
+<td>구체적 작업, 버그 추적</td>
+<td>질문, 토론, 아이디어</td>
+</tr>
+<tr>
+<td><strong>상태</strong></td>
+<td>Open / Closed</td>
+<td>종료 개념 없음</td>
+</tr>
+<tr>
+<td><strong>추적</strong></td>
+<td>Milestone, Projects 연결</td>
+<td>카테고리별 분류</td>
+</tr>
+<tr>
+<td><strong>알림</strong></td>
+<td>모든 변경 알림</td>
+<td>답변 알림</td>
+</tr>
+<tr>
+<td><strong>적합한 주제</strong></td>
+<td>"로그인 버튼 안 눌림"</td>
+<td>"로그인 방식 개선 제안"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Issue로 만들어야 하는 경우</strong>:
+- 명확한 버그 보고
+- 구체적인 기능 개발 작업
+- 릴리스 일정에 포함될 작업</p>
+<p><strong>Discussion으로 만들어야 하는 경우</strong>:
+- 사용법 질문 ("어떻게 설정하나요?")
+- 기능 제안 초기 단계 ("이런 기능 어때요?")
+- 일반적인 토론 ("이 디자인 vs 저 디자인")
+- 커뮤니티 공지</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: Discussion에서 충분히 논의된 기능 제안은 Issue로 전환하여 구체적으로 작업할 수 있습니다.</p>
+</blockquote>
+<h4 id="polls">Polls 기능으로 의견 수렴<a class="headerlink" href="#polls" title="Permanent link">&para;</a></h4>
+<p><strong>Polls(투표)</strong>는 Discussion 내에서 간단한 선택지 투표를 만들 수 있는 기능입니다.</p>
+<p><strong>투표 만들기</strong>:</p>
+<p>Discussion 작성 시 본문에 다음 형식을 사용합니다:</p>
+<div class="codehilite"><pre><span></span><code>다음 릴리스에서 우선 개발할 기능을 투표해주세요!
+
+<span class="k">- [ ]</span> 다크 모드
+<span class="k">- [ ]</span> 모바일 앱
+<span class="k">- [ ]</span> 다국어 지원
+<span class="k">- [ ]</span> 성능 개선
+</code></pre></div>
+
+<p>GitHub가 자동으로 체크박스를 투표 UI로 변환합니다.</p>
+<p><strong>사용 시나리오</strong>:
+- 기능 우선순위 결정
+- 디자인 옵션 선택
+- 릴리스 일정 조율</p>
+<blockquote>
+<p><strong>주의</strong>: Polls는 Discussion 본문에만 사용할 수 있으며, 댓글에는 작동하지 않습니다.</p>
+</blockquote>
+<h3 id="_10">절 요약<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Discussions는 Issue보다 가벼운 소통 채널입니다</li>
+<li>Announcements, Q&amp;A, Ideas 등 카테고리별로 주제를 분류합니다</li>
+<li>Issue는 구체적 작업 추적, Discussion은 질문과 아이디어 논의에 적합합니다</li>
+<li>Q&amp;A 카테고리에서 Accepted Answer로 해결된 질문을 표시합니다</li>
+<li>Polls로 커뮤니티 의견을 수렴할 수 있습니다</li>
+</ul>
+<hr />
+<h2 id="github-pages-wiki">GitHub Pages와 Wiki<a class="headerlink" href="#github-pages-wiki" title="Permanent link">&para;</a></h2>
+<h3 id="_11">도입<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>오픈소스 프로젝트를 운영하다 보면 사용자에게 문서를 제공해야 할 필요가 생깁니다. README 파일 하나로는 부족하고, 설치 가이드, API 문서, 튜토리얼 등 체계적인 문서 사이트가 필요합니다. GitHub Pages와 Wiki는 이를 위한 두 가지 도구입니다.</p>
+<h3 id="_12">핵심 개념 설명<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<h4 id="github-pages">GitHub Pages로 프로젝트 문서 사이트 만들기<a class="headerlink" href="#github-pages" title="Permanent link">&para;</a></h4>
+<p><strong>GitHub Pages</strong>는 GitHub 저장소에서 정적 웹사이트를 무료로 호스팅하는 서비스입니다. Markdown 파일을 HTML로 자동 변환하여 웹사이트로 제공합니다.</p>
+<p><strong>활성화 방법</strong>:</p>
+<ol>
+<li><strong>소스 선택</strong> (3가지 방식):</li>
+</ol>
+<p><strong>a) GitHub Actions 방식</strong> (권장):
+   <code>Settings → Pages → Source: GitHub Actions</code></p>
+<p><strong>b) 브랜치 방식</strong>:
+   <code>Settings → Pages → Source: Deploy from a branch
+   Branch: main / docs (또는 gh-pages)</code></p>
+<p><strong>c) 전용 브랜치</strong>:
+   <code>bash
+   $ git checkout --orphan gh-pages
+   $ git rm -rf .
+   $ echo "Hello GitHub Pages" &gt; index.html
+   $ git add index.html
+   $ git commit -m "docs: GitHub Pages 초기 설정"
+   $ git push origin gh-pages</code></p>
+<ol>
+<li><strong>사이트 확인</strong>:</li>
+<li><code>https://&lt;username&gt;.github.io/&lt;repository&gt;/</code></li>
+<li>배포 완료까지 1-2분 소요</li>
+</ol>
+<p><strong>프로젝트 문서 구조 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code>docs/
+├── index.md              # 홈페이지
+├── getting-started.md    # 시작 가이드
+├── api/
+│   ├── authentication.md
+│   └── endpoints.md
+├── guides/
+│   ├── installation.md
+│   └── configuration.md
+└── _config.yml           # Jekyll 설정 (선택)
+</code></pre></div>
+
+<p><strong>GitHub Actions로 배포</strong>:</p>
+<p><code>.github/workflows/deploy-docs.yml</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deploy Docs</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;docs/**&#39;</span>
+
+<span class="nt">permissions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span>
+<span class="w">  </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+<span class="w">  </span><span class="nt">id-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/configure-pages@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/jekyll-build-pages@v1</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./docs</span>
+<span class="w">          </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./_site</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-pages-artifact@v3</span>
+
+<span class="w">  </span><span class="nt">deploy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-pages</span>
+<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ steps.deployment.outputs.page_url }}</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/deploy-pages@v4</span>
+<span class="w">        </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deployment</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 문서 변경 시에만 배포하도록 <code>paths: - 'docs/**'</code> 필터를 사용하면 불필요한 빌드를 줄일 수 있습니다.</p>
+</blockquote>
+<h4 id="jekyll">Jekyll 테마 적용<a class="headerlink" href="#jekyll" title="Permanent link">&para;</a></h4>
+<p><strong>Jekyll</strong>은 GitHub Pages의 기본 정적 사이트 생성기입니다. Markdown을 HTML로 변환하고 테마를 적용합니다.</p>
+<p><strong>지원 테마</strong>:</p>
+<p>GitHub Pages는 다음 공식 테마를 기본 지원합니다:
+- <strong>Cayman</strong>: 깔끔한 단일 페이지
+- <strong>Minimal</strong>: 미니멀리즘
+- <strong>Slate</strong>: 다크 테마
+- <strong>Time Machine</strong>: 기술 문서용
+- <strong>Architect</strong>: 대형 프로젝트용</p>
+<p><strong>테마 설정</strong>:</p>
+<p><code>docs/_config.yml</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My Project Documentation</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">종합 사용 가이드</span>
+<span class="nt">theme</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jekyll-theme-cayman</span>
+
+<span class="c1"># 네비게이션</span>
+<span class="nt">navigation</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Home</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Getting Started</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/getting-started</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/api</span>
+</code></pre></div>
+
+<p><strong>커스텀 테마 사용</strong>:</p>
+<p>더 많은 테마는 <a href="https://jekyllthemes.io/">Jekyll Themes</a>에서 찾을 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Gemfile</span>
+<span class="l l-Scalar l-Scalar-Plain">source &quot;https://rubygems.org&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">gem &quot;jekyll-theme-just-the-docs&quot;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># _config.yml</span>
+<span class="nt">remote_theme</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">just-the-docs/just-the-docs</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 프로젝트 문서는 일관된 구조를 유지하세요. 설치 → 설정 → 사용법 → API 레퍼런스 순서가 일반적입니다.</p>
+</blockquote>
+<h4 id="_13">커스텀 도메인 설정<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p>기본 <code>&lt;username&gt;.github.io/&lt;repo&gt;</code> 대신 자신의 도메인을 사용할 수 있습니다.</p>
+<p><strong>절차</strong>:</p>
+<ol>
+<li><strong>도메인 등록 서비스에서 DNS 설정</strong>:</li>
+</ol>
+<p>A 레코드 추가:
+   <code>185.199.108.153
+   185.199.109.153
+   185.199.110.153
+   185.199.111.153</code></p>
+<p>또는 CNAME 레코드:
+   <code>docs.myproject.com → &lt;username&gt;.github.io</code></p>
+<ol>
+<li><strong>GitHub Pages 설정</strong>:</li>
+<li>Settings → Pages → Custom domain</li>
+<li><code>docs.myproject.com</code> 입력</li>
+<li>
+<p><code>Enforce HTTPS</code> 체크 (Let's Encrypt 인증서 자동 발급)</p>
+</li>
+<li>
+<p><strong>CNAME 파일 생성</strong>:</p>
+</li>
+</ol>
+<p><code>docs/CNAME</code>:
+   <code>docs.myproject.com</code></p>
+<p><strong>HTTPS 적용</strong>:</p>
+<p>GitHub Pages는 Let's Encrypt를 통해 HTTPS를 자동 지원합니다. 커스텀 도메인 설정 후 몇 분이면 인증서가 발급됩니다.</p>
+<blockquote>
+<p><strong>주의</strong>: CNAME 파일은 저장소 루트 또는 docs 디렉토리에 있어야 하며, 배포 시 삭제되지 않도록 주의하세요.</p>
+</blockquote>
+<h4 id="wiki">Wiki 페이지 작성과 관리<a class="headerlink" href="#wiki" title="Permanent link">&para;</a></h4>
+<p><strong>Wiki</strong>는 저장소에 내장된 간단한 문서 시스템입니다. GitHub Pages보다 설정이 간단하지만 기능은 제한적입니다.</p>
+<p><strong>활성화</strong>:</p>
+<div class="codehilite"><pre><span></span><code>Settings → Features → Wikis 체크
+</code></pre></div>
+
+<p><strong>Wiki 페이지 구조</strong>:</p>
+<p>Wiki는 자동으로 다음 페이지를 생성합니다:
+- <strong>Home</strong>: 위키 홈페이지
+- <strong>_Sidebar</strong>: 좌측 사이드바 (선택)
+- <strong>_Footer</strong>: 페이지 하단 (선택)</p>
+<p><strong>페이지 작성</strong>:</p>
+<ol>
+<li>Wiki 탭 → <code>New page</code></li>
+<li>페이지 제목: <code>Installation Guide</code></li>
+<li>Markdown으로 내용 작성</li>
+<li><code>Save page</code></li>
+</ol>
+<p><strong>페이지 간 링크</strong>:</p>
+<div class="codehilite"><pre><span></span><code>자세한 내용은 [[API Reference]]를 참고하세요.
+</code></pre></div>
+
+<p>GitHub Wiki는 <code>[[페이지 제목]]</code> 형식으로 내부 링크를 생성합니다.</p>
+<p><strong>Wiki 로컬 편집</strong>:</p>
+<p>Wiki도 Git 저장소이므로 로컬에서 편집할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Wiki 클론</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/username/repo.wiki.git
+
+<span class="c1"># 편집 후 커밋</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;docs: Installation 가이드 업데이트&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
+</code></pre></div>
+
+<p><strong>Wiki vs GitHub Pages 비교</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>특성</th>
+<th>Wiki</th>
+<th>GitHub Pages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설정 복잡도</strong></td>
+<td>매우 간단</td>
+<td>중간 (Jekyll 설정 필요)</td>
+</tr>
+<tr>
+<td><strong>커스텀 디자인</strong></td>
+<td>제한적</td>
+<td>완전 커스터마이징</td>
+</tr>
+<tr>
+<td><strong>검색 엔진 최적화</strong></td>
+<td>약함</td>
+<td>강함 (커스텀 도메인 가능)</td>
+</tr>
+<tr>
+<td><strong>버전 관리</strong></td>
+<td>Git 히스토리</td>
+<td>Git 히스토리</td>
+</tr>
+<tr>
+<td><strong>적합한 용도</strong></td>
+<td>간단한 내부 문서</td>
+<td>공식 프로젝트 문서</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 소규모 프로젝트는 Wiki, 대규모 프로젝트는 GitHub Pages를 권장합니다.</p>
+</blockquote>
+<h3 id="_14">절 요약<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>GitHub Pages는 정적 웹사이트를 무료로 호스팅하는 서비스입니다</li>
+<li>Jekyll 테마로 문서 사이트를 예쁘게 꾸밀 수 있습니다</li>
+<li>커스텀 도메인과 HTTPS를 설정하여 전문적인 문서 사이트를 만들 수 있습니다</li>
+<li>Wiki는 간단한 문서 작성에 적합하며 설정이 매우 쉽습니다</li>
+<li>Wiki는 내부 문서, GitHub Pages는 공식 문서 사이트에 적합합니다</li>
+</ul>
+<hr />
+<h2 id="_15">자동화 워크플로우: 프로젝트 관리 자동화<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<h3 id="_16">도입<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>프로젝트 관리에는 반복적인 작업이 많습니다. "새 Issue에 자동으로 라벨을 붙이고 싶다", "PR이 머지되면 연결된 Issue를 자동으로 닫고 싶다"라는 요구가 생깁니다. GitHub Actions와 자동화 기능으로 이런 반복 작업을 줄일 수 있습니다.</p>
+<h3 id="_17">핵심 개념 설명<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h4 id="issue-codeowners">Issue 자동 할당 (CODEOWNERS)<a class="headerlink" href="#issue-codeowners" title="Permanent link">&para;</a></h4>
+<p><strong>CODEOWNERS</strong>는 코드의 특정 영역에 대한 소유권을 정의하는 파일입니다. PR이 생성되면 해당 영역의 소유자가 자동으로 리뷰어로 지정됩니다.</p>
+<p><strong>파일 위치</strong>:</p>
+<div class="codehilite"><pre><span></span><code>.github/CODEOWNERS
+</code></pre></div>
+
+<p><strong>기본 문법</strong>:</p>
+<div class="codehilite"><pre><span></span><code># 기본 소유자 (모든 파일)
+* @default-owner
+
+# 특정 디렉토리
+/frontend/        @frontend-team
+/backend/         @backend-team
+/docs/            @docs-team
+
+# 특정 파일 타입
+*.js              @javascript-experts
+*.py              @python-developers
+*.md              @technical-writers
+
+# 특정 파일
+/package.json     @infra-team
+/.github/         @devops-team
+
+# 중첩 규칙 (더 구체적인 규칙이 우선)
+/frontend/components/  @ui-team
+/frontend/api/         @api-team
+
+# 여러 소유자
+/security/        @security-team @cto
+
+# 이메일로 지정 (Organization만 가능)
+/legal/           legal@company.com
+</code></pre></div>
+
+<p><strong>동작 방식</strong>:</p>
+<ol>
+<li>개발자가 <code>/frontend/Login.js</code> 파일을 수정하여 PR 생성</li>
+<li>GitHub가 CODEOWNERS 확인</li>
+<li><code>@frontend-team</code>이 자동으로 리뷰어로 추가됨</li>
+<li><code>@frontend-team</code> 멤버가 알림 수신</li>
+</ol>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: CODEOWNERS를 브랜치 보호 규칙과 함께 사용하세요. "CODEOWNERS 승인 필수"로 설정하면 해당 영역 전문가의 리뷰를 강제할 수 있습니다.</p>
+</blockquote>
+<p><strong>브랜치 보호 규칙 설정</strong>:</p>
+<div class="codehilite"><pre><span></span><code>Settings → Branches → Add rule
+- Branch name pattern: main
+- ✅ Require pull request reviews before merging
+  - ✅ Require review from Code Owners
+</code></pre></div>
+
+<h4 id="pr-issue">PR 머지 시 Issue 자동 닫기<a class="headerlink" href="#pr-issue" title="Permanent link">&para;</a></h4>
+<p>GitHub는 PR과 Issue를 자동으로 연결하는 키워드를 지원합니다.</p>
+<p><strong>키워드</strong>:
+- <code>Closes #123</code>
+- <code>Fixes #123</code>
+- <code>Resolves #123</code></p>
+<p>PR 설명 또는 커밋 메시지에 이 키워드를 사용하면, PR이 머지될 때 연결된 Issue가 자동으로 닫힙니다.</p>
+<p><strong>PR 설명 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## 변경 사항</span>
+로그인 버그를 수정했습니다.
+
+<span class="gu">## 관련 Issue</span>
+Fixes <span class="ni">#42</span>
+Closes <span class="ni">#45</span>, <span class="ni">#47</span>
+</code></pre></div>
+
+<p><strong>커밋 메시지 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: 로그인 세션 만료 버그 수정</span>
+
+<span class="s2">사용자가 로그인 후 1시간이 지나면 세션이 자동 갱신되도록 수정했습니다.</span>
+
+<span class="s2">Fixes #42&quot;</span>
+</code></pre></div>
+
+<p><strong>여러 Issue 동시 닫기</strong>:</p>
+<div class="codehilite"><pre><span></span><code>Closes <span class="ni">#10</span>, closes <span class="ni">#12</span>, fixes <span class="ni">#15</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 키워드는 대소문자를 구분하지 않습니다. <code>fixes</code>, <code>Fixes</code>, <code>FIXES</code> 모두 동작합니다.</p>
+</blockquote>
+<h4 id="_18">라벨 기반 자동 분류<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h4>
+<p>새로운 Issue가 생성되면 제목이나 본문의 키워드를 바탕으로 자동으로 라벨을 추가할 수 있습니다.</p>
+<p><strong>.github/workflows/auto-label.yml</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Auto Label Issues</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">issues</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">opened</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">permissions</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">issues</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/github-script@v7</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">const issue = context.payload.issue;</span>
+<span class="w">            </span><span class="no">const title = issue.title.toLowerCase();</span>
+<span class="w">            </span><span class="no">const body = issue.body ? issue.body.toLowerCase() : &#39;&#39;;</span>
+<span class="w">            </span><span class="no">const labels = [];</span>
+
+<span class="w">            </span><span class="no">// 키워드 기반 라벨 추가</span>
+<span class="w">            </span><span class="no">if (title.includes(&#39;bug&#39;) || body.includes(&#39;버그&#39;)) {</span>
+<span class="w">              </span><span class="no">labels.push(&#39;bug&#39;);</span>
+<span class="w">            </span><span class="no">}</span>
+<span class="w">            </span><span class="no">if (title.includes(&#39;feature&#39;) || title.includes(&#39;기능&#39;)) {</span>
+<span class="w">              </span><span class="no">labels.push(&#39;enhancement&#39;);</span>
+<span class="w">            </span><span class="no">}</span>
+<span class="w">            </span><span class="no">if (body.includes(&#39;도움&#39;) || body.includes(&#39;help&#39;)) {</span>
+<span class="w">              </span><span class="no">labels.push(&#39;help wanted&#39;);</span>
+<span class="w">            </span><span class="no">}</span>
+<span class="w">            </span><span class="no">if (title.includes(&#39;security&#39;) || title.includes(&#39;보안&#39;)) {</span>
+<span class="w">              </span><span class="no">labels.push(&#39;security&#39;);</span>
+<span class="w">            </span><span class="no">}</span>
+
+<span class="w">            </span><span class="no">// 기본 라벨</span>
+<span class="w">            </span><span class="no">labels.push(&#39;triage&#39;);</span>
+
+<span class="w">            </span><span class="no">// 라벨 추가</span>
+<span class="w">            </span><span class="no">if (labels.length &gt; 0) {</span>
+<span class="w">              </span><span class="no">await github.rest.issues.addLabels({</span>
+<span class="w">                </span><span class="no">owner: context.repo.owner,</span>
+<span class="w">                </span><span class="no">repo: context.repo.repo,</span>
+<span class="w">                </span><span class="no">issue_number: issue.number,</span>
+<span class="w">                </span><span class="no">labels: labels</span>
+<span class="w">              </span><span class="no">});</span>
+<span class="w">            </span><span class="no">}</span>
+</code></pre></div>
+
+<p><strong>동작 흐름</strong>:
+1. 사용자가 Issue 생성: "버그: 로그인 안 됨"
+2. 워크플로우 트리거
+3. 제목에서 "버그" 키워드 감지
+4. <code>bug</code>, <code>triage</code> 라벨 자동 추가</p>
+<h4 id="stale-bot">Stale bot으로 오래된 이슈 관리<a class="headerlink" href="#stale-bot" title="Permanent link">&para;</a></h4>
+<p>오래 동안 활동이 없는 Issue나 PR을 자동으로 라벨링하고 닫는 봇입니다.</p>
+<p><strong>.github/workflows/stale.yml</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Close Stale Issues</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&#39;</span><span class="w">  </span><span class="c1"># 매일 자정(UTC) 실행</span>
+
+<span class="nt">permissions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">issues</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+<span class="w">  </span><span class="nt">pull-requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stale</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/stale@v9</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">repo-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span>
+
+<span class="w">          </span><span class="c1"># Issue 설정</span>
+<span class="w">          </span><span class="nt">stale-issue-message</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">이 Issue는 60일 동안 활동이 없어 자동으로 `stale` 라벨이 추가되었습니다.</span>
+<span class="w">            </span><span class="no">7일 이내에 활동이 없으면 자동으로 닫힙니다.</span>
+<span class="w">            </span><span class="no">계속 진행하려면 댓글을 남겨주세요.</span>
+<span class="w">          </span><span class="nt">close-issue-message</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">이 Issue는 활동이 없어 자동으로 닫혔습니다.</span>
+<span class="w">            </span><span class="no">필요하다면 다시 열어주세요.</span>
+<span class="w">          </span><span class="nt">days-before-stale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+<span class="w">          </span><span class="nt">days-before-close</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="w">          </span><span class="nt">stale-issue-label</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;stale&#39;</span>
+<span class="w">          </span><span class="nt">exempt-issue-labels</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pinned,security,roadmap&#39;</span>
+
+<span class="w">          </span><span class="c1"># PR 설정</span>
+<span class="w">          </span><span class="nt">stale-pr-message</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">이 PR은 30일 동안 활동이 없습니다.</span>
+<span class="w">          </span><span class="nt">close-pr-message</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">이 PR은 활동이 없어 자동으로 닫혔습니다.</span>
+<span class="w">          </span><span class="nt">days-before-pr-stale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">          </span><span class="nt">days-before-pr-close</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<span class="w">          </span><span class="nt">stale-pr-label</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;stale&#39;</span>
+<span class="w">          </span><span class="nt">exempt-pr-labels</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;work-in-progress&#39;</span>
+</code></pre></div>
+
+<p><strong>설정 옵션</strong>:
+- <code>days-before-stale</code>: 며칠 후 stale 라벨 추가
+- <code>days-before-close</code>: stale 후 며칠 후 닫기
+- <code>exempt-issue-labels</code>: 제외할 라벨 (영구 보존)</p>
+<blockquote>
+<p><strong>주의</strong>: Stale bot은 신중히 설정하세요. 중요한 Issue를 실수로 닫지 않도록 <code>exempt-issue-labels</code>를 잘 설정해야 합니다.</p>
+</blockquote>
+<h4 id="_19">프로젝트 보드 자동 업데이트<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h4>
+<p>Issue의 상태가 변경되면 GitHub Projects 보드를 자동으로 업데이트할 수 있습니다.</p>
+<p><strong>.github/workflows/project-automation.yml</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Project Automation</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">issues</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">opened</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">closed</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">reopened</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">opened</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">closed</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ready_for_review</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">update-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/add-to-project@v0.5.0</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">project-url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/orgs/myorg/projects/1</span>
+<span class="w">          </span><span class="nt">github-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.PROJECT_TOKEN }}</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Update Status</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/github-script@v7</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">github-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.PROJECT_TOKEN }}</span>
+<span class="w">          </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">// Issue가 닫히면 Done 열로 이동</span>
+<span class="w">            </span><span class="no">if (context.payload.action === &#39;closed&#39;) {</span>
+<span class="w">              </span><span class="no">// 프로젝트 보드 업데이트 로직</span>
+<span class="w">            </span><span class="no">}</span>
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    subgraph Events["이벤트 발생"]
+        E1["Issue 생성"]
+        E2["PR 생성"]
+        E3["PR 머지"]
+        E4["Label 변경"]
+    end
+
+    subgraph Triggers["자동화 트리거"]
+        direction TB
+        T1["GitHub Actions<br/>워크플로우"]
+        T2["CODEOWNERS<br/>파일"]
+        T3["Stale Bot<br/>Action"]
+    end
+
+    subgraph Actions["자동 액션"]
+        A1["Assignee 자동 할당"]
+        A2["Label 자동 추가"]
+        A3["Issue 자동 종료<br/>(Closes #123)"]
+        A4["Projects 보드<br/>자동 이동"]
+        A5["오래된 Issue/PR<br/>자동 닫기"]
+    end
+
+    Events --> Triggers
+    Triggers --> Actions
+
+    E1 --> T2
+    T2 --> A1
+
+    E2 --> T1
+    T1 --> A2
+
+    E3 --> T1
+    T1 --> A3
+    T1 --> A4
+
+    E4 --> T1
+
+    T3 --> A5
+
+    Result["반복 작업 자동화<br/>팀 생산성 향상"]
+
+    Actions --> Result
+
+    style Events fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+    style E1 fill:#e1f5fe
+    style E2 fill:#e1f5fe
+    style E3 fill:#e1f5fe
+    style E4 fill:#e1f5fe
+    style Triggers fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style T1 fill:#fff3e0
+    style T2 fill:#fff3e0
+    style T3 fill:#fff3e0
+    style Actions fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style A1 fill:#e8f5e9
+    style A2 fill:#e8f5e9
+    style A3 fill:#e8f5e9
+    style A4 fill:#e8f5e9
+    style A5 fill:#e8f5e9
+    style Result fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+
+</div>
+<figcaption>프로젝트 관리 자동화 흐름</figcaption>
+</figure>
+
+<p><strong>자동화 예시</strong>:
+- Issue 생성 → Backlog 열에 추가
+- PR 생성 → In Progress 열로 이동
+- PR 머지 → Done 열로 이동
+- Issue 재개 → To Do 열로 이동</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 자동화는 팀 워크플로우에 맞게 커스터마이즈하세요. 모든 프로젝트에 맞는 만능 자동화는 없습니다.</p>
+</blockquote>
+<h3 id="_20">절 요약<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li>CODEOWNERS로 코드 영역별 소유자를 지정하고 자동 리뷰어 할당</li>
+<li>PR에 <code>Closes #123</code> 키워드를 사용하면 머지 시 Issue 자동 종료</li>
+<li>GitHub Actions로 라벨 자동 분류, Stale Issue 관리 등을 자동화</li>
+<li>Stale bot으로 오래된 Issue를 정리하여 백로그 관리</li>
+<li>GitHub Projects 보드를 Issue 상태 변화에 따라 자동 업데이트</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: GitHub Projects와 Jira의 차이는 무엇인가요? 어떤 것을 사용해야 하나요?</strong></p>
+<p>A1: GitHub Projects는 GitHub 생태계에 깊이 통합되어 Issue와 PR을 직접 관리하며, 간단한 프로젝트 관리에 적합합니다. Jira는 복잡한 워크플로우, 고급 보고서, 엔터프라이즈 기능이 필요한 대규모 조직에 적합합니다. 중소규모 팀이나 오픈소스 프로젝트는 GitHub Projects로 충분하며, 대기업 또는 복잡한 프로세스가 필요한 경우 Jira를 고려하세요.</p>
+<p><strong>Q2: Release를 잘못 만들었는데 삭제할 수 있나요?</strong></p>
+<p>A2: 네, Release는 삭제할 수 있습니다. 저장소 → Releases → 해당 Release → Delete this release. 단, Git Tag는 별도로 삭제해야 합니다(<code>git push --delete origin v1.0.0</code>). 이미 배포된 Release를 삭제하면 사용자에게 혼란을 줄 수 있으므로, 대신 새로운 패치 버전을 출시하는 것이 좋습니다.</p>
+<p><strong>Q3: Discussions를 활성화했는데 아무도 사용하지 않아요. 어떻게 활성화할 수 있나요?</strong></p>
+<p>A3: 다음 방법을 시도하세요. (1) README에 Discussions 링크와 사용법 추가, (2) 관리자가 먼저 질문을 올리고 답변하여 예시 제공, (3) Issue 템플릿에 "질문은 Discussions로" 안내 추가, (4) 커뮤니티에 흥미로운 주제로 토론 시작 (예: "다음 기능 투표"), (5) Q&amp;A에 답변하고 Accepted Answer 표시하여 유용성 강조.</p>
+<p><strong>Q4: GitHub Pages 사이트가 404 오류가 나요. 어떻게 해결하나요?</strong></p>
+<p>A4: 다음을 확인하세요. (1) Settings → Pages에서 올바른 Source 설정 (브랜치 또는 GitHub Actions), (2) 배포 완료 여부 확인 (Actions 탭에서 워크플로우 상태 확인), (3) <code>index.html</code> 또는 <code>index.md</code> 파일이 루트에 존재하는지 확인, (4) CNAME 파일이 잘못되지 않았는지 확인, (5) 배포 후 1-2분 대기 (GitHub CDN 캐시 업데이트 시간 필요).</p>
+<p><strong>Q5: CODEOWNERS 파일을 만들었는데 자동 리뷰어 할당이 안 됩니다.</strong></p>
+<p>A5: 다음을 점검하세요. (1) 파일 위치가 정확한지 확인 (<code>.github/CODEOWNERS</code>, 저장소 루트, 또는 <code>docs/</code> 중 하나), (2) 파일이 main 브랜치에 커밋되었는지 확인 (PR의 base 브랜치에 있어야 함), (3) 문법 오류 확인 (공백, 경로 등), (4) 지정된 사용자가 저장소 접근 권한이 있는지 확인 (읽기 권한 이상 필요), (5) Organization의 경우 팀 이름이 올바른지 확인 (<code>@org/team-name</code>).</p>
+<hr />
+<h2 id="_21">장 요약<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 GitHub의 프로젝트 관리 도구들을 배웠습니다. GitHub Projects로 작업을 시각적으로 관리하고, Milestones와 Releases로 릴리스 계획을 수립하며, Discussions로 커뮤니티와 소통하는 방법을 익혔습니다. GitHub Pages로 전문적인 문서 사이트를 만들고, CODEOWNERS와 자동화 워크플로우로 반복 작업을 줄이는 방법도 배웠습니다. 이제 프로젝트를 체계적으로 관리하고 팀 생산성을 높일 수 있습니다.</p>
+<h3 id="_22">핵심 키워드<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<p><code>GitHub Projects</code>, <code>Milestone</code>, <code>Release</code>, <code>Discussions</code>, <code>GitHub Pages</code>, <code>Wiki</code>, <code>CODEOWNERS</code>, <code>자동화</code>, <code>Stale bot</code>, <code>Release Notes</code>, <code>Jekyll</code></p>
+<h3 id="_23">다음 장 미리보기<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 Git과 GitHub의 보안 기능을 배웁니다. GPG/SSH로 커밋을 서명하고, Secrets를 안전하게 관리하며, Dependabot으로 의존성 취약점을 자동 탐지합니다. 또한 민감한 데이터를 히스토리에서 완전히 제거하고, Git LFS로 대용량 파일을 효율적으로 관리하는 방법을 배웁니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_08.html" class="nav-prev">&larr; GitHub Actions와 CI/CD</a><a href="index.html" class="nav-home">목차</a><a href="ch_10.html" class="nav-next">Git 보안과 관리 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01장: Git과 버전 관리 시작하기 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#ch_01_s01">버전 관리란 무엇인가 (ch_01_s01)</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#git-ch_01_s02">Git 설치와 환경 설정 (ch_01_s02)</a><ul>
+<li><a href="#_5">도입</a></li>
+<li><a href="#_6">핵심 개념 설명</a></li>
+<li><a href="#_8">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#git-ch_01_s03">첫 번째 Git 저장소 만들기 (ch_01_s03)</a><ul>
+<li><a href="#_9">도입</a></li>
+<li><a href="#_10">핵심 개념 설명</a></li>
+<li><a href="#_12">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#git-ch_01_s04">Git의 세 가지 영역 이해하기 (ch_01_s04)</a><ul>
+<li><a href="#_13">도입</a></li>
+<li><a href="#_14">핵심 개념 설명</a></li>
+<li><a href="#_16">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_17">장 요약</a><ul>
+<li><a href="#_18">핵심 키워드</a></li>
+<li><a href="#_19">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>01장: Git과 버전 관리 시작하기</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-입문">입문</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="git">Git과 버전 관리 시작하기<a class="headerlink" href="#git" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- 버전 관리의 필요성과 Git의 장점을 설명할 수 있다
+- 자신의 운영체제에 Git을 설치하고 초기 설정을 완료할 수 있다
+- git init으로 새 저장소를 생성하고 .git 디렉토리의 역할을 이해할 수 있다
+- Git의 세 가지 영역(Working Directory, Staging Area, Repository)의 관계를 설명할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="ch_01_s01">버전 관리란 무엇인가 (ch_01_s01)<a class="headerlink" href="#ch_01_s01" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>파일을 수정하다가 실수로 중요한 내용을 삭제한 경험이 있으신가요?
+'보고서_최종.docx', '보고서_최종_수정.docx', '보고서_진짜최종.docx'처럼 파일명으로 버전을 관리해 본 적이 있으신가요?
+이 절에서는 이러한 불편함을 해결하는 버전 관리 시스템의 개념과 필요성을 알아봅니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="version-control">버전 관리(Version Control)란<a class="headerlink" href="#version-control" title="Permanent link">&para;</a></h4>
+<p><strong>버전 관리(Version Control)</strong>는 파일의 변경 이력을 체계적으로 기록하고 관리하여, 이전 상태로 복원하거나 변경 내용을 추적할 수 있게 하는 시스템입니다.</p>
+<p>문서를 작성할 때 '보고서_최종.docx', '보고서_최종_수정.docx', '보고서_진짜최종.docx'처럼 파일을 복사하는 대신, 하나의 파일에 모든 변경 히스토리를 자동으로 기록하는 타임머신과 같습니다.</p>
+<p><strong>버전 관리가 필요한 이유</strong></p>
+<ol>
+<li><strong>실수 복구</strong>: 잘못된 수정을 이전 상태로 쉽게 되돌릴 수 있습니다.</li>
+<li><strong>변경 추적</strong>: 누가, 언제, 무엇을, 왜 변경했는지 모든 히스토리를 기록합니다.</li>
+<li><strong>협업 지원</strong>: 여러 사람이 동시에 작업해도 변경 사항을 안전하게 합칠 수 있습니다.</li>
+<li><strong>실험 안전성</strong>: 새로운 기능을 시도할 때 원본을 손상시키지 않고 실험할 수 있습니다.</li>
+</ol>
+<blockquote>
+<p><strong>팁</strong>: 버전 관리는 개발자만 사용하는 도구가 아닙니다. 문서, 디자인, 데이터 등 모든 종류의 파일 관리에 활용할 수 있습니다.</p>
+</blockquote>
+<h4 id="_3">버전 관리 시스템의 역사와 종류<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p>버전 관리 시스템은 크게 두 가지로 분류됩니다.</p>
+<p><strong>1. 중앙 집중식 VCS (예: SVN, CVS)</strong></p>
+<p>중앙 서버에만 전체 히스토리가 저장되고, 클라이언트는 최신 스냅샷만 가져옵니다.
+네트워크 연결이 필수이며, 서버 장애 시 작업이 불가능합니다.</p>
+<p><strong>2. 분산형 VCS (예: Git, Mercurial)</strong></p>
+<p>모든 클라이언트가 전체 히스토리를 포함한 완전한 저장소를 가집니다.
+오프라인 작업이 가능하며, 서버 장애에도 복구가 용이합니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart LR
+    subgraph centralized["중앙 집중식 VCS (SVN)"]
+        direction TB
+        C_Server["중앙 서버<br/>(저장소)"]
+        C_Client1["클라이언트 1<br/>(작업 복사본)"]
+        C_Client2["클라이언트 2<br/>(작업 복사본)"]
+        C_Client3["클라이언트 3<br/>(작업 복사본)"]
+
+        C_Server -.->|체크아웃| C_Client1
+        C_Server -.->|체크아웃| C_Client2
+        C_Server -.->|체크아웃| C_Client3
+        C_Client1 -->|커밋| C_Server
+        C_Client2 -->|커밋| C_Server
+        C_Client3 -->|커밋| C_Server
+
+        style C_Server fill:#fff3e0,stroke:#f57c00
+        style C_Client1 fill:#e1f5fe,stroke:#0288d1
+        style C_Client2 fill:#e1f5fe,stroke:#0288d1
+        style C_Client3 fill:#e1f5fe,stroke:#0288d1
+    end
+
+    subgraph distributed["분산형 VCS (Git)"]
+        direction TB
+        D_Remote["원격 저장소<br/>(전체 히스토리)"]
+        D_Local1["로컬 저장소 1<br/>(전체 히스토리)"]
+        D_Local2["로컬 저장소 2<br/>(전체 히스토리)"]
+        D_Local3["로컬 저장소 3<br/>(전체 히스토리)"]
+
+        D_Remote <-->|push/pull| D_Local1
+        D_Remote <-->|push/pull| D_Local2
+        D_Remote <-->|push/pull| D_Local3
+        D_Local1 <-.->|직접 교환 가능| D_Local2
+
+        style D_Remote fill:#e8f5e9,stroke:#388e3c
+        style D_Local1 fill:#f3e5f5,stroke:#7b1fa2
+        style D_Local2 fill:#f3e5f5,stroke:#7b1fa2
+        style D_Local3 fill:#f3e5f5,stroke:#7b1fa2
+    end
+
+    centralized ~~~ distributed
+
+</div>
+<figcaption>중앙 집중식 VCS와 분산형 VCS 비교</figcaption>
+</figure>
+
+<h4 id="vs">중앙 집중식 vs 분산형 비교<a class="headerlink" href="#vs" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>중앙 집중식(SVN)</th>
+<th>분산형(Git)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>저장소 위치</td>
+<td>중앙 서버 1개</td>
+<td>모든 클라이언트에 완전한 복제본</td>
+</tr>
+<tr>
+<td>네트워크 의존성</td>
+<td>필수 (커밋 시 연결 필요)</td>
+<td>선택적 (오프라인 커밋 가능)</td>
+</tr>
+<tr>
+<td>속도</td>
+<td>느림 (서버 통신 필요)</td>
+<td>빠름 (로컬 작업)</td>
+</tr>
+<tr>
+<td>백업</td>
+<td>중앙 서버만 백업</td>
+<td>모든 클라이언트가 백업</td>
+</tr>
+<tr>
+<td>브랜치 비용</td>
+<td>높음 (디렉토리 복사)</td>
+<td>낮음 (포인터만 생성)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 현대 소프트웨어 개발에서는 분산형 버전 관리 시스템(특히 Git)이 사실상의 표준입니다. 브랜치 기반 협업과 빠른 속도가 주요 장점입니다.</p>
+</blockquote>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>버전 관리는 파일의 변경 이력을 체계적으로 기록하는 시스템입니다.</li>
+<li>실수 복구, 변경 추적, 협업 지원, 실험 안전성을 제공합니다.</li>
+<li>분산형 VCS(Git)는 중앙 집중식(SVN)보다 속도, 백업, 브랜치 면에서 우수합니다.</li>
+</ul>
+<hr />
+<h2 id="git-ch_01_s02">Git 설치와 환경 설정 (ch_01_s02)<a class="headerlink" href="#git-ch_01_s02" title="Permanent link">&para;</a></h2>
+<h3 id="_5">도입<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>Git을 사용하기 전에 먼저 컴퓨터에 설치하고 기본 설정을 완료해야 합니다.
+이 절에서는 Windows, macOS, Linux 각 운영체제별 설치 방법과 필수 초기 설정을 단계별로 안내합니다.</p>
+<h3 id="_6">핵심 개념 설명<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="windows-git-git-for-windows">Windows에서 Git 설치 (Git for Windows)<a class="headerlink" href="#windows-git-git-for-windows" title="Permanent link">&para;</a></h4>
+<p><strong>1단계: 설치 파일 다운로드</strong></p>
+<p><a href="https://git-scm.com/download/win">https://git-scm.com/download/win</a>에서 최신 버전을 다운로드합니다.</p>
+<p><strong>2단계: 설치 실행</strong></p>
+<p>설치 마법사에서 다음 옵션을 권장합니다.</p>
+<ul>
+<li><strong>에디터 선택</strong>: VS Code 또는 자신이 선호하는 에디터</li>
+<li><strong>PATH 환경 변수</strong>: "Git from the command line and also from 3rd-party software" 선택</li>
+<li><strong>줄바꿈 변환</strong>: "Checkout Windows-style, commit Unix-style line endings" (권장)</li>
+<li><strong>터미널 에뮬레이터</strong>: "Use Windows' default console window" 또는 "Use MinTTY"</li>
+</ul>
+<p><strong>3단계: 설치 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>--version
+<span class="c1"># 출력: git version 2.43.0</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: Windows에서는 CRLF(캐리지 리턴 + 라인 피드) 줄바꿈을 사용하지만, Git은 내부적으로 LF만 사용합니다. 설치 시 자동 변환 설정을 권장합니다.</p>
+</blockquote>
+<h4 id="macos-git-homebrew-xcode-cli">macOS에서 Git 설치 (Homebrew / Xcode CLI)<a class="headerlink" href="#macos-git-homebrew-xcode-cli" title="Permanent link">&para;</a></h4>
+<p><strong>방법 1: Homebrew 사용 (권장)</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>git
+</code></pre></div>
+
+<p><strong>방법 2: Xcode Command Line Tools</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>xcode-select<span class="w"> </span>--install
+</code></pre></div>
+
+<p>터미널에서 위 명령을 실행하면 설치 다이얼로그가 나타납니다.</p>
+<p><strong>설치 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>--version
+<span class="c1"># 출력: git version 2.43.0</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: Homebrew를 사용하면 최신 Git 버전을 쉽게 유지할 수 있습니다. Xcode CLI는 macOS에 기본 포함되지만 버전이 구식일 수 있습니다.</p>
+</blockquote>
+<h4 id="linux-git-aptyumdnf">Linux에서 Git 설치 (apt/yum/dnf)<a class="headerlink" href="#linux-git-aptyumdnf" title="Permanent link">&para;</a></h4>
+<p><strong>Debian/Ubuntu</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>update
+$<span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>git
+</code></pre></div>
+
+<p><strong>Fedora/RHEL/CentOS</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>git
+<span class="c1"># 또는</span>
+$<span class="w"> </span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>git
+</code></pre></div>
+
+<p><strong>설치 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>--version
+<span class="c1"># 출력: git version 2.43.0</span>
+</code></pre></div>
+
+<h4 id="_7">필수 초기 설정: 사용자 이름과 이메일<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p>Git은 모든 커밋에 작성자 정보를 기록합니다.
+처음 설치 후 반드시 사용자 이름과 이메일을 설정해야 합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name<span class="w"> </span><span class="s2">&quot;홍길동&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email<span class="w"> </span><span class="s2">&quot;hong@example.com&quot;</span>
+</code></pre></div>
+
+<p><strong>설정 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name
+<span class="c1"># 출력: 홍길동</span>
+
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email
+<span class="c1"># 출력: hong@example.com</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: <code>--global</code> 옵션은 현재 사용자의 모든 프로젝트에 적용됩니다. 특정 프로젝트에만 다른 설정을 적용하려면 프로젝트 디렉토리에서 <code>--global</code> 없이 실행합니다.</p>
+</blockquote>
+<h4 id="crlflf">에디터, 줄바꿈(CRLF/LF) 설정<a class="headerlink" href="#crlflf" title="Permanent link">&para;</a></h4>
+<p><strong>기본 에디터 설정</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># VS Code 사용 시</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.editor<span class="w"> </span><span class="s2">&quot;code --wait&quot;</span>
+
+<span class="c1"># Vim 사용 시</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.editor<span class="w"> </span><span class="s2">&quot;vim&quot;</span>
+
+<span class="c1"># nano 사용 시</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.editor<span class="w"> </span><span class="s2">&quot;nano&quot;</span>
+</code></pre></div>
+
+<p><strong>줄바꿈 설정</strong></p>
+<p>OS별 권장 설정입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Windows</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.autocrlf<span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># macOS/Linux</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>core.autocrlf<span class="w"> </span>input
+</code></pre></div>
+
+<p><strong>모든 설정 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--list
+<span class="c1"># 출력:</span>
+<span class="c1"># user.name=홍길동</span>
+<span class="c1"># user.email=hong@example.com</span>
+<span class="c1"># core.editor=code --wait</span>
+<span class="c1"># core.autocrlf=true</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 팀 협업 시 줄바꿈 설정이 통일되지 않으면 불필요한 diff가 발생합니다. 프로젝트에 <code>.gitattributes</code> 파일로 줄바꿈 규칙을 명시하는 것을 권장합니다.</p>
+</blockquote>
+<h3 id="_8">절 요약<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Windows는 Git for Windows, macOS는 Homebrew, Linux는 패키지 매니저로 설치합니다.</li>
+<li>설치 후 <code>git config --global</code>로 사용자 이름과 이메일을 반드시 설정해야 합니다.</li>
+<li>OS별 줄바꿈 차이(CRLF/LF)를 <code>core.autocrlf</code>로 설정하여 협업 문제를 방지합니다.</li>
+</ul>
+<hr />
+<h2 id="git-ch_01_s03">첫 번째 Git 저장소 만들기 (ch_01_s03)<a class="headerlink" href="#git-ch_01_s03" title="Permanent link">&para;</a></h2>
+<h3 id="_9">도입<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>Git 설치가 완료되었다면 이제 실제로 Git 저장소를 만들어 볼 차례입니다.
+이 절에서는 <code>git init</code> 명령어로 프로젝트를 Git 저장소로 초기화하고, <code>.git</code> 디렉토리의 구조를 살펴봅니다.</p>
+<h3 id="_10">핵심 개념 설명<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<h4 id="git-init">git init으로 저장소 초기화<a class="headerlink" href="#git-init" title="Permanent link">&para;</a></h4>
+<p><strong>저장소(Repository)</strong>는 프로젝트의 모든 파일과 변경 히스토리를 저장하는 공간으로, <code>.git</code> 디렉토리에 메타데이터와 객체 데이터베이스를 포함합니다.</p>
+<p>도서관의 서고와 같습니다. 서고에는 모든 책(파일)이 보관되어 있고, 카드 카탈로그(<code>.git</code>)에는 각 책의 위치, 저자, 입고 날짜 등의 정보가 기록되어 있습니다.</p>
+<p><strong>새 저장소 만들기</strong></p>
+<p>원하는 프로젝트 디렉토리에서 <code>git init</code> 명령을 실행합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>my-first-repo
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>my-first-repo
+$<span class="w"> </span>git<span class="w"> </span>init
+<span class="c1"># 출력: Initialized empty Git repository in /path/to/my-first-repo/.git/</span>
+</code></pre></div>
+
+<p><strong>현재 상태 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>ls<span class="w"> </span>-la
+<span class="c1"># 출력:</span>
+<span class="c1"># .</span>
+<span class="c1"># ..</span>
+<span class="c1"># .git/</span>
+</code></pre></div>
+
+<p>숨김 디렉토리 <code>.git</code>이 생성되었습니다.
+이 디렉토리가 Git 저장소의 핵심입니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart LR
+    subgraph before["git init 실행 전"]
+        direction TB
+        B_Root["my_project/"]
+        B_File1["README.md"]
+        B_File2["index.html"]
+        B_Folder["src/"]
+        B_File3["main.js"]
+
+        B_Root --> B_File1
+        B_Root --> B_File2
+        B_Root --> B_Folder
+        B_Folder --> B_File3
+
+        style B_Root fill:#e1f5fe,stroke:#0288d1
+        style B_File1 fill:#fff,stroke:#90caf9
+        style B_File2 fill:#fff,stroke:#90caf9
+        style B_Folder fill:#e1f5fe,stroke:#0288d1
+        style B_File3 fill:#fff,stroke:#90caf9
+    end
+
+    subgraph after["git init 실행 후"]
+        direction TB
+        A_Root["my_project/"]
+        A_File1["README.md"]
+        A_File2["index.html"]
+        A_Folder["src/"]
+        A_File3["main.js"]
+        A_Git[".git/<br/>(숨김 폴더)"]
+        A_Objects["objects/"]
+        A_Refs["refs/"]
+        A_HEAD["HEAD"]
+        A_Config["config"]
+
+        A_Root --> A_File1
+        A_Root --> A_File2
+        A_Root --> A_Folder
+        A_Folder --> A_File3
+        A_Root --> A_Git
+        A_Git --> A_Objects
+        A_Git --> A_Refs
+        A_Git --> A_HEAD
+        A_Git --> A_Config
+
+        style A_Root fill:#e1f5fe,stroke:#0288d1
+        style A_File1 fill:#fff,stroke:#90caf9
+        style A_File2 fill:#fff,stroke:#90caf9
+        style A_Folder fill:#e1f5fe,stroke:#0288d1
+        style A_File3 fill:#fff,stroke:#90caf9
+        style A_Git fill:#e8f5e9,stroke:#388e3c
+        style A_Objects fill:#fff3e0,stroke:#f57c00
+        style A_Refs fill:#fff3e0,stroke:#f57c00
+        style A_HEAD fill:#fff3e0,stroke:#f57c00
+        style A_Config fill:#fff3e0,stroke:#f57c00
+    end
+
+    before ==>|"$ git init"| after
+
+</div>
+<figcaption>git init 실행 전후의 디렉토리 구조</figcaption>
+</figure>
+
+<blockquote>
+<p><strong>팁</strong>: <code>git init</code>은 기존 프로젝트를 Git 저장소로 만들 수도 있습니다. 이미 파일이 있는 디렉토리에서 실행해도 문제없습니다.</p>
+</blockquote>
+<h4 id="git_1">.git 디렉토리 탐험하기<a class="headerlink" href="#git_1" title="Permanent link">&para;</a></h4>
+<p><code>.git</code> 디렉토리의 주요 구성 요소를 살펴봅니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>ls<span class="w"> </span>-la<span class="w"> </span>.git/
+<span class="c1"># 출력:</span>
+<span class="c1"># HEAD</span>
+<span class="c1"># config</span>
+<span class="c1"># description</span>
+<span class="c1"># hooks/</span>
+<span class="c1"># objects/</span>
+<span class="c1"># refs/</span>
+</code></pre></div>
+
+<p><strong>주요 항목 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HEAD</code></td>
+<td>현재 체크아웃된 브랜치(또는 커밋)를 가리키는 포인터</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>이 저장소의 설정 파일 (프로젝트별 설정)</td>
+</tr>
+<tr>
+<td><code>objects/</code></td>
+<td>모든 콘텐츠(커밋, 파일, 트리)를 저장하는 데이터베이스</td>
+</tr>
+<tr>
+<td><code>refs/</code></td>
+<td>브랜치와 태그의 포인터를 저장</td>
+</tr>
+<tr>
+<td><code>hooks/</code></td>
+<td>Git 이벤트에 반응하는 스크립트를 저장</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HEAD 파일 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>cat<span class="w"> </span>.git/HEAD
+<span class="c1"># 출력: ref: refs/heads/main</span>
+</code></pre></div>
+
+<p>현재 <code>main</code> 브랜치를 가리키고 있습니다.
+(아직 커밋이 없어 <code>refs/heads/main</code> 파일은 존재하지 않습니다.)</p>
+<blockquote>
+<p><strong>주의</strong>: <code>.git</code> 디렉토리를 직접 수정하지 마세요. Git 명령어를 통해서만 조작해야 저장소가 손상되지 않습니다.</p>
+</blockquote>
+<h4 id="_11">작업 디렉토리와 저장소의 관계<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
+<p><strong>작업 디렉토리(Working Directory)</strong>는 실제 파일이 존재하는 공간입니다.
+개발자가 직접 파일을 편집하는 곳입니다.</p>
+<p><strong>.git 디렉토리</strong>는 Git이 버전 관리에 필요한 모든 정보를 저장하는 숨겨진 공간입니다.</p>
+<div class="codehilite"><pre><span></span><code>my-first-repo/          ← 작업 디렉토리
+├── .git/               ← Git 저장소 (숨김)
+│   ├── HEAD
+│   ├── objects/
+│   └── refs/
+├── README.md           ← 실제 프로젝트 파일
+└── main.py
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: <code>.git</code> 디렉토리만 삭제하면 일반 디렉토리가 되고 Git 히스토리는 모두 사라집니다. 백업 시 <code>.git</code> 디렉토리를 포함해야 합니다.</p>
+</blockquote>
+<h3 id="_12">절 요약<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>git init</code> 명령으로 디렉토리를 Git 저장소로 초기화합니다.</li>
+<li><code>.git</code> 디렉토리에 모든 버전 관리 정보가 저장됩니다.</li>
+<li>작업 디렉토리는 실제 파일이 있는 곳, <code>.git</code>은 Git의 데이터베이스입니다.</li>
+</ul>
+<hr />
+<h2 id="git-ch_01_s04">Git의 세 가지 영역 이해하기 (ch_01_s04)<a class="headerlink" href="#git-ch_01_s04" title="Permanent link">&para;</a></h2>
+<h3 id="_13">도입<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>Git을 효과적으로 사용하려면 파일이 어떤 상태에 있는지, 어떤 경로로 저장되는지 이해해야 합니다.
+이 절에서는 Git의 핵심 개념인 세 가지 영역(작업 디렉토리, 스테이징 영역, 저장소)의 관계와 파일 흐름을 알아봅니다.</p>
+<h3 id="_14">핵심 개념 설명<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<h4 id="working-directory">작업 디렉토리(Working Directory): 실제 파일이 존재하는 곳<a class="headerlink" href="#working-directory" title="Permanent link">&para;</a></h4>
+<p><strong>작업 디렉토리(Working Directory)</strong>는 프로젝트의 특정 버전을 체크아웃하여 실제 파일로 펼쳐 놓은 공간입니다.</p>
+<p>개발자가 직접 파일을 생성, 수정, 삭제하는 곳입니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;# My First Project&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>README.md
+$<span class="w"> </span>ls
+<span class="c1"># 출력: README.md</span>
+</code></pre></div>
+
+<p>현재 <code>README.md</code> 파일은 작업 디렉토리에만 존재하고, Git은 아직 이 파일을 추적하지 않습니다.</p>
+<h4 id="staging-area-index">스테이징 영역(Staging Area / Index): 커밋 준비 공간<a class="headerlink" href="#staging-area-index" title="Permanent link">&para;</a></h4>
+<p><strong>스테이징 영역(Staging Area)</strong>은 커밋에 포함시킬 변경 사항을 미리 선별하여 준비하는 중간 영역으로, 인덱스(Index)라고도 불립니다.</p>
+<p>장을 보고 돌아와서 냉장고(저장소)에 넣기 전에 식탁(스테이징 영역)에 올려놓고 무엇을 냉장고에 넣을지 정리하는 과정과 같습니다.</p>
+<p><strong>파일을 스테이징 영역에 추가</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+</code></pre></div>
+
+<p>이제 <code>README.md</code>는 스테이징 영역에 추가되었습니다.
+다음 커밋에 포함될 준비가 완료되었습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 스테이징 영역이 불필요한 단계라고 생각할 수 있지만, 여러 파일을 수정한 후 관련된 변경만 골라서 커밋할 수 있게 해주는 핵심 기능입니다.</p>
+</blockquote>
+<h4 id="git_2">저장소(.git): 커밋 히스토리 저장소<a class="headerlink" href="#git_2" title="Permanent link">&para;</a></h4>
+<p><strong>저장소(Repository)</strong>는 스테이징 영역의 스냅샷을 영구적으로 저장하는 공간입니다.
+<code>.git</code> 디렉토리에 모든 커밋 히스토리가 저장됩니다.</p>
+<p><strong>스테이징된 파일을 커밋</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add README file&quot;</span>
+<span class="c1"># 출력:</span>
+<span class="c1"># [main (root-commit) a1b2c3d] Add README file</span>
+<span class="c1">#  1 file changed, 1 insertion(+)</span>
+<span class="c1">#  create mode 100644 README.md</span>
+</code></pre></div>
+
+<p>이제 <code>README.md</code>의 현재 상태가 저장소에 영구적으로 기록되었습니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart LR
+    WD["작업 디렉토리<br/>(Working Directory)<br/><br/>실제 파일이<br/>존재하는 공간"]
+    SA["스테이징 영역<br/>(Staging Area)<br/><br/>커밋 준비 영역<br/>(Index)"]
+    REPO["저장소<br/>(Repository)<br/><br/>커밋 히스토리<br/>(.git 디렉토리)"]
+
+    WD -->|"git add<br/>(파일 스테이징)"| SA
+    SA -->|"git commit<br/>(커밋 생성)"| REPO
+    REPO -.->|"git checkout<br/>(특정 커밋으로 이동)"| WD
+    SA -.->|"git restore --staged<br/>(스테이징 취소)"| WD
+
+    style WD fill:#e1f5fe,stroke:#0288d1,stroke-width:3px
+    style SA fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style REPO fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+
+</div>
+<figcaption>Git의 세 가지 영역과 파일 흐름</figcaption>
+</figure>
+
+<h4 id="_15">세 영역 간 파일 흐름 실습<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h4>
+<p>세 영역 간 파일 이동을 실습으로 확인합니다.</p>
+<p><strong>1단계: 파일 수정 (작업 디렉토리)</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello Git!&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>README.md
+</code></pre></div>
+
+<p><strong>2단계: 상태 확인</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>status
+<span class="c1"># 출력:</span>
+<span class="c1"># On branch main</span>
+<span class="c1"># Changes not staged for commit:</span>
+<span class="c1">#   modified:   README.md</span>
+</code></pre></div>
+
+<p>수정된 파일이 작업 디렉토리에만 있고, 아직 스테이징되지 않았습니다.</p>
+<p><strong>3단계: 스테이징 (작업 디렉토리 → 스테이징 영역)</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>README.md
+$<span class="w"> </span>git<span class="w"> </span>status
+<span class="c1"># 출력:</span>
+<span class="c1"># On branch main</span>
+<span class="c1"># Changes to be committed:</span>
+<span class="c1">#   modified:   README.md</span>
+</code></pre></div>
+
+<p><strong>4단계: 커밋 (스테이징 영역 → 저장소)</strong></p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add greeting message&quot;</span>
+<span class="c1"># 출력:</span>
+<span class="c1"># [main b2c3d4e] Add greeting message</span>
+<span class="c1">#  1 file changed, 1 insertion(+)</span>
+</code></pre></div>
+
+<p><strong>전체 흐름 요약</strong></p>
+<div class="codehilite"><pre><span></span><code>[작업 디렉토리]  →  git add  →  [스테이징 영역]  →  git commit  →  [저장소]
+   파일 편집                         커밋 준비                      영구 저장
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 논리적으로 관련된 변경만 묶어서 하나의 커밋으로 만드세요. 스테이징 영역을 활용하면 여러 파일을 수정해도 관련된 변경만 선택하여 커밋할 수 있습니다.</p>
+</blockquote>
+<h3 id="_16">절 요약<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li>작업 디렉토리는 파일을 편집하는 실제 공간입니다.</li>
+<li>스테이징 영역은 커밋에 포함할 변경을 선별하는 준비 공간입니다.</li>
+<li>저장소는 커밋으로 영구 저장된 히스토리를 보관합니다.</li>
+<li><code>git add</code>로 스테이징, <code>git commit</code>으로 저장소에 기록합니다.</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: Git과 GitHub는 같은 것인가요?</strong></p>
+<p>아닙니다. Git은 로컬 컴퓨터에서 실행되는 버전 관리 도구이고, GitHub는 Git 저장소를 호스팅하는 웹 서비스입니다. Git은 1명이 사용해도 유용하지만, GitHub는 협업을 위한 플랫폼입니다. GitLab, Bitbucket 등 다른 호스팅 서비스도 있습니다.</p>
+<p><strong>Q2: .git 디렉토리가 보이지 않아요.</strong></p>
+<p><code>.git</code>은 숨김 디렉토리입니다. Windows 탐색기에서는 "보기 → 숨김 항목"을 체크하고, macOS Finder에서는 <code>Cmd + Shift + .</code>을 누르면 보입니다. 터미널에서는 <code>ls -la</code> 명령으로 확인할 수 있습니다.</p>
+<p><strong>Q3: git init을 실수로 잘못된 디렉토리에서 실행했어요. 어떻게 취소하나요?</strong></p>
+<p><code>.git</code> 디렉토리를 삭제하면 됩니다. <code>rm -rf .git</code> (Linux/macOS) 또는 탐색기에서 <code>.git</code> 폴더를 삭제하세요. Git 저장소 초기화가 완전히 취소됩니다. 단, 이미 커밋한 히스토리도 모두 사라지므로 주의하세요.</p>
+<p><strong>Q4: 스테이징 영역이 왜 필요한가요? 바로 커밋하면 안 되나요?</strong></p>
+<p>스테이징 영역이 있으면 여러 파일을 수정한 후 관련된 변경만 선택하여 논리적으로 의미 있는 커밋을 만들 수 있습니다. 예를 들어 버그 수정과 새 기능을 동시에 작업했다면, 각각 별도의 커밋으로 분리할 수 있습니다. 이는 나중에 히스토리를 검토할 때 매우 유용합니다.</p>
+<p><strong>Q5: 회사 이메일과 개인 이메일을 프로젝트별로 다르게 설정할 수 있나요?</strong></p>
+<p>가능합니다. <code>--global</code> 없이 프로젝트 디렉토리에서 <code>git config user.email "work@company.com"</code>을 실행하면 해당 프로젝트에만 적용됩니다. 설정 우선순위는 로컬(프로젝트) &gt; 전역(--global) &gt; 시스템(--system) 순입니다.</p>
+<hr />
+<h2 id="_17">장 요약<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 Git과 버전 관리의 기초를 배웠습니다.
+버전 관리 시스템이 필요한 이유와 중앙 집중식과 분산형의 차이를 이해했습니다.
+운영체제별로 Git을 설치하고 필수 설정(사용자 이름, 이메일, 줄바꿈)을 완료했습니다.
+<code>git init</code>으로 첫 저장소를 만들고, <code>.git</code> 디렉토리의 역할을 살펴보았습니다.
+마지막으로 Git의 세 가지 핵심 영역(작업 디렉토리, 스테이징 영역, 저장소)과 파일 흐름을 실습했습니다.</p>
+<h3 id="_18">핵심 키워드<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<p><code>버전 관리</code>, <code>Git</code>, <code>분산형 VCS</code>, <code>git init</code>, <code>git config</code>, <code>.git 디렉토리</code>, <code>작업 디렉토리</code>, <code>스테이징 영역</code>, <code>저장소</code>, <code>git add</code>, <code>git commit</code></p>
+<h3 id="_19">다음 장 미리보기<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 Git의 기본 명령어를 본격적으로 배웁니다.
+<code>git add</code>, <code>git commit</code>으로 변경 사항을 기록하고, <code>git status</code>, <code>git log</code>, <code>git diff</code>로 상태를 확인하며, <code>git restore</code>, <code>git reset</code>으로 실수를 되돌리는 방법을 익힙니다.
+또한 <code>.gitignore</code>로 불필요한 파일을 제외하고, Conventional Commits 규약에 따라 의미 있는 커밋 메시지를 작성하는 법을 학습합니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="index.html" class="nav-home">목차</a><a href="ch_02.html" class="nav-next">Git 기본 명령어 마스터하기 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

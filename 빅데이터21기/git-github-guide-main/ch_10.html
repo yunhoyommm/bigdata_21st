@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10장: Git 보안과 관리 - Git & GitHub 올인원 가이드: 버전 관리부터 팀 협업까지</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:"default", securityLevel:"loose"});</script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#_1">커밋 서명과 검증</a><ul>
+<li><a href="#_2">도입</a></li>
+<li><a href="#_3">핵심 개념 설명</a></li>
+<li><a href="#_6">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#secret">Secret 관리와 민감 데이터 보호</a><ul>
+<li><a href="#_7">도입</a></li>
+<li><a href="#_8">핵심 개념 설명</a></li>
+<li><a href="#_9">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#dependabot">Dependabot과 의존성 보안</a><ul>
+<li><a href="#_10">도입</a></li>
+<li><a href="#_11">핵심 개념 설명</a></li>
+<li><a href="#_12">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_13">민감 데이터 제거와 히스토리 정리</a><ul>
+<li><a href="#_14">도입</a></li>
+<li><a href="#_15">핵심 개념 설명</a></li>
+<li><a href="#_18">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#git-lfs">Git LFS와 대용량 파일 관리</a><ul>
+<li><a href="#_19">도입</a></li>
+<li><a href="#_20">핵심 개념 설명</a></li>
+<li><a href="#_21">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_22">장 요약</a><ul>
+<li><a href="#_23">핵심 키워드</a></li>
+<li><a href="#_24">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>10장: Git 보안과 관리</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-중급">중급</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="git">Git 보안과 관리<a class="headerlink" href="#git" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- GPG/SSH 키로 커밋을 서명하고 검증할 수 있다
+- GitHub Secrets와 Secret Scanning으로 민감 데이터를 안전하게 관리할 수 있다
+- Dependabot을 설정하여 의존성 보안을 자동화할 수 있다
+- git filter-repo로 히스토리에서 민감 데이터를 완전히 제거할 수 있다
+- Git LFS를 설정하여 대용량 파일을 효율적으로 관리할 수 있다</p>
+</blockquote>
+<hr />
+<h2 id="_1">커밋 서명과 검증<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="_2">도입<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>GitHub에서 커밋을 보면 작성자 이름과 이메일이 표시됩니다. 하지만 이 정보는 쉽게 위조할 수 있습니다. <code>git config</code>로 아무 이름이나 설정할 수 있기 때문입니다. 커밋의 작성자를 암호학적으로 증명하려면 커밋 서명(Commit Signing)이 필요합니다.</p>
+<h3 id="_3">핵심 개념 설명<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h4 id="_4">왜 커밋 서명이 필요한가: 신뢰의 문제<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<p><strong>커밋 서명</strong>은 커밋이 정말 본인이 작성한 것임을 암호학적으로 증명하는 기능입니다. GPG 또는 SSH 키로 서명하면 GitHub에서 "Verified" 배지를 표시합니다.</p>
+<p>공증 서류와 같습니다. 일반 서명은 누구나 흉내 낼 수 있지만, 공증(GPG 서명)은 제3자가 신원을 보증하므로 위조가 어렵습니다.</p>
+<p><strong>위조 가능한 커밋 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 누구나 다른 사람의 이름으로 커밋 가능</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>user.name<span class="w"> </span><span class="s2">&quot;Linus Torvalds&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>user.email<span class="w"> </span><span class="s2">&quot;torvalds@linux-foundation.org&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add backdoor&quot;</span><span class="w">  </span><span class="c1"># 이 커밋은 Linus가 한 것처럼 보임</span>
+</code></pre></div>
+
+<p>이런 위조를 막기 위해 커밋 서명이 필요합니다.</p>
+<p><strong>커밋 서명이 중요한 시나리오</strong>:
+- 오픈소스 프로젝트의 보안 패치
+- 금융, 의료 등 민감한 산업의 코드
+- 규정 준수(Compliance) 요구사항
+- 공급망 보안(Supply Chain Security)</p>
+<h4 id="gpg-github">GPG 키 생성과 GitHub 등록<a class="headerlink" href="#gpg-github" title="Permanent link">&para;</a></h4>
+<p><strong>GPG(GNU Privacy Guard)</strong>는 암호화와 전자 서명을 위한 오픈소스 도구입니다.</p>
+<p><strong>1. GPG 설치 확인</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># GPG 버전 확인</span>
+$<span class="w"> </span>gpg<span class="w"> </span>--version
+gpg<span class="w"> </span><span class="o">(</span>GnuPG<span class="o">)</span><span class="w"> </span><span class="m">2</span>.4.0
+</code></pre></div>
+
+<p>Windows: <a href="https://gpg4win.org/">gpg4win</a> 설치
+macOS: <code>brew install gnupg</code>
+Linux: 대부분 기본 설치됨</p>
+<p><strong>2. GPG 키 생성</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gpg<span class="w"> </span>--full-generate-key
+</code></pre></div>
+
+<p>대화형 프롬프트:</p>
+<div class="codehilite"><pre><span></span><code>키 종류를 선택하세요:
+(1) RSA and RSA (기본값)
+→ 1 입력 또는 Enter
+
+키 크기를 입력하세요 (1024-4096):
+→ 4096 입력 (최대 보안)
+
+키 유효 기간:
+→ 2y (2년) 또는 0 (무기한)
+
+실명:
+→ Kim Developer
+
+이메일:
+→ kim@example.com (GitHub 이메일과 동일해야 함)
+
+코멘트:
+→ (비워두기 또는 &quot;GitHub signing key&quot;)
+
+비밀번호:
+→ 강력한 비밀번호 입력 (커밋 서명 시마다 필요)
+</code></pre></div>
+
+<p><strong>3. GPG 키 ID 확인</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gpg<span class="w"> </span>--list-secret-keys<span class="w"> </span>--keyid-format<span class="o">=</span>long
+
+/home/user/.gnupg/secring.gpg
+------------------------------------
+sec<span class="w">   </span>rsa4096/3AA5C34371567BD2<span class="w"> </span><span class="m">2025</span>-01-01<span class="w"> </span><span class="o">[</span>SC<span class="o">]</span><span class="w"> </span><span class="o">[</span>expires:<span class="w"> </span><span class="m">2027</span>-01-01<span class="o">]</span>
+<span class="w">      </span>0123456789ABCDEF0123456789ABCDEF01234567
+uid<span class="w">                 </span><span class="o">[</span>ultimate<span class="o">]</span><span class="w"> </span>Kim<span class="w"> </span>Developer<span class="w"> </span>&lt;kim@example.com&gt;
+ssb<span class="w">   </span>rsa4096/42B317FD4BA89E7A<span class="w"> </span><span class="m">2025</span>-01-01<span class="w"> </span><span class="o">[</span>E<span class="o">]</span><span class="w"> </span><span class="o">[</span>expires:<span class="w"> </span><span class="m">2027</span>-01-01<span class="o">]</span>
+</code></pre></div>
+
+<p>키 ID는 <code>3AA5C34371567BD2</code> 부분입니다.</p>
+<p><strong>4. 공개키 내보내기</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gpg<span class="w"> </span>--armor<span class="w"> </span>--export<span class="w"> </span>3AA5C34371567BD2
+-----BEGIN<span class="w"> </span>PGP<span class="w"> </span>PUBLIC<span class="w"> </span>KEY<span class="w"> </span>BLOCK-----
+
+mQINBGX...
+<span class="o">(</span>긴<span class="w"> </span>문자열<span class="o">)</span>
+...qwerty
+-----END<span class="w"> </span>PGP<span class="w"> </span>PUBLIC<span class="w"> </span>KEY<span class="w"> </span>BLOCK-----
+</code></pre></div>
+
+<p>이 내용을 복사합니다.</p>
+<p><strong>5. GitHub에 공개키 등록</strong>:</p>
+<ol>
+<li>GitHub → Settings → SSH and GPG keys → New GPG key</li>
+<li>복사한 공개키 붙여넣기</li>
+<li>Add GPG key</li>
+</ol>
+<h4 id="git-config-commitgpgsign">커밋 서명 설정: git config commit.gpgsign<a class="headerlink" href="#git-config-commitgpgsign" title="Permanent link">&para;</a></h4>
+<p><strong>Git에 GPG 키 설정</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 전역 설정 (모든 저장소에 적용)</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.signingkey<span class="w"> </span>3AA5C34371567BD2
+
+<span class="c1"># 자동 서명 활성화</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>commit.gpgsign<span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Tag 서명도 자동화</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>tag.gpgsign<span class="w"> </span><span class="nb">true</span>
+</code></pre></div>
+
+<p><strong>서명된 커밋 만들기</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 자동 서명 활성화 후</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 인증 기능 추가&quot;</span>
+
+<span class="c1"># 수동 서명 (자동 서명 비활성화 시)</span>
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-S<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: 사용자 인증 기능 추가&quot;</span>
+</code></pre></div>
+
+<p>GPG 비밀번호를 입력하면 커밋이 서명됩니다.</p>
+<p><strong>서명 확인</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--show-signature<span class="w"> </span>-1
+
+commit<span class="w"> </span>7f3a9e8c1d2b4f5e<span class="w"> </span><span class="o">(</span>HEAD<span class="w"> </span>-&gt;<span class="w"> </span>main<span class="o">)</span>
+gpg:<span class="w"> </span>Signature<span class="w"> </span>made<span class="w"> </span>Mon<span class="w"> </span>Jan<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">14</span>:30:25<span class="w"> </span><span class="m">2025</span><span class="w"> </span>KST
+gpg:<span class="w">                </span>using<span class="w"> </span>RSA<span class="w"> </span>key<span class="w"> </span>3AA5C34371567BD2
+gpg:<span class="w"> </span>Good<span class="w"> </span>signature<span class="w"> </span>from<span class="w"> </span><span class="s2">&quot;Kim Developer &lt;kim@example.com&gt;&quot;</span><span class="w"> </span><span class="o">[</span>ultimate<span class="o">]</span>
+Author:<span class="w"> </span>Kim<span class="w"> </span>Developer<span class="w"> </span>&lt;kim@example.com&gt;
+Date:<span class="w">   </span>Mon<span class="w"> </span>Jan<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">14</span>:30:25<span class="w"> </span><span class="m">2025</span><span class="w"> </span>+0900
+
+<span class="w">    </span>feat:<span class="w"> </span>사용자<span class="w"> </span>인증<span class="w"> </span>기능<span class="w"> </span>추가
+</code></pre></div>
+
+<p>GitHub에서는 이 커밋에 "Verified" 배지가 표시됩니다.</p>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart LR
+    subgraph Developer["개발자 환경"]
+        Dev["개발자"]
+        PrivateKey["개인키<br/>(Private Key)<br/>~/.gnupg/ 또는<br/>~/.ssh/"]
+        Commit["git commit -S<br/>(서명된 커밋)"]
+
+        Dev --> PrivateKey
+        PrivateKey -->|"서명"| Commit
+    end
+
+    Push["git push"]
+
+    subgraph GitHub["GitHub 서버"]
+        Receive["커밋 수신"]
+        PublicKey["공개키<br/>(Public Key)<br/>GitHub에 등록됨"]
+        Verify["서명 검증"]
+        Result{{"검증<br/>성공?"}}
+        Badge["Verified 배지 표시"]
+
+        Receive --> PublicKey
+        PublicKey --> Verify
+        Verify --> Result
+        Result -->|"예"| Badge
+        Result -.->|"아니오"| Unverified["Unverified<br/>경고 표시"]
+    end
+
+    Commit --> Push
+    Push --> Receive
+
+    Note["암호학적 신원 증명<br/>위조 불가능"]
+
+    Badge --> Note
+
+    style Developer fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style Dev fill:#e1f5fe,stroke:#0288d1
+    style PrivateKey fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style Commit fill:#fff3e0,stroke:#f57c00
+    style Push fill:#f3e5f5,stroke:#7b1fa2
+    style GitHub fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style Receive fill:#e8f5e9
+    style PublicKey fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style Verify fill:#fff3e0
+    style Result fill:#f3e5f5
+    style Badge fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+    style Unverified fill:#fce4ec,stroke:#c2185b
+    style Note fill:#fff3e0
+
+</div>
+<figcaption>커밋 서명과 검증 과정</figcaption>
+</figure>
+
+<blockquote>
+<p><strong>팁</strong>: GPG 비밀번호를 매번 입력하기 번거롭다면 gpg-agent를 설정하여 일정 시간 캐시할 수 있습니다.</p>
+</blockquote>
+<p><strong>gpg-agent 캐시 설정</strong>:</p>
+<p><code>~/.gnupg/gpg-agent.conf</code>:</p>
+<div class="codehilite"><pre><span></span><code>default-cache-ttl 3600
+max-cache-ttl 7200
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>gpg-connect-agent<span class="w"> </span>reloadagent<span class="w"> </span>/bye
+</code></pre></div>
+
+<h4 id="_5">서명된 커밋과 태그 만들기<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p><strong>서명된 Tag</strong>:</p>
+<p>Tag도 커밋처럼 서명할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 서명된 Annotated Tag 생성</span>
+$<span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>-s<span class="w"> </span>v1.0.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release v1.0.0&quot;</span>
+
+<span class="c1"># Tag 서명 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>tag<span class="w"> </span>-v<span class="w"> </span>v1.0.0
+gpg:<span class="w"> </span>Signature<span class="w"> </span>made<span class="w"> </span>...
+gpg:<span class="w"> </span>Good<span class="w"> </span>signature<span class="w"> </span>from<span class="w"> </span><span class="s2">&quot;Kim Developer &lt;kim@example.com&gt;&quot;</span><span class="w"> </span><span class="o">[</span>ultimate<span class="o">]</span>
+</code></pre></div>
+
+<p>GitHub Release를 만들 때 서명된 Tag를 사용하면 릴리스의 신뢰성이 높아집니다.</p>
+<h4 id="ssh-git-234">SSH 키를 이용한 커밋 서명 (Git 2.34+)<a class="headerlink" href="#ssh-git-234" title="Permanent link">&para;</a></h4>
+<p>Git 2.34부터는 SSH 키로도 커밋을 서명할 수 있습니다. GPG보다 설정이 간단합니다.</p>
+<p><strong>1. SSH 키 생성</strong> (이미 있다면 생략):</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>ssh-keygen<span class="w"> </span>-t<span class="w"> </span>ed25519<span class="w"> </span>-C<span class="w"> </span><span class="s2">&quot;kim@example.com&quot;</span>
+</code></pre></div>
+
+<p><strong>2. 공개키 GitHub에 등록</strong>:</p>
+<p>Settings → SSH and GPG keys → New SSH key → Signing Key 타입 선택</p>
+<p><code>~/.ssh/id_ed25519.pub</code> 내용 복사하여 등록</p>
+<p><strong>3. Git 설정</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># SSH 서명 활성화</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>gpg.format<span class="w"> </span>ssh
+
+<span class="c1"># SSH 공개키 지정</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.signingkey<span class="w"> </span>~/.ssh/id_ed25519.pub
+
+<span class="c1"># 자동 서명</span>
+$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>commit.gpgsign<span class="w"> </span><span class="nb">true</span>
+</code></pre></div>
+
+<p><strong>4. 허용된 서명자 설정</strong>:</p>
+<p><code>.git/allowed_signers</code> (또는 전역):</p>
+<div class="codehilite"><pre><span></span><code>kim@example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB...
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>gpg.ssh.allowedSignersFile<span class="w"> </span>~/.ssh/allowed_signers
+</code></pre></div>
+
+<p>이제 커밋하면 SSH 키로 자동 서명됩니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: SSH 키 서명은 GPG보다 설정이 간단하지만, GPG는 더 광범위하게 지원됩니다. 팀 정책에 따라 선택하세요.</p>
+</blockquote>
+<h3 id="_6">절 요약<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>커밋 서명은 커밋 작성자의 신원을 암호학적으로 증명합니다</li>
+<li>GPG 키를 생성하고 GitHub에 등록하여 "Verified" 배지를 받을 수 있습니다</li>
+<li><code>git config commit.gpgsign true</code>로 자동 서명을 활성화합니다</li>
+<li>Git 2.34+에서는 SSH 키로도 커밋을 서명할 수 있습니다</li>
+<li>서명된 Tag는 릴리스의 신뢰성을 보장합니다</li>
+</ul>
+<hr />
+<h2 id="secret">Secret 관리와 민감 데이터 보호<a class="headerlink" href="#secret" title="Permanent link">&para;</a></h2>
+<h3 id="_7">도입<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>소프트웨어 개발 중 API 키, 데이터베이스 비밀번호, 인증 토큰 등 민감한 정보를 다루게 됩니다. 이런 비밀(Secrets)을 실수로 Git에 커밋하면 공개 저장소에 노출되어 심각한 보안 사고로 이어질 수 있습니다. GitHub는 여러 계층의 보안 기능을 제공하여 이를 방지합니다.</p>
+<h3 id="_8">핵심 개념 설명<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<h4 id="api">절대 커밋하면 안 되는 것들: API 키, 비밀번호, 토큰<a class="headerlink" href="#api" title="Permanent link">&para;</a></h4>
+<p><strong>커밋하면 안 되는 민감 데이터</strong>:</p>
+<ol>
+<li><strong>인증 정보</strong>:</li>
+<li>API 키 (AWS, Google Cloud, OpenAI 등)</li>
+<li>OAuth 토큰</li>
+<li>데이터베이스 비밀번호</li>
+<li>
+<p>SSH 개인키</p>
+</li>
+<li>
+<p><strong>설정 파일</strong>:</p>
+</li>
+<li><code>.env</code> (환경 변수)</li>
+<li><code>secrets.json</code></li>
+<li><code>credentials.yaml</code></li>
+<li>
+<p><code>config/production.yml</code></p>
+</li>
+<li>
+<p><strong>인증서와 키</strong>:</p>
+</li>
+<li>SSL/TLS 개인키 (<code>.key</code>, <code>.pem</code>)</li>
+<li>
+<p>서명 인증서</p>
+</li>
+<li>
+<p><strong>기타 민감 정보</strong>:</p>
+</li>
+<li>내부 IP 주소, 호스트명</li>
+<li>개인 식별 정보 (PII)</li>
+<li>라이선스 키</li>
+</ol>
+<p><strong>실수로 커밋 시 발생 가능한 문제</strong>:
+- 무단 API 사용 및 과금
+- 데이터베이스 침해
+- 서비스 거부 공격(DDoS)
+- 데이터 유출</p>
+<blockquote>
+<p><strong>주의</strong>: 한 번이라도 Git 히스토리에 커밋되면, 나중에 삭제해도 히스토리에 남습니다. 완전히 제거하려면 히스토리 재작성이 필요합니다.</p>
+</blockquote>
+<h4 id="gitignore-env">.gitignore와 .env 파일 관리<a class="headerlink" href="#gitignore-env" title="Permanent link">&para;</a></h4>
+<p><strong>.gitignore 설정</strong>:</p>
+<p>프로젝트 시작 시 <code>.gitignore</code>에 민감한 파일 패턴을 추가하세요.</p>
+<div class="codehilite"><pre><span></span><code># 환경 변수
+.env
+.env.local
+.env.production
+
+# 설정 파일
+config/secrets.yml
+credentials.json
+secrets.json
+
+# 인증서
+*.pem
+*.key
+*.crt
+*.p12
+
+# 클라우드 제공자
+.aws/credentials
+.gcp/keyfile.json
+
+# IDE 설정 (민감 정보 포함 가능)
+.vscode/settings.json
+.idea/workspace.xml
+</code></pre></div>
+
+<p><strong>환경 변수 사용 패턴</strong>:</p>
+<p>민감한 정보는 코드에 직접 작성하지 말고 환경 변수로 분리합니다.</p>
+<p><strong>나쁜 예</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># ❌ 코드에 API 키 하드코딩</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;sk-1234567890abcdef&quot;</span>
+</code></pre></div>
+
+<p><strong>좋은 예</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># ✅ 환경 변수 사용</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENAI_API_KEY&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><code>.env</code> 파일:</p>
+<div class="codehilite"><pre><span></span><code>OPENAI_API_KEY=sk-1234567890abcdef
+DATABASE_URL=postgresql://user:password@localhost/mydb
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+</code></pre></div>
+
+<p><code>.env.example</code> (저장소에 커밋):</p>
+<div class="codehilite"><pre><span></span><code>OPENAI_API_KEY=your_api_key_here
+DATABASE_URL=postgresql://user:password@localhost/mydb
+AWS_ACCESS_KEY_ID=your_access_key_here
+</code></pre></div>
+
+<p>팀원은 <code>.env.example</code>을 <code>.env</code>로 복사하여 자신의 값을 입력합니다.</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+<span class="c1"># .env 파일 편집하여 실제 키 입력</span>
+</code></pre></div>
+
+<h4 id="github-secrets">GitHub Secrets: 안전한 비밀 저장<a class="headerlink" href="#github-secrets" title="Permanent link">&para;</a></h4>
+<p><strong>GitHub Secrets</strong>는 GitHub Actions 워크플로우에서 사용할 비밀을 안전하게 저장하는 기능입니다. 암호화되어 저장되며, 로그에도 마스킹됩니다.</p>
+<p><strong>Repository Secret 추가</strong>:</p>
+<ol>
+<li>저장소 → Settings → Secrets and variables → Actions</li>
+<li>New repository secret</li>
+<li>Name: <code>OPENAI_API_KEY</code></li>
+<li>Secret: <code>sk-1234567890abcdef</code></li>
+<li>Add secret</li>
+</ol>
+<p><strong>워크플로우에서 사용</strong>:</p>
+<p><code>.github/workflows/deploy.yml</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deploy</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">deploy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deploy to Production</span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">OPENAI_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.OPENAI_API_KEY }}</span>
+<span class="w">          </span><span class="nt">DATABASE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.DATABASE_URL }}</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">echo &quot;Deploying with API key...&quot;</span>
+<span class="w">          </span><span class="no"># 배포 스크립트 실행</span>
+</code></pre></div>
+
+<p>Secret은 <code>${{ secrets.SECRET_NAME }}</code> 형식으로 접근합니다.</p>
+<p><strong>Secret 보안 기능</strong>:
+- AES-256 암호화 저장
+- 로그에서 자동 마스킹 (<code>***</code>)
+- Pull Request에서는 기본적으로 접근 불가 (설정 필요)</p>
+<p><strong>Secret 범위</strong>:
+- <strong>Repository secrets</strong>: 해당 저장소에서만 사용
+- <strong>Organization secrets</strong>: 조직의 여러 저장소에서 공유
+- <strong>Environment secrets</strong>: 특정 환경(staging, production)에서만 사용</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 프로덕션 Secret은 Environment secrets로 분리하고, 배포 승인(approval) 설정을 추가하세요.</p>
+</blockquote>
+<h4 id="secret-scanning">Secret Scanning: 실수로 커밋된 비밀 탐지<a class="headerlink" href="#secret-scanning" title="Permanent link">&para;</a></h4>
+<p><strong>Secret Scanning</strong>은 GitHub가 저장소를 자동으로 스캔하여 알려진 Secret 패턴을 탐지하는 기능입니다.</p>
+<p><strong>지원하는 Secret 타입</strong> (200개 이상):
+- AWS 액세스 키
+- Google Cloud API 키
+- GitHub Personal Access Token
+- Stripe API 키
+- Slack 토큰
+- Azure 연결 문자열
+- 데이터베이스 연결 문자열</p>
+<p><strong>활성화</strong>:</p>
+<p>Public 저장소는 기본 활성화됩니다.
+Private 저장소는 GitHub Advanced Security 라이선스 필요 (Enterprise 플랜).</p>
+<p>Settings → Code security and analysis → Secret scanning → Enable</p>
+<p><strong>탐지 시 동작</strong>:</p>
+<ol>
+<li>GitHub가 커밋에서 Secret 패턴 발견</li>
+<li>Security 탭에 Alert 생성</li>
+<li>저장소 관리자에게 이메일 알림</li>
+<li>파트너 서비스 (AWS, Google 등)에 자동 알림 (선택)</li>
+</ol>
+<p><strong>Alert 처리</strong>:</p>
+<ol>
+<li>Security → Secret scanning alerts</li>
+<li>Alert 확인</li>
+<li>조치:</li>
+<li>Secret 즉시 무효화/재발급</li>
+<li>히스토리에서 완전 제거 (아래 섹션 참조)</li>
+<li>Alert를 "Resolved"로 표시</li>
+</ol>
+<blockquote>
+<p><strong>주의</strong>: Secret Scanning이 감지하지 못하는 Secret도 있습니다. 완벽하게 의존하지 말고 <code>.gitignore</code> 설정을 철저히 하세요.</p>
+</blockquote>
+<h4 id="push-protection">Push Protection으로 비밀 유출 사전 방지<a class="headerlink" href="#push-protection" title="Permanent link">&para;</a></h4>
+<p><strong>Push Protection</strong>은 Secret이 포함된 커밋을 push하려 할 때 사전에 차단하는 기능입니다.</p>
+<p><strong>활성화</strong>:</p>
+<p>Settings → Code security and analysis → Push protection → Enable</p>
+<p><strong>동작 방식</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+
+remote:<span class="w"> </span>error:<span class="w"> </span>Secret<span class="w"> </span>detected<span class="w"> </span><span class="k">in</span><span class="w"> </span>commit<span class="w"> </span>7f3a9e8c1d2b4f5e
+remote:
+remote:<span class="w"> </span>GitHub<span class="w"> </span>found<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>secrets:
+remote:<span class="w"> </span>-<span class="w"> </span>AWS<span class="w"> </span>Access<span class="w"> </span>Key<span class="w"> </span>ID<span class="w"> </span><span class="o">(</span>AKIAIOSFODNN7EXAMPLE<span class="o">)</span>
+remote:
+remote:<span class="w"> </span>To<span class="w"> </span>push<span class="w"> </span>anyway,<span class="w"> </span>run:
+remote:<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--no-verify
+remote:
+remote:<span class="w"> </span>Or<span class="w"> </span>remove<span class="w"> </span>the<span class="w"> </span>secret<span class="w"> </span>from<span class="w"> </span>your<span class="w"> </span>commit<span class="w"> </span><span class="nb">history</span><span class="w"> </span>and<span class="w"> </span>try<span class="w"> </span>again.
+To<span class="w"> </span>github.com:user/repo.git
+<span class="w"> </span>!<span class="w"> </span><span class="o">[</span>remote<span class="w"> </span>rejected<span class="o">]</span><span class="w"> </span>main<span class="w"> </span>-&gt;<span class="w"> </span>main<span class="w"> </span><span class="o">(</span>push<span class="w"> </span>declined<span class="w"> </span>due<span class="w"> </span>to<span class="w"> </span>secret<span class="o">)</span>
+error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span>push<span class="w"> </span>some<span class="w"> </span>refs<span class="w"> </span>to<span class="w"> </span><span class="s1">&#39;github.com:user/repo.git&#39;</span>
+</code></pre></div>
+
+<p><strong>우회 옵션</strong>:</p>
+<p>정당한 이유가 있을 때 (예: 테스트용 더미 키) 우회할 수 있습니다:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--no-verify
+</code></pre></div>
+
+<p>하지만 대부분의 경우 Secret을 제거하고 push해야 합니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: Push Protection을 활성화하고, 팀원에게 <code>.gitignore</code> 설정과 환경 변수 사용을 교육하세요.</p>
+</blockquote>
+<h3 id="_9">절 요약<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>API 키, 비밀번호, 토큰은 절대 Git에 커밋하지 않습니다</li>
+<li><code>.gitignore</code>에 <code>.env</code>, <code>secrets.json</code> 등을 추가하여 실수 방지</li>
+<li>GitHub Secrets에 민감 정보를 암호화 저장하고 Actions에서 사용</li>
+<li>Secret Scanning이 커밋된 Secret을 자동 탐지하여 알립니다</li>
+<li>Push Protection으로 Secret 포함 커밋을 push 전에 차단합니다</li>
+</ul>
+<hr />
+<h2 id="dependabot">Dependabot과 의존성 보안<a class="headerlink" href="#dependabot" title="Permanent link">&para;</a></h2>
+<h3 id="_10">도입<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>현대 소프트웨어는 수십, 수백 개의 외부 라이브러리에 의존합니다. 이런 의존성(dependency)에서 보안 취약점이 발견되면 프로젝트도 위험해집니다. 수동으로 모든 의존성을 추적하는 것은 불가능합니다. Dependabot은 이를 자동화하는 GitHub의 기능입니다.</p>
+<h3 id="_11">핵심 개념 설명<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h4 id="dependabot-alerts">Dependabot Alerts: 취약한 의존성 알림<a class="headerlink" href="#dependabot-alerts" title="Permanent link">&para;</a></h4>
+<p><strong>Dependabot Alerts</strong>는 프로젝트의 의존성에서 알려진 보안 취약점(CVE)을 자동으로 탐지하고 알려줍니다.</p>
+<p>건물의 자동 보안 점검 시스템과 같습니다. 정기적으로 건물(프로젝트)의 잠금장치(의존성)를 검사하고, 취약한 부분이 발견되면 자동으로 수리 요청서(PR)를 발행합니다.</p>
+<p><strong>지원하는 생태계</strong>:
+- JavaScript (npm, yarn)
+- Python (pip)
+- Ruby (bundler)
+- Java (maven, gradle)
+- .NET (nuget)
+- PHP (composer)
+- Go (go modules)
+- Rust (cargo)
+- Docker</p>
+<p><strong>활성화</strong>:</p>
+<p>Settings → Code security and analysis → Dependabot alerts → Enable</p>
+<p><strong>Alert 확인</strong>:</p>
+<p>Security → Dependabot alerts</p>
+<p>예시:</p>
+<div class="codehilite"><pre><span></span><code>lodash
+Severity: High
+GHSA-xxxx-yyyy-zzzz: Prototype Pollution in lodash
+
+Affected versions: &lt; 4.17.21
+Patched version: 4.17.21
+
+Recommendation: Update to version 4.17.21 or later
+</code></pre></div>
+
+<p><strong>Alert 처리</strong>:</p>
+<ol>
+<li>Alert 상세 보기</li>
+<li>영향 평가 (실제로 취약한 함수 사용하는지 확인)</li>
+<li>업데이트 또는 회피 조치</li>
+<li>Alert "Resolved" 처리</li>
+</ol>
+<h4 id="dependabot-security-updates-pr">Dependabot Security Updates: 자동 패치 PR<a class="headerlink" href="#dependabot-security-updates-pr" title="Permanent link">&para;</a></h4>
+<p><strong>Dependabot Security Updates</strong>는 취약점이 발견되면 자동으로 패치 PR을 생성합니다.</p>
+<p><strong>활성화</strong>:</p>
+<p>Settings → Code security and analysis → Dependabot security updates → Enable</p>
+<p><strong>동작 흐름</strong>:</p>
+<ol>
+<li>Dependabot이 취약점 발견 (예: lodash &lt; 4.17.21)</li>
+<li>패치 버전 확인 (4.17.21)</li>
+<li>자동으로 PR 생성:</li>
+<li>제목: <code>Bump lodash from 4.17.20 to 4.17.21</code></li>
+<li>본문: 취약점 설명, Changelog 링크</li>
+<li>
+<p><code>package.json</code> 또는 <code>requirements.txt</code> 업데이트</p>
+</li>
+<li>
+<p>CI 테스트 자동 실행</p>
+</li>
+<li>팀원이 리뷰 후 머지</li>
+</ol>
+<p><strong>PR 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="gu">## Bumps lodash from 4.17.20 to 4.17.21</span>
+
+<span class="gu">### Release notes</span>
+<span class="k">-</span><span class="w"> </span>Fix: Prototype Pollution vulnerability
+
+<span class="gu">### Commits</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`abc1234`</span> Release 4.17.21
+<span class="k">-</span><span class="w"> </span><span class="sb">`def5678`</span> Fix prototype pollution
+
+<span class="gs">**Dependabot compatibility score**</span>: 98/100
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: Dependabot PR은 CI 테스트가 통과하고 호환성 점수가 높으면 안심하고 머지할 수 있습니다.</p>
+</blockquote>
+<h4 id="dependabot-version-updates">Dependabot Version Updates: 버전 최신화 자동화<a class="headerlink" href="#dependabot-version-updates" title="Permanent link">&para;</a></h4>
+<p><strong>Dependabot Version Updates</strong>는 보안 취약점과 관계없이 정기적으로 의존성을 최신 버전으로 업데이트하는 PR을 생성합니다.</p>
+<p><strong><code>.github/dependabot.yml</code> 설정</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">updates</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># JavaScript 의존성</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">package-ecosystem</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;npm&quot;</span>
+<span class="w">    </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly&quot;</span>
+<span class="w">      </span><span class="nt">day</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;monday&quot;</span>
+<span class="w">      </span><span class="nt">time</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;09:00&quot;</span>
+<span class="w">      </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Asia/Seoul&quot;</span>
+<span class="w">    </span><span class="nt">open-pull-requests-limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">reviewers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;frontend-team&quot;</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;dependencies&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;javascript&quot;</span>
+<span class="w">    </span><span class="nt">commit-message</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chore(deps)&quot;</span>
+
+<span class="w">  </span><span class="c1"># Python 의존성</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">package-ecosystem</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;pip&quot;</span>
+<span class="w">    </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/backend&quot;</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly&quot;</span>
+<span class="w">    </span><span class="nt">versioning-strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;increase-if-necessary&quot;</span>
+<span class="w">    </span><span class="nt">ignore</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dependency-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;django&quot;</span>
+<span class="w">        </span><span class="nt">update-types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;version-update:semver-major&quot;</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="c1"># Docker</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">package-ecosystem</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;docker&quot;</span>
+<span class="w">    </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly&quot;</span>
+
+<span class="w">  </span><span class="c1"># GitHub Actions</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">package-ecosystem</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;github-actions&quot;</span>
+<span class="w">    </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;monthly&quot;</span>
+</code></pre></div>
+
+<p><strong>주요 설정</strong>:</p>
+<ul>
+<li><code>schedule.interval</code>: daily, weekly, monthly</li>
+<li><code>open-pull-requests-limit</code>: 동시 열린 PR 개수 제한</li>
+<li><code>reviewers</code>: 자동 리뷰어 지정</li>
+<li><code>labels</code>: PR에 자동 라벨 추가</li>
+<li><code>ignore</code>: 특정 의존성 또는 버전 타입 무시</li>
+<li><code>versioning-strategy</code>: 업데이트 전략</li>
+</ul>
+<p><strong>versioning-strategy 옵션</strong>:
+- <code>auto</code>: Dependabot이 자동 결정 (기본값)
+- <code>increase</code>: 항상 최신 버전으로 업데이트
+- <code>increase-if-necessary</code>: 취약점 수정 시에만 업데이트
+- <code>lockfile-only</code>: lockfile만 업데이트, manifest 파일은 수정 안 함
+- <code>widen</code>: 버전 범위 확대</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: <code>open-pull-requests-limit</code>를 5개 이하로 설정하세요. PR이 너무 많으면 관리가 어려워집니다.</p>
+</blockquote>
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    Start["Dependabot 활성화"]
+
+    Scan["의존성 스캔<br/>(정기적 실행)"]
+
+    Check{{"보안 취약점<br/>발견?"}}
+
+    Alert["Dependabot Alert<br/>생성"]
+
+    CreatePR["자동 PR 생성<br/>(보안 패치 적용)"]
+
+    subgraph Review["리뷰 프로세스"]
+        direction TB
+        CI["CI 검사 실행"]
+        Review1["개발자 리뷰"]
+        Test["테스트 확인"]
+
+        CI --> Review1
+        Review1 --> Test
+    end
+
+    Decision{{"PR<br/>승인?"}}
+
+    Merge["PR 머지"]
+
+    Close["Alert 자동 종료"]
+
+    Done["보안 취약점 해결"]
+
+    Start --> Scan
+    Scan --> Check
+    Check -->|"예"| Alert
+    Check -.->|"아니오"| Safe["안전<br/>다음 스캔 대기"]
+
+    Alert --> CreatePR
+    CreatePR --> Review
+    Review --> Decision
+    Decision -->|"예"| Merge
+    Decision -.->|"아니오"| Reject["수동 대응 필요"]
+
+    Merge --> Close
+    Close --> Done
+
+    style Start fill:#e1f5fe,stroke:#0288d1
+    style Scan fill:#fff3e0,stroke:#f57c00
+    style Check fill:#f3e5f5,stroke:#7b1fa2
+    style Alert fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style CreatePR fill:#fff3e0,stroke:#f57c00
+    style Review fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style CI fill:#e8f5e9
+    style Review1 fill:#e8f5e9
+    style Test fill:#e8f5e9
+    style Decision fill:#f3e5f5,stroke:#7b1fa2
+    style Merge fill:#e8f5e9,stroke:#388e3c
+    style Close fill:#e8f5e9,stroke:#388e3c
+    style Done fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+    style Safe fill:#e8f5e9
+    style Reject fill:#fce4ec
+
+</div>
+<figcaption>Dependabot 동작 흐름</figcaption>
+</figure>
+
+<h4 id="dependabotyml">dependabot.yml 설정 파일 작성<a class="headerlink" href="#dependabotyml" title="Permanent link">&para;</a></h4>
+<p><strong>고급 설정 예시</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">updates</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">package-ecosystem</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;npm&quot;</span>
+<span class="w">    </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">    </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;weekly&quot;</span>
+<span class="w">    </span><span class="c1"># 특정 의존성만 업데이트</span>
+<span class="w">    </span><span class="nt">allow</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dependency-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;react*&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dependency-type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+<span class="w">    </span><span class="c1"># 특정 의존성 무시</span>
+<span class="w">    </span><span class="nt">ignore</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">dependency-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;lodash&quot;</span>
+<span class="w">        </span><span class="nt">versions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;4.x&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="c1"># 그룹화: 여러 업데이트를 하나의 PR로</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">react-ecosystem</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">patterns</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;react&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;react-dom&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;react-router&quot;</span>
+<span class="w">    </span><span class="c1"># 커밋 메시지 커스터마이즈</span>
+<span class="w">    </span><span class="nt">commit-message</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deps&quot;</span>
+<span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;scope&quot;</span>
+<span class="w">    </span><span class="c1"># PR 제목 템플릿</span>
+<span class="w">    </span><span class="nt">pull-request-branch-name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-&quot;</span>
+</code></pre></div>
+
+<p><strong>그룹화 기능</strong>:</p>
+<p>여러 관련 패키지를 하나의 PR로 묶을 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test-dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">patterns</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;jest&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;@testing-library/*&quot;</span>
+<span class="w">    </span><span class="nt">update-types</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;minor&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;patch&quot;</span>
+</code></pre></div>
+
+<p>이렇게 하면 jest, @testing-library/react 등이 하나의 PR로 업데이트됩니다.</p>
+<h4 id="dependency-graph">의존성 그래프(Dependency Graph) 활용<a class="headerlink" href="#dependency-graph" title="Permanent link">&para;</a></h4>
+<p><strong>의존성 그래프</strong>는 프로젝트의 모든 의존성을 시각적으로 보여줍니다.</p>
+<p><strong>확인 방법</strong>:</p>
+<p>Insights → Dependency graph</p>
+<p>표시 정보:
+- 직접 의존성(Direct dependencies)
+- 간접 의존성(Transitive dependencies)
+- 의존성 버전
+- 알려진 취약점 수</p>
+<p><strong>의존성 내보내기</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># SBOM (Software Bill of Materials) 생성</span>
+$<span class="w"> </span>gh<span class="w"> </span>api<span class="w"> </span>/repos/owner/repo/dependency-graph/sbom<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/vnd.github+json&quot;</span>
+</code></pre></div>
+
+<p>SBOM은 소프트웨어 공급망 보안(Supply Chain Security)의 핵심 요소입니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 의존성 그래프를 정기적으로 검토하여 불필요한 의존성을 제거하고 번들 크기를 줄이세요.</p>
+</blockquote>
+<h3 id="_12">절 요약<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Dependabot Alerts가 의존성의 보안 취약점을 자동 탐지합니다</li>
+<li>Dependabot Security Updates가 취약점 패치 PR을 자동 생성합니다</li>
+<li>Dependabot Version Updates로 의존성을 최신 상태로 유지합니다</li>
+<li><code>.github/dependabot.yml</code>로 업데이트 일정, 전략, 그룹화를 설정합니다</li>
+<li>의존성 그래프로 프로젝트의 모든 의존성을 시각적으로 파악합니다</li>
+</ul>
+<hr />
+<h2 id="_13">민감 데이터 제거와 히스토리 정리<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<h3 id="_14">도입<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p>실수로 API 키를 커밋하고 원격에 push했다면, 단순히 파일을 삭제하고 다시 커밋하는 것으로는 부족합니다. Git 히스토리에 여전히 남아있기 때문입니다. 이럴 때는 히스토리를 재작성하여 완전히 제거해야 합니다.</p>
+<h3 id="_15">핵심 개념 설명<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<h4 id="_16">실수로 커밋된 민감 데이터 대응 절차<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h4>
+<p><strong>즉시 조치 사항</strong>:</p>
+<ol>
+<li><strong>비밀 즉시 무효화</strong>:</li>
+<li>API 키 재발급</li>
+<li>비밀번호 변경</li>
+<li>
+<p>토큰 revoke</p>
+</li>
+<li>
+<p><strong>영향 범위 파악</strong>:</p>
+</li>
+<li>누가 접근 가능한가?</li>
+<li>얼마 동안 노출되었나?</li>
+<li>
+<p>악용 흔적은 없는가?</p>
+</li>
+<li>
+<p><strong>히스토리 재작성</strong> (아래 설명)</p>
+</li>
+<li>
+<p><strong>팀 공지</strong>:</p>
+</li>
+<li>팀원에게 상황 알림</li>
+<li>저장소 다시 클론 요청</li>
+</ol>
+<blockquote>
+<p><strong>주의</strong>: 비밀을 무효화하는 것이 가장 중요합니다. 히스토리에서 제거해도 누군가 이미 복사했을 수 있습니다.</p>
+</blockquote>
+<h4 id="git-filter-repo">git filter-repo로 파일 완전 제거<a class="headerlink" href="#git-filter-repo" title="Permanent link">&para;</a></h4>
+<p><strong>git filter-repo</strong>는 Git 히스토리를 재작성하는 권장 도구입니다. 구버전의 <code>git filter-branch</code>보다 빠르고 안전합니다.</p>
+<p><strong>설치</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># pip로 설치</span>
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>git-filter-repo
+
+<span class="c1"># macOS</span>
+$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>git-filter-repo
+
+<span class="c1"># 버전 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>filter-repo<span class="w"> </span>--version
+</code></pre></div>
+
+<p><strong>특정 파일 완전 제거</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 로컬 백업</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git<span class="w"> </span>repo-backup
+
+<span class="c1"># 2. 작업용 클론</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git<span class="w"> </span>repo-clean
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>repo-clean
+
+<span class="c1"># 3. 모든 브랜치에서 파일 제거</span>
+$<span class="w"> </span>git<span class="w"> </span>filter-repo<span class="w"> </span>--path<span class="w"> </span>secrets.txt<span class="w"> </span>--invert-paths
+
+<span class="c1"># 4. 히스토리 재작성 완료</span>
+<span class="c1"># secrets.txt가 모든 커밋에서 제거됨</span>
+</code></pre></div>
+
+<p><code>--invert-paths</code>는 "지정한 파일을 제외한 모든 것 유지"를 의미합니다.</p>
+<p><strong>여러 파일 제거</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>filter-repo<span class="w"> </span>--path<span class="w"> </span>.env<span class="w"> </span>--path<span class="w"> </span>config/secrets.yml<span class="w"> </span>--invert-paths
+</code></pre></div>
+
+<p><strong>디렉토리 전체 제거</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>filter-repo<span class="w"> </span>--path<span class="w"> </span>private/<span class="w"> </span>--invert-paths
+</code></pre></div>
+
+<p><strong>파일 내용 대체</strong>:</p>
+<p>민감한 내용만 마스킹하고 파일은 유지하려면:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 비밀번호를 REDACTED로 대체</span>
+$<span class="w"> </span>git<span class="w"> </span>filter-repo<span class="w"> </span>--replace-text<span class="w"> </span>&lt;<span class="o">(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;password123==&gt;REDACTED&quot;</span><span class="o">)</span>
+</code></pre></div>
+
+<h4 id="bfg-repo-cleaner">BFG Repo Cleaner 활용<a class="headerlink" href="#bfg-repo-cleaner" title="Permanent link">&para;</a></h4>
+<p><strong>BFG Repo Cleaner</strong>는 대용량 파일이나 민감 데이터를 제거하는 또 다른 도구입니다. git filter-repo보다 간단하지만 기능은 제한적입니다.</p>
+<p><strong>설치</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Java 필요</span>
+$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>bfg<span class="w">  </span><span class="c1"># macOS</span>
+<span class="c1"># 또는</span>
+$<span class="w"> </span>wget<span class="w"> </span>https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar
+</code></pre></div>
+
+<p><strong>사용법</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. bare 클론</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>--mirror<span class="w"> </span>https://github.com/user/repo.git
+
+<span class="c1"># 2. BFG 실행</span>
+$<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>bfg.jar<span class="w"> </span>--delete-files<span class="w"> </span>secrets.txt<span class="w"> </span>repo.git
+
+<span class="c1"># 3. 히스토리 정리</span>
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>repo.git
+$<span class="w"> </span>git<span class="w"> </span>reflog<span class="w"> </span>expire<span class="w"> </span>--expire<span class="o">=</span>now<span class="w"> </span>--all
+$<span class="w"> </span>git<span class="w"> </span>gc<span class="w"> </span>--prune<span class="o">=</span>now<span class="w"> </span>--aggressive
+
+<span class="c1"># 4. force push</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force
+</code></pre></div>
+
+<p><strong>비밀번호 대체</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># passwords.txt 파일에 민감한 문자열 나열</span>
+$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;password123&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>passwords.txt
+$<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>bfg.jar<span class="w"> </span>--replace-text<span class="w"> </span>passwords.txt<span class="w"> </span>repo.git
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 간단한 작업은 BFG가 빠르고, 복잡한 히스토리 재작성은 git filter-repo가 강력합니다.</p>
+</blockquote>
+<h4 id="_17">히스토리 재작성의 영향과 팀 협업 시 주의사항<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h4>
+<p><strong>히스토리 재작성의 영향</strong>:</p>
+<ul>
+<li>모든 커밋 해시 변경</li>
+<li>브랜치 포인터 변경</li>
+<li>원격 저장소와 로컬 저장소 불일치</li>
+</ul>
+<p><strong>force push</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force<span class="w"> </span>--all
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force<span class="w"> </span>--tags
+</code></pre></div>
+
+<blockquote>
+<p><strong>경고</strong>: force push는 원격 히스토리를 덮어씁니다. 팀원의 로컬 작업이 손실될 수 있습니다.</p>
+</blockquote>
+<p><strong>팀원 동기화 가이드</strong>:</p>
+<p>히스토리 재작성 후 팀원에게 다음 절차를 안내하세요:</p>
+<ol>
+<li><strong>현재 작업 커밋 또는 stash</strong>:</li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;WIP: 히스토리 재작성 전 백업&quot;</span>
+</code></pre></div>
+
+<ol>
+<li><strong>기존 저장소 삭제하고 다시 클론</strong>:</li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+$<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>old-repo
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git<span class="w"> </span>new-repo
+</code></pre></div>
+
+<ol>
+<li><strong>또는 hard reset</strong> (위험):</li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>fetch<span class="w"> </span>origin
+$<span class="w"> </span>git<span class="w"> </span>reset<span class="w"> </span>--hard<span class="w"> </span>origin/main
+</code></pre></div>
+
+<p><strong>브랜치 보호 규칙 임시 해제</strong>:</p>
+<p>force push를 하려면 브랜치 보호 규칙을 임시로 해제해야 할 수 있습니다.</p>
+<p>Settings → Branches → Edit rule → 임시 비활성화 → force push 후 다시 활성화</p>
+<h4 id="force-push">force push 후 팀원 동기화 가이드<a class="headerlink" href="#force-push" title="Permanent link">&para;</a></h4>
+<p><strong>자동화 스크립트</strong>:</p>
+<p>팀원에게 제공할 동기화 스크립트:</p>
+<p><code>sync-after-history-rewrite.sh</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nb">set</span><span class="w"> </span>-e
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;⚠️  Git 히스토리가 재작성되었습니다.&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;현재 작업을 백업합니다...&quot;</span>
+
+<span class="c1"># 현재 브랜치 이름 저장</span>
+<span class="nv">CURRENT_BRANCH</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>branch<span class="w"> </span>--show-current<span class="k">)</span>
+
+<span class="c1"># 작업 백업</span>
+git<span class="w"> </span>stash<span class="w"> </span>save<span class="w"> </span><span class="s2">&quot;Before history rewrite sync&quot;</span>
+
+<span class="c1"># 모든 원격 변경 가져오기</span>
+git<span class="w"> </span>fetch<span class="w"> </span>--all
+
+<span class="c1"># 현재 브랜치를 원격과 동기화</span>
+git<span class="w"> </span>reset<span class="w"> </span>--hard<span class="w"> </span>origin/<span class="nv">$CURRENT_BRANCH</span>
+
+<span class="c1"># Stash 복원 시도</span>
+<span class="k">if</span><span class="w"> </span>git<span class="w"> </span>stash<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;Before history rewrite sync&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;작업을 복원합니다...&quot;</span>
+<span class="w">  </span>git<span class="w"> </span>stash<span class="w"> </span>pop<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;⚠️  충돌이 발생했습니다. 수동으로 해결하세요.&quot;</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ 동기화 완료!&quot;</span>
+</code></pre></div>
+
+<p>사용:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>sync-after-history-rewrite.sh
+$<span class="w"> </span>./sync-after-history-rewrite.sh
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 히스토리 재작성은 마지막 수단입니다. 가능하면 비밀을 무효화하고 앞으로 주의하는 것이 더 안전합니다.</p>
+</blockquote>
+<h3 id="_18">절 요약<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>민감 데이터가 커밋되면 즉시 비밀을 무효화하세요</li>
+<li>git filter-repo로 히스토리에서 파일을 완전히 제거할 수 있습니다</li>
+<li>BFG Repo Cleaner는 간단한 대용량 파일/비밀 제거에 적합합니다</li>
+<li>히스토리 재작성 후 force push하면 팀원도 동기화해야 합니다</li>
+<li>브랜치 보호 규칙을 임시 해제하고 force push 후 다시 활성화하세요</li>
+</ul>
+<hr />
+<h2 id="git-lfs">Git LFS와 대용량 파일 관리<a class="headerlink" href="#git-lfs" title="Permanent link">&para;</a></h2>
+<h3 id="_19">도입<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<p>Git은 텍스트 파일 버전 관리에 최적화되어 있지만, 이미지, 동영상, 3D 모델 같은 대용량 바이너리 파일에는 비효율적입니다. 큰 파일을 커밋할 때마다 저장소 크기가 급증하고, 클론 속도가 느려집니다. Git LFS는 이 문제를 해결합니다.</p>
+<h3 id="_20">핵심 개념 설명<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<h4 id="git_1">Git이 대용량 파일에 약한 이유<a class="headerlink" href="#git_1" title="Permanent link">&para;</a></h4>
+<p><strong>Git의 스냅샷 모델</strong>:</p>
+<p>Git은 매 커밋마다 전체 프로젝트의 스냅샷을 저장합니다. 동일 파일은 재사용하지만, 바이너리 파일이 조금만 변경되어도 전체를 다시 저장해야 합니다.</p>
+<p>도서관의 대형 지도 보관과 같습니다. 큰 지도(대용량 파일)는 별도의 지도실(LFS 서버)에 보관하고, 서가에는 '지도실 A-3번에 있음'이라는 메모(포인터)만 꽂아둡니다.</p>
+<p><strong>문제 상황</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 100MB 이미지 파일 커밋</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>large-image.png
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add image&quot;</span>
+
+<span class="c1"># 이미지 살짝 수정</span>
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>large-image.png
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update image&quot;</span>
+
+<span class="c1"># 저장소 크기가 200MB로 증가!</span>
+</code></pre></div>
+
+<p>Git은 델타 압축을 하지만, 바이너리 파일은 압축률이 낮습니다.</p>
+<p><strong>Git LFS 없이 대용량 파일 관리 시 문제</strong>:
+- 저장소 크기 급증
+- 클론 시간 증가 (GB 단위 다운로드)
+- GitHub 저장소 크기 제한 (파일당 100MB, 저장소 권장 1GB)
+- 느린 푸시/풀</p>
+<h4 id="git-lfs_1">Git LFS 설치와 설정<a class="headerlink" href="#git-lfs_1" title="Permanent link">&para;</a></h4>
+<p><strong>Git LFS(Large File Storage)</strong>는 대용량 파일을 별도 서버에 저장하고, Git 저장소에는 포인터만 유지하는 확장 기능입니다.</p>
+<p><strong>설치</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Windows</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>install
+
+<span class="c1"># macOS</span>
+$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>git-lfs
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>install
+
+<span class="c1"># Linux</span>
+$<span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>git-lfs<span class="w">  </span><span class="c1"># Ubuntu/Debian</span>
+$<span class="w"> </span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>git-lfs<span class="w">  </span><span class="c1"># CentOS/RHEL</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>install
+</code></pre></div>
+
+<p>확인:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>version
+git-lfs/3.4.0<span class="w"> </span><span class="o">(</span>GitHub<span class="p">;</span><span class="w"> </span>linux<span class="w"> </span>amd64<span class="p">;</span><span class="w"> </span>go<span class="w"> </span><span class="m">1</span>.20.1<span class="o">)</span>
+</code></pre></div>
+
+<p><strong>저장소에서 LFS 활성화</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>my-repo
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>install
+Updated<span class="w"> </span>git<span class="w"> </span>hooks.
+Git<span class="w"> </span>LFS<span class="w"> </span>initialized.
+</code></pre></div>
+
+<p>이 명령은 <code>.git/hooks/</code>에 LFS 훅을 설치합니다.</p>
+<h4 id="gitattributes-lfs">.gitattributes로 LFS 추적 패턴 지정<a class="headerlink" href="#gitattributes-lfs" title="Permanent link">&para;</a></h4>
+<p><strong>.gitattributes 설정</strong>:</p>
+<p>어떤 파일을 LFS로 관리할지 지정합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 특정 확장자 추적</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;*.psd&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;*.ai&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;*.mp4&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;*.zip&quot;</span>
+
+<span class="c1"># 특정 디렉토리의 모든 파일</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;assets/**&quot;</span>
+
+<span class="c1"># 추적 패턴 확인</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track
+Listing<span class="w"> </span>tracked<span class="w"> </span>patterns
+<span class="w">    </span>*.psd<span class="w"> </span><span class="o">(</span>.gitattributes<span class="o">)</span>
+<span class="w">    </span>*.ai<span class="w"> </span><span class="o">(</span>.gitattributes<span class="o">)</span>
+<span class="w">    </span>*.mp4<span class="w"> </span><span class="o">(</span>.gitattributes<span class="o">)</span>
+<span class="w">    </span>*.zip<span class="w"> </span><span class="o">(</span>.gitattributes<span class="o">)</span>
+</code></pre></div>
+
+<p>이 명령은 <code>.gitattributes</code> 파일을 자동 생성/수정합니다:</p>
+<p><code>.gitattributes</code>:</p>
+<div class="codehilite"><pre><span></span><code>*.psd filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+</code></pre></div>
+
+<p><strong>LFS 파일 커밋</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>design.psd
+$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.gitattributes
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: LFS로 디자인 파일 관리&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
+</code></pre></div>
+
+<p>LFS 파일은 자동으로 LFS 서버에 업로드되고, Git 저장소에는 포인터만 저장됩니다.</p>
+<p><strong>포인터 파일 내용</strong>:</p>
+<div class="codehilite"><pre><span></span><code>version https://git-lfs.github.com/spec/v1
+oid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393
+size 123456789
+</code></pre></div>
+
+<figure class="diagram">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#e1f5fe',
+  'primaryTextColor': '#37474f',
+  'primaryBorderColor': '#90caf9',
+  'lineColor': '#78909c',
+  'secondaryColor': '#fff3e0',
+  'tertiaryColor': '#e8f5e9'
+}}}%%
+
+flowchart TB
+    subgraph Normal["일반 파일 (작은 텍스트 파일)"]
+        direction LR
+        N_File["README.md<br/>(10KB)"]
+        N_Git["Git 저장소<br/>(파일 전체 저장)"]
+        N_Remote["GitHub<br/>(파일 전체)"]
+
+        N_File --> N_Git
+        N_Git <--> N_Remote
+
+        style N_File fill:#e1f5fe,stroke:#0288d1
+        style N_Git fill:#e8f5e9,stroke:#388e3c
+        style N_Remote fill:#f3e5f5,stroke:#7b1fa2
+    end
+
+    subgraph LFS["LFS 파일 (대용량 바이너리)"]
+        direction LR
+        L_File["video.mp4<br/>(500MB)"]
+        L_Pointer["포인터 파일<br/>(133 bytes)<br/>Git 저장소에 저장"]
+        L_LFS["LFS 서버<br/>(실제 파일 저장)"]
+
+        L_File -->|"git add"| L_Pointer
+        L_File -.->|"실제 파일"| L_LFS
+        L_Pointer <-->|"push/pull"| L_LFS
+
+        style L_File fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+        style L_Pointer fill:#fff3e0,stroke:#f57c00
+        style L_LFS fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    end
+
+    Compare["비교"]
+
+    Normal --> Compare
+    LFS --> Compare
+
+    Compare --> Note1["일반 파일:<br/>Git에 직접 저장<br/>저장소 크기 증가"]
+    Compare --> Note2["LFS 파일:<br/>포인터만 Git에 저장<br/>실제 파일은 별도 서버<br/>저장소 경량 유지"]
+
+    Note3[".gitattributes 설정:<br/>*.mp4 filter=lfs<br/>*.psd filter=lfs<br/>*.ai filter=lfs"]
+
+    LFS --> Note3
+
+    style Compare fill:#f3e5f5,stroke:#7b1fa2
+    style Note1 fill:#e1f5fe
+    style Note2 fill:#e8f5e9
+    style Note3 fill:#fff3e0
+    style Normal fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style LFS fill:#f1f8e9,stroke:#388e3c,stroke-width:2px
+
+</div>
+<figcaption>Git LFS 동작 원리</figcaption>
+</figure>
+
+<h4 id="lfs">LFS 사용량과 비용<a class="headerlink" href="#lfs" title="Permanent link">&para;</a></h4>
+<p><strong>GitHub LFS 무료 한도</strong>:</p>
+<ul>
+<li><strong>스토리지</strong>: 1GB</li>
+<li><strong>대역폭</strong>: 월 1GB (다운로드)</li>
+</ul>
+<p><strong>초과 시 과금</strong>:</p>
+<ul>
+<li>스토리지: $5/월당 50GB</li>
+<li>대역폭: $5/월당 50GB</li>
+</ul>
+<p><strong>사용량 확인</strong>:</p>
+<p>Settings → Billing → Git LFS Data</p>
+<p><strong>최적화 팁</strong>:</p>
+<ol>
+<li><strong>정말 필요한 파일만 LFS로</strong>:</li>
+<li>작은 이미지(&lt;1MB)는 Git으로 관리 가능</li>
+<li>
+<p>자주 변경되지 않는 파일만 LFS</p>
+</li>
+<li>
+<p><strong>로컬에서 LFS 파일 스킵</strong>:</p>
+</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># LFS 파일 없이 클론 (포인터만)</span>
+$<span class="w"> </span><span class="nv">GIT_LFS_SKIP_SMUDGE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git
+
+<span class="c1"># 나중에 필요한 LFS 파일만 다운로드</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>pull<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;assets/logo.png&quot;</span>
+</code></pre></div>
+
+<ol>
+<li><strong>오래된 LFS 객체 정리</strong>:</li>
+</ol>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>prune
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: 프로젝트가 커지면 LFS 비용이 빠르게 증가할 수 있습니다. 대안으로 외부 CDN이나 클라우드 스토리지를 고려하세요.</p>
+</blockquote>
+<h4 id="lfs_1">기존 저장소에 LFS 도입하기<a class="headerlink" href="#lfs_1" title="Permanent link">&para;</a></h4>
+<p><strong>이미 커밋된 대용량 파일을 LFS로 마이그레이션</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. LFS 설치 및 활성화</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>install
+
+<span class="c1"># 2. 추적 패턴 설정</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">&quot;*.psd&quot;</span>
+
+<span class="c1"># 3. 기존 파일을 LFS로 마이그레이션</span>
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>migrate<span class="w"> </span>import<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.psd&quot;</span><span class="w"> </span>--everything
+
+<span class="c1"># 4. force push (히스토리 재작성됨)</span>
+$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--force<span class="w"> </span>--all
+$<span class="w"> </span>git<span class="w"> </span>lfs<span class="w"> </span>push<span class="w"> </span>--all<span class="w"> </span>origin
+</code></pre></div>
+
+<p><code>--everything</code>은 모든 브랜치와 태그를 처리합니다.</p>
+<p><strong>마이그레이션 영향</strong>:
+- 커밋 해시 변경
+- 저장소 크기 감소
+- 팀원 동기화 필요</p>
+<p><strong>팀원 동기화</strong>:</p>
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+$<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>old-repo
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/user/repo.git<span class="w"> </span>new-repo
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: LFS 도입은 프로젝트 초기에 하세요. 나중에 마이그레이션하면 히스토리 재작성이 필요합니다.</p>
+</blockquote>
+<h3 id="_21">절 요약<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Git은 바이너리 대용량 파일에 비효율적입니다</li>
+<li>Git LFS는 대용량 파일을 별도 서버에 저장하고 포인터만 Git에 유지합니다</li>
+<li><code>.gitattributes</code>에 LFS 추적 패턴을 지정합니다</li>
+<li>GitHub LFS는 1GB 스토리지와 월 1GB 대역폭이 무료입니다</li>
+<li>기존 저장소에 LFS 도입 시 <code>git lfs migrate</code>로 마이그레이션합니다</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: GPG 키 비밀번호를 매번 입력하기 번거로워요. 자동화할 수 없나요?</strong></p>
+<p>A1: gpg-agent를 설정하여 일정 시간 비밀번호를 캐시할 수 있습니다. <code>~/.gnupg/gpg-agent.conf</code>에 <code>default-cache-ttl 3600</code> (1시간 캐시)을 추가하고 <code>gpg-connect-agent reloadagent /bye</code>로 적용하세요. 또는 SSH 키 서명(Git 2.34+)을 사용하면 SSH 에이전트가 자동으로 처리합니다.</p>
+<p><strong>Q2: .env 파일을 실수로 커밋했는데, 이미 원격에 push했습니다. 어떻게 해야 하나요?</strong></p>
+<p>A2: 다음 순서로 조치하세요. (1) .env의 모든 Secret 즉시 무효화/재발급, (2) git filter-repo로 히스토리에서 .env 완전 제거, (3) force push, (4) 팀원에게 저장소 다시 클론 요청. 가장 중요한 것은 1번입니다. 히스토리에서 제거해도 누군가 이미 복사했을 수 있습니다.</p>
+<p><strong>Q3: Dependabot PR이 너무 많이 올라와서 부담스러워요. 어떻게 조절하나요?</strong></p>
+<p>A3: <code>.github/dependabot.yml</code>에서 <code>open-pull-requests-limit</code>을 5 이하로 설정하고, <code>schedule.interval</code>을 weekly 또는 monthly로 변경하세요. 또한 <code>ignore</code> 설정으로 메이저 버전 업데이트를 제외하거나, <code>groups</code> 기능으로 관련 패키지를 하나의 PR로 묶을 수 있습니다.</p>
+<p><strong>Q4: Git LFS 비용이 걱정됩니다. 대안이 있나요?</strong></p>
+<p>A4: 여러 대안이 있습니다. (1) AWS S3나 Cloudinary 같은 외부 스토리지에 파일 저장하고 URL만 Git에 커밋, (2) 디자인 파일은 Figma나 Sketch Cloud 사용, (3) 빌드 산출물은 Git에 포함하지 않고 CI/CD에서 생성, (4) 필수가 아닌 대용량 파일은 별도 저장소로 분리. LFS는 정말 필요한 경우에만 사용하세요.</p>
+<p><strong>Q5: Secret Scanning이 false positive를 너무 많이 내요. 끌 수 있나요?</strong></p>
+<p>A5: Secret Scanning을 끄는 것보다 특정 Alert를 "False positive"로 표시하는 것이 좋습니다. Security → Secret scanning alerts에서 Alert를 "Dismissed as false positive"로 처리하면 같은 패턴에 대해 다시 알림이 오지 않습니다. 테스트용 더미 키는 주석으로 표시하세요. (<code># dummy-key-for-testing</code>).</p>
+<hr />
+<h2 id="_22">장 요약<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 Git과 GitHub의 보안 기능을 배웠습니다. GPG/SSH로 커밋을 서명하여 작성자를 증명하고, GitHub Secrets와 Secret Scanning으로 민감 데이터를 안전하게 관리하며, Dependabot으로 의존성 취약점을 자동 탐지했습니다. 또한 git filter-repo로 히스토리에서 민감 데이터를 완전히 제거하고, Git LFS로 대용량 파일을 효율적으로 관리하는 방법을 익혔습니다. 이제 보안이 강화된 저장소를 운영할 수 있습니다.</p>
+<h3 id="_23">핵심 키워드<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<p><code>커밋 서명</code>, <code>GPG</code>, <code>SSH 서명</code>, <code>Secrets</code>, <code>Secret Scanning</code>, <code>Push Protection</code>, <code>Dependabot</code>, <code>git filter-repo</code>, <code>BFG</code>, <code>Git LFS</code>, <code>.gitattributes</code>, <code>의존성 보안</code></p>
+<h3 id="_24">다음 장 미리보기<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 팀 협업을 위한 워크플로우를 배웁니다. Git Flow, GitHub Flow, Trunk-Based Development의 특징을 비교하고, 브랜치 보호 규칙과 CODEOWNERS로 코드 품질을 보장하며, 효과적인 코드 리뷰 문화를 구축하는 방법을 배웁니다.</p>
+  </div>
+  
+  
+  
+  <nav class="chapter-nav"><a href="ch_09.html" class="nav-prev">&larr; GitHub 프로젝트 관리</a><a href="index.html" class="nav-home">목차</a><a href="ch_11.html" class="nav-next">팀 협업 워크플로우 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>
