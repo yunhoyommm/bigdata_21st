@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미디어 쿼리 예제</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f8f9fa;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 모바일 기준 먼저 해야 하니 화면에 카드 1개 */
+            gap: 16px;
+        }
+        .card {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .card h3 {
+            margin: 0 0 8px;
+            color: #343a40;
+        }
+        .card p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        /* 태블릿 : 2열 */
+        @media (min-width: 768px){
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 1024px) {
+            .card-grid{
+                grid-template-columns: repeat(3,1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>카드 갤러리</h1>
+    <div class="card-grid">
+        <div class="card">
+            <h3>카드 1</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+        <div class="card">
+            <h3>카드 2</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+        <div class="card">
+            <h3>카드 3</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+        <div class="card">
+            <h3>카드 4</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+        <div class="card">
+            <h3>카드 5</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+        <div class="card">
+            <h3>카드 6</h3>
+            <p>설명 텍스트입니다.</p>
+        </div>
+    </div>
+</body>
+</html>

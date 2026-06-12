@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모바일 우선 네비게이션</title>
+    <style>
+        /* 모바일 기본 스타일 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: sans-serif;
+        }
+        .site-header {
+            background-color: #1e293b;
+            padding: 0 16px;
+        }
+        .site-header__inner {
+            display: flex;
+            flex-direction: column; /* 세로 배치 */
+            align-items: flex-start;
+        }
+        .site-logo {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 16px 0;
+            text-decoration: none;
+        }
+        .site-nav {
+            width: 100%;
+            border-top: 1px solid #97acca;
+        }
+        .site-nav__list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .site-nav__link {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 12px 0;
+            border-bottom: 1px solid #334155;
+            transition: color 0.2s;
+        }
+        .site-nav__link:hover {
+            color: white;
+        }
+        /* 태블릿 스타일(768px) */
+        @media (min-width:768px) {
+            .site-header__inner {
+                flex-direction: row;    /* 가로 배치로 변경 */
+                align-items: center;
+                justify-content: space-between;
+            }
+            .site-nav {
+                width: auto;    /* 가운데 정렬 처리 */
+                border-top: none;
+            }
+            .site-nav__list {
+                flex-direction: row;
+                gap:8px
+            }
+            .site-nav__link {
+                padding: 20px 12px;
+                border-bottom: none;
+                
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a href="#" class="site-logo">My Brand</a>
+            <nav class="site-nav">
+                <ul class="site-nav__list">
+                    <li><a href="#" class="site-nav__link">홈</a></li>
+                    <li><a href="#" class="site-nav__link">소개</a></li>
+                    <li><a href="#" class="site-nav__link">포트폴리오</a></li>
+                    <li><a href="#" class="site-nav__link">연락처</a></li>
+                </ul>
+            </nav>
+        </div>
+
+    </header>
+    <main style="padding: 24px 16px;">
+        <p>화면 너비를 줄이고 늘려보면서 네비게이션 변화를 확인하세요.</p>
+    </main>
+</body>
+</html>
