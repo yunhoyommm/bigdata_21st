@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>의사 클래스 예제</title>
+<style>
+/* 기본 버튼 스타일 */ 
+.btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+}
+/* 마우스를 올렸을 때 */
+.btn:hover {
+  background-color: #2563eb;
+}
+/* 키보드 포커스를 받았을 때 (접근성) tab키*/
+.btn:focus {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+/* 클릭하는 순간 */
+.btn:active {
+  background-color: #1d4ed8;
+}
+/* 비활성화 상태 */
+.btn:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+</style>
+</head>
+<body>
+  <button class="btn">기본 버튼</button>
+  <button class="btn" disabled>비활성 버튼</button>
+</body>
+</html>

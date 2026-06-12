@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>다단계 애니메이션</title>
+<style>
+.notification {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px; background-color: #fff;
+  border: 1px solid #e2e8f0; border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slide-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+@keyframes slide-in {
+  0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.badge {
+  background-color: #ef4444; color: #fff;
+  font-size: 0.75rem; font-weight: bold;
+  padding: 2px 7px; border-radius: 999px;
+  animation: bounce 0.8s 0.6s ease both;
+}
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+}
+</style>
+</head>
+<body>
+<div class="notification">새 메시지가 도착했습니다 <span class="badge">3</span></div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>의사 요소 예제</title>
+<style>
+/* 필수 항목 표시(*) */
+.required::after {
+  content: "*";
+  color: #ef4444;
+  font-weight: bold;
+}
+/* 아이콘 없이 인용 블록 꾸미기 */
+blockquote {
+  position: relative;
+  padding: 16px 16px 16px 48px;
+  background-color: #f8fafc;
+  border-left: 4px solid #3b82f6;
+  margin: 24px 0;
+}
+blockquote::before {
+  content: "\201C"; /* 여는 큰따옴표 유니코드 */
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  font-size: 3rem;
+  line-height: 1;
+  color: #3b82f6;
+  font-family: Georgia, serif;
+}
+/* 호버 밑줄 효과 */
+.underline-hover {
+  position: relative;
+  text-decoration: none;
+  color: #1e40af;
+}
+.underline-hover::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 0; /* 초기 너비 0 */
+  height: 2px;
+  background-color: #3b82f6;
+  transition: width 3s ease;
+}
+.underline-hover:hover::after {
+  width: 100%; /* hover 시 전체 너비로 확장 */
+}
+</style>
+</head>
+<body>
+<form><label class="required">이름</label><input type="text"></form>
+<blockquote>디자인은 어떻게 보이는지가 아니라 어떻게 작동하는지에 관한 것입니다.</blockquote>
+<a href="#" class="underline-hover">마우스를 올려보세요</a>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>transform 함수</title>
+<style>
+.container { display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; }
+.box {
+  width: 80px; height: 80px;
+  background-color: #3b82f6; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+.translate:hover { transform: translate(20px, 20px); }
+.rotate:hover { transform: rotate(45deg); }
+.scale:hover { transform: scale(1.3); }
+.skew:hover { transform: skewX(15deg); }
+.combo:hover { transform: rotate(10deg) scale(1.1) translateY(-8px); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="box translate">이동</div>
+  <div class="box rotate">회전</div>
+  <div class="box scale">확대</div>
+  <div class="box skew">기울기</div>
+  <div class="box combo">복합</div>
+</div>
+</body>
+</html>
+

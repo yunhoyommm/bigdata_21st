@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>다크 모드 테마</title>
+<style>
+:root {
+  --color-bg: #ffffff; --color-surface: #f8fafc;
+  --color-text: #1e293b; --color-text-sub: #64748b;
+  --color-border: #e2e8f0; --color-primary: #3b82f6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f172a; --color-surface: #1e293b;
+    --color-text: #f1f5f9; --color-text-sub: #94a3b8;
+    --color-border: #334155; --color-primary: #60a5fa;
+  }
+}
+body {
+  background-color: var(--color-bg); color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 24px;
+}
+.card {
+  background-color: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 12px; padding: 24px; max-width: 360px;
+}
+.card p { color: var(--color-text-sub); }
+.link { color: var(--color-primary); text-decoration: none; }
+.link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>테마 자동 전환</h2>
+  <p>시스템 설정에 따라 라이트/다크 모드가 자동으로 바뀝니다. <a class="link" href="#">더 알아보기</a></p>
+</div>
+</body>
+</html>
+ 

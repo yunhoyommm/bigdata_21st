@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>transition 기본</title>
+<style>
+.card {
+  width: 200px;
+  padding: 24px;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  /* 여러 속성에 각각 다른 전환 지정 */
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease-out;
+}
+.card:hover {
+  background-color: #eff6ff;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+  transform: translateY(-4px);
+}
+.progress-bar {
+  height: 12px;
+  background-color: #e2e8f0;
+  border-radius: 6px;
+  margin-top: 24px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 30%;
+  background-color: #3b82f6;
+  border-radius: 6px;
+  transition: width 1s ease-in-out;
+}
+.progress-bar:hover .progress-fill {
+  width: 80%;
+}
+</style>
+</head>
+<body>
+<div class="card"><p>카드 위에 마우스를 올려보세요</p></div>
+<div class="progress-bar"><div class="progress-fill"></div></div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>transition-delay</title>
+<style>
+.list { list-style: none; padding: 0; }
+.list-item {
+  padding: 12px 16px;
+  margin: 4px 0;
+  background-color: #3b82f6;
+  color: #fff;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.list:hover .list-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+/* 각 항목에 지연 시간 개별 설정 */
+.list-item:nth-child(1) { transition-delay: 0s; }
+.list-item:nth-child(2) { transition-delay: 0.1s; }
+.list-item:nth-child(3) { transition-delay: 0.2s; }
+.list-item:nth-child(4) { transition-delay: 0.3s; }
+</style>
+</head>
+<body>
+<ul class="list">
+  <li class="list-item">HTML 기초</li>
+  <li class="list-item">CSS 레이아웃</li>
+  <li class="list-item">JavaScript 입문</li>
+  <li class="list-item">반응형 디자인</li>
+</ul>
+</body>
+</html>

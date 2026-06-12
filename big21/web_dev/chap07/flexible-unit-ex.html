@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유연한 단위 예제</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            font-family: sans-serif;
+            padding: 0 clamp(16px, 4vw, 64px);
+        }
+        /* 히어로 섹션 : 전체 화면 높이를 차지합니다 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg,#667eea, #764ba2);
+            color: white;
+            text-align: center;
+        }
+        .hero__title {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            opacity: 0.85;
+        }
+        .hero__subtitle{
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            opacity: 0.85
+        }
+        .content {
+            max-width: 800px;
+            margin: 48px auto;  /* 좌우에 auto 주면 양 옆의 가운데에 content 배치 */
+            display: grid;
+            gap: 24px;
+        }
+        .feature {
+            background-color: #a4b4c4;
+            border-radius: 8px;
+            padding: clamp(16px, 3vw, 32px);
+        }
+        .feature h3 {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin-bottom: 8px;
+                color: #f4f4f0;
+        }
+        .feature p {
+            font-size: 0.95rem;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        @media (min-width:600px) {
+            .content{
+                grid-template-columns: repeat(2,f);
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1 class="hero__title">유연한 레이아웃</h1>
+        <p class="hero__subtitle">화면 크기를 바꾸면서 글자 크기 변화를 확인하세요</p>
+    </section>
+    <div class="content">
+        <div class="feature">
+            <h3>clamp() 함수</h3>
+            <p>최소값, 최대값 사이에서 유연하게 크기 조정</p>
+        </div>
+        <div class="feature">
+            <h3>vw/vh 단위</h3>
+            <p>뷰포트 크기를 기준으로 요소 크기를 지정</p>
+        </div>
+        <div class="feature">
+            <h3>max-width</h3>
+            <p>넓은 화면에서 과도하게 늘어나지 않도록 최대 너비 제한</p>
+        </div>
+        <div class="feature">
+            <h3>퍼센트</h3>
+            <p>부모 요소 기준으로 비율로 크기 지정</p>
+        </div>
+    </div>
+</body>
+</html>
