@@ -57,3 +57,11 @@ big21/dl-dev/chap07/data/MNIST/raw/train-images-idx3-ubyte
 big21/dl-dev/chap07/data/MNIST/raw/train-images-idx3-ubyte.gz
 big21/dl-dev/chap07/data/MNIST/raw/train-labels-idx1-ubyte
 big21/dl-dev/chap07/data/MNIST/raw/train-labels-idx1-ubyte.gz
+big21/dl-dev/chap08/data/MNIST/raw/t10k-images-idx3-ubyte
+big21/dl-dev/chap08/data/MNIST/raw/t10k-images-idx3-ubyte.gz
+big21/dl-dev/chap08/data/MNIST/raw/t10k-labels-idx1-ubyte
+big21/dl-dev/chap08/data/MNIST/raw/t10k-labels-idx1-ubyte.gz
+big21/dl-dev/chap08/data/MNIST/raw/train-images-idx3-ubyte
+big21/dl-dev/chap08/data/MNIST/raw/train-images-idx3-ubyte.gz
+big21/dl-dev/chap08/data/MNIST/raw/train-labels-idx1-ubyte
+big21/dl-dev/chap08/data/MNIST/raw/train-labels-idx1-ubyte.gz
