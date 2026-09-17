@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9일 차 정리 — 자연어 처리 기초와 Transformer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAFAF7; --ink:#161C2E; --ink-soft:#4A5268; --rule:#DFDCD3;
+  --teal:#0E6B60; --teal-wash:#E7F0EE; --gold:#96701C; --gold-wash:#F4EEDD;
+  --code-bg:#F1F0EB; --chip:#ECEAE3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12151C; --ink:#E7E6E0; --ink-soft:#A1A8B8; --rule:#2B313D;
+    --teal:#6FC7B8; --teal-wash:#162A28; --gold:#D8B364; --gold-wash:#2A2417;
+    --code-bg:#1A1E27; --chip:#222833;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12151C; --ink:#E7E6E0; --ink-soft:#A1A8B8; --rule:#2B313D;
+  --teal:#6FC7B8; --teal-wash:#162A28; --gold:#D8B364; --gold-wash:#2A2417;
+  --code-bg:#1A1E27; --chip:#222833;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  font-size:17px;line-height:1.85;word-break:keep-all;}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem 6rem}
+header{padding:4.5rem 0 2.5rem;border-bottom:2px solid var(--ink)}
+.course{font-family:"IBM Plex Sans KR",sans-serif;font-size:.82rem;font-weight:500;
+  color:var(--ink-soft);margin:0 0 1.75rem;}
+h1{font-family:"IBM Plex Sans KR",sans-serif;font-size:clamp(2rem,7vw,3rem);
+  font-weight:700;line-height:1.2;letter-spacing:-.02em;margin:0 0 .6rem;}
+.sub{font-size:1.02rem;color:var(--ink-soft);margin:0}
+.day{display:inline-block;font-family:"IBM Plex Sans KR",sans-serif;font-weight:600;
+  font-size:.8rem;padding:.2rem .6rem;border:1px solid var(--teal);color:var(--teal);
+  border-radius:2px;margin-bottom:1rem;}
+nav{margin:2.25rem 0 3rem;font-family:"IBM Plex Sans KR",sans-serif;font-size:.95rem}
+nav ol{margin:0;padding-left:1.4rem}
+nav li{margin:.3rem 0}
+nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+nav a:hover{border-color:var(--teal);color:var(--teal)}
+section{margin:3.5rem 0 0;scroll-margin-top:1rem}
+h2{font-family:"IBM Plex Sans KR",sans-serif;font-size:1.5rem;font-weight:700;
+  letter-spacing:-.01em;margin:0 0 1.2rem;padding-bottom:.5rem;border-bottom:1px solid var(--rule);}
+h3{font-family:"IBM Plex Sans KR",sans-serif;font-size:1.12rem;font-weight:600;
+  margin:2.2rem 0 .7rem;color:var(--teal);}
+h4{font-family:"IBM Plex Sans KR",sans-serif;font-size:1rem;font-weight:600;margin:1.6rem 0 .5rem}
+p{margin:0 0 1rem}
+ul,ol{padding-left:1.3rem;margin:0 0 1.1rem}
+li{margin:.35rem 0}
+.term{font-family:"IBM Plex Sans KR",sans-serif;font-weight:600}
+.en{font-family:"IBM Plex Sans KR",sans-serif;font-size:.9em;color:var(--ink-soft)}
+dl.defs{margin:0 0 1.2rem;border-left:3px solid var(--teal);padding:.2rem 0 .2rem 1.1rem}
+dl.defs dt{font-family:"IBM Plex Sans KR",sans-serif;font-weight:600;margin-top:1rem}
+dl.defs dt:first-child{margin-top:0}
+dl.defs dd{margin:.15rem 0 0}
+.formula{background:var(--gold-wash);border-left:3px solid var(--gold);
+  padding:1rem 1.1rem;margin:1.4rem 0;overflow-x:auto;}
+.formula .eq{font-family:"IBM Plex Mono",monospace;font-size:1.02rem;color:var(--ink);
+  display:block;margin-bottom:.4rem;white-space:nowrap;}
+.formula .cap{font-size:.9rem;color:var(--ink-soft);display:block;line-height:1.6}
+.note{background:var(--teal-wash);padding:1rem 1.1rem;margin:1.4rem 0;
+  font-size:.95rem;line-height:1.75;border-radius:3px;}
+.note b{font-family:"IBM Plex Sans KR",sans-serif;display:block;margin-bottom:.3rem;color:var(--teal)}
+.note p:last-child{margin-bottom:0}
+pre{background:var(--code-bg);padding:1rem 1.1rem;overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace;font-size:.86rem;line-height:1.7;
+  margin:1rem 0;border-radius:3px;-webkit-overflow-scrolling:touch;}
+code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--chip);
+  padding:.08em .34em;border-radius:2px}
+pre code{background:none;padding:0;font-size:1em}
+.tbl{overflow-x:auto;margin:1.2rem 0}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Sans KR",sans-serif;
+  font-size:.9rem;min-width:28rem}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;border-bottom:2px solid var(--ink);white-space:nowrap}
+caption{caption-side:bottom;font-size:.83rem;color:var(--ink-soft);padding-top:.5rem;text-align:left}
+.check{list-style:none;padding:0}
+.check li{padding-left:1.6rem;position:relative;margin:.6rem 0}
+.check li::before{content:"□";position:absolute;left:0;color:var(--teal);font-size:1.05rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Sans KR",sans-serif;font-size:.85rem;color:var(--ink-soft)}
+a{color:var(--teal)}
+@media (max-width:480px){body{font-size:16px}header{padding-top:3rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="course">딥러닝 학습 정리 노트 · Transformer 개정판</p>
+  <span class="day">9일 차</span>
+  <h1>자연어 처리 기초와 Transformer</h1>
+  <p class="sub">서브워드 토큰화부터 셀프 어텐션, 그리고 사전학습 모델 파인튜닝까지. 원문의 RNN 파트를 현재 실무 기준으로 다시 쓴 버전입니다.</p>
+</header>
+
+<nav>
+  <ol>
+    <li><a href="#s0">왜 RNN이 아니라 Transformer인가</a></li>
+    <li><a href="#s1">자연어 처리란 무엇인가</a></li>
+    <li><a href="#s2">기본 용어와 서브워드 토큰화</a></li>
+    <li><a href="#s3">임베딩과 위치 정보</a></li>
+    <li><a href="#s4">셀프 어텐션: Transformer의 심장</a></li>
+    <li><a href="#s5">Transformer 블록과 3가지 계열</a></li>
+    <li><a href="#s6">실습 A: Transformer 인코더 직접 만들기</a></li>
+    <li><a href="#s7">실습 B: 사전학습 모델 파인튜닝</a></li>
+    <li><a href="#s8">한 장 요약과 점검 목록</a></li>
+  </ol>
+</nav>
+
+<!-- 0 -->
+<section id="s0">
+<h2>0. 왜 RNN이 아니라 Transformer인가</h2>
+
+<p>많은 교재가 NLP를 RNN → LSTM → Transformer 순서로 가르친다. 개념 설명에는 좋은 순서지만, <strong>2018년 이후 실무에서 텍스트 분류·번역·생성에 RNN 계열을 새로 쓰는 경우는 거의 없다.</strong> 이 노트는 처음부터 Transformer 기준으로 전체를 다시 구성했다.</p>
+
+<div class="tbl">
+<table>
+<caption>같은 문제를 푸는 두 구조의 차이</caption>
+<thead><tr><th>기준</th><th>RNN · LSTM</th><th>Transformer</th></tr></thead>
+<tbody>
+<tr><td>입력 처리</td><td>단어를 한 개씩 순차적으로</td><td>문장 전체를 한 번에</td></tr>
+<tr><td>병렬화</td><td>불가능 (이전 결과를 기다려야 함)</td><td>완전 병렬 — GPU 효율이 높다</td></tr>
+<tr><td>먼 단어 연결</td><td>거리가 멀수록 신호가 희미해짐</td><td>거리와 무관하게 한 번에 연결</td></tr>
+<tr><td>순서 정보</td><td>구조 자체에 내재</td><td>위치 인코딩으로 따로 주입해야 함</td></tr>
+<tr><td>연산량</td><td>길이 n에 비례 (O(n))</td><td>길이의 제곱에 비례 (O(n²))</td></tr>
+<tr><td>사전학습 생태계</td><td>사실상 없음</td><td>BERT, GPT 등 방대함</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+  <b>RNN이 완전히 죽은 것은 아니다</b>
+  <p>입력이 끝없이 들어오는 스트리밍 처리, 메모리가 극히 제한된 온디바이스 환경, 짧은 시계열 예측에서는 O(n)인 순환 구조가 여전히 유리하다. 최근 Mamba 같은 상태공간 모델(SSM)이 '순환 구조의 귀환'으로 주목받는 것도 이 때문이다. 다만 <strong>일반적인 텍스트 이해·생성 과제의 기본값은 Transformer</strong>다.</p>
+</div>
+</section>
+
+<!-- 1 -->
+<section id="s1">
+<h2>1. 자연어 처리란 무엇인가</h2>
+
+<p>사람은 "오늘 기분이 좋아요"를 읽는 순간 긍정적인 감정을 알아챈다. 컴퓨터에게 이 문장은 기호와 문자의 나열일 뿐이다. 이 간극을 메우는 기술이 <span class="term">자연어 처리(Natural Language Processing, NLP)</span>다.</p>
+
+<dl class="defs">
+  <dt>좁은 의미</dt>
+  <dd>텍스트를 컴퓨터가 계산할 수 있는 <strong>숫자 형태로 변환</strong>하는 과정.</dd>
+  <dt>넓은 의미</dt>
+  <dd>인간의 언어를 이해·생성하는 인공지능의 한 분야. 변환된 숫자로 감정을 분석하고, 번역하고, 요약하고, 대화하는 일 전체.</dd>
+</dl>
+
+<h3>어디에 쓰이나</h3>
+<p>기계 번역(Google 번역기, Papago), 대화형 AI(ChatGPT, Claude), SNS 감정 분석, 검색과 추천, 문서 요약, 코드 생성. 오늘날 이 목록의 거의 전부가 Transformer 위에서 돌아간다.</p>
+
+<h3>왜 어려운가</h3>
+<ul>
+  <li><strong>모호성(Ambiguity)</strong> — "배가 아프다"의 배는 신체, "배를 타고 떠나다"의 배는 교통수단이다. 같은 철자, 다른 의미.</li>
+  <li><strong>지시 대상 파악</strong> — "민수는 [중략] 그래서 그는 매우 슬펐다"에서 '그는'이 민수임을 알아야 한다.</li>
+  <li><strong>언어의 불규칙성</strong> — 문법 규칙과 예외가 많고 언어마다 구조가 다르다.</li>
+  <li><strong>데이터 부족과 편향</strong> — 저자원 언어는 학습 데이터 자체가 적고, 있는 데이터도 한쪽으로 치우쳐 있다.</li>
+  <li><strong>긴 문맥</strong> — 의미를 이해하려면 수천 단어 전의 내용까지 붙들고 있어야 한다.</li>
+</ul>
+
+<p>Transformer는 이 중 <strong>모호성과 지시 대상 문제를 셀프 어텐션으로</strong>, <strong>데이터 부족 문제를 사전학습·전이학습으로</strong> 크게 완화했다. 긴 문맥과 편향은 여전히 활발한 연구 주제다.</p>
+
+<h3>기술의 계보</h3>
+<p>문법 규칙 기반 → 확률·통계 기반(n-gram) → 신경망 기반(RNN, LSTM) → <strong>Transformer(2017, "Attention Is All You Need")</strong> → 사전학습 언어 모델(BERT 2018, GPT 시리즈) → 대규모 언어 모델(LLM).</p>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+<h2>2. 기본 용어와 서브워드 토큰화</h2>
+
+<h3>단위의 위계</h3>
+<dl class="defs">
+  <dt>토큰 <span class="en">Token</span></dt>
+  <dd>모델이 처리하는 <strong>최소 단위</strong>. 과거에는 단어 하나였지만, 지금은 대부분 <strong>서브워드</strong>(단어 조각)다.</dd>
+  <dt>문장 <span class="en">Sentence</span></dt>
+  <dd>여러 토큰이 모여 구성되는 단위.</dd>
+  <dt>문서 <span class="en">Document</span></dt>
+  <dd>여러 문장이 모인 하나의 글. 블로그 글, 기사, 이메일 등.</dd>
+  <dt>말뭉치 <span class="en">Corpus</span></dt>
+  <dd>여러 문서가 모인 대량의 텍스트 데이터 세트. 사전학습 모델은 수백 GB 규모의 말뭉치로 학습한다.</dd>
+  <dt>어휘 집합 <span class="en">Vocabulary, Vocab</span></dt>
+  <dd>토크나이저가 다루는 <strong>중복 없는 토큰들의 사전</strong>. BERT는 약 3만, GPT 계열은 5만~20만 개 수준이다.</dd>
+</dl>
+
+<h3>왜 서브워드인가</h3>
+<p>단어 단위 토큰화에는 두 가지 고질적인 문제가 있었다.</p>
+<ul>
+  <li><strong>OOV(Out-Of-Vocabulary)</strong> — 사전에 없는 단어는 전부 <code>&lt;UNK&gt;</code>가 되어 정보가 통째로 사라진다.</li>
+  <li><strong>사전 폭발</strong> — 한국어처럼 조사·어미가 붙는 언어는 어휘 집합이 수십만 개로 커진다.</li>
+</ul>
+<p>서브워드 토큰화는 자주 등장하는 조각은 통째로, 드문 단어는 조각으로 쪼개서 이 둘을 동시에 해결한다.</p>
+
+<pre><code>"unhappiness"  →  ["un", "happi", "ness"]
+"토큰화하겠습니다" →  ["▁토큰", "화", "하겠", "습니다"]
+"ㅋㅋㅋㅋ루삥뽕"   →  ["ㅋㅋ", "ㅋㅋ", "루", "삥", "뽕"]   ← 신조어도 UNK가 되지 않는다</code></pre>
+
+<div class="tbl">
+<table>
+<thead><tr><th>알고리즘</th><th>원리</th><th>대표 모델</th></tr></thead>
+<tbody>
+<tr><td>BPE <span class="en">Byte Pair Encoding</span></td><td>가장 자주 붙어 나오는 문자 쌍을 반복해서 병합</td><td>GPT 계열, RoBERTa</td></tr>
+<tr><td>WordPiece</td><td>병합했을 때 말뭉치 확률이 가장 크게 오르는 쌍을 선택</td><td>BERT</td></tr>
+<tr><td>SentencePiece <span class="en">Unigram</span></td><td>공백까지 문자로 취급해 언어 구분 없이 학습</td><td>T5, LLaMA, 한국어 모델 다수</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+  <b>한국어 형태소 분석은 이제 필수가 아니다</b>
+  <p>RNN 시절에는 KoNLPy나 Kiwi 같은 형태소 분석기로 "먹었습니다"를 ["먹다","었","습니다"]로 쪼개는 전처리가 필수였다. 지금은 SentencePiece 계열 토크나이저가 통계적으로 비슷한 분할을 학습으로 찾아낸다. 형태소 분석기는 검색 색인, 키워드 추출, 언어학적 분석처럼 <strong>사람이 결과를 읽어야 하는 작업</strong>에서 여전히 유용하다.</p>
+</div>
+
+<h3>특수 토큰</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>토큰</th><th>역할</th></tr></thead>
+<tbody>
+<tr><td><code>[CLS]</code> / <code>&lt;s&gt;</code></td><td>문장 맨 앞. 이 위치의 최종 벡터를 문장 전체 요약으로 쓴다 (분류에 사용)</td></tr>
+<tr><td><code>[SEP]</code> / <code>&lt;/s&gt;</code></td><td>문장의 끝, 또는 두 문장의 경계</td></tr>
+<tr><td><code>[PAD]</code></td><td>길이를 맞추기 위한 빈칸. 어텐션 마스크로 계산에서 제외된다</td></tr>
+<tr><td><code>[UNK]</code></td><td>사전에 없는 토큰. 서브워드 방식에서는 거의 등장하지 않는다</td></tr>
+<tr><td><code>[MASK]</code></td><td>BERT의 사전학습에서 가려진 단어를 맞히는 데 쓰인다</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+<h2>3. 임베딩과 위치 정보</h2>
+
+<h3>임베딩의 출발점: 분포 가설</h3>
+<p>언어학자 젤리그 해리스(Zellig Harris)가 1954년에 남긴 관점 — 비슷한 맥락에서 쓰이는 단어들은 비슷한 의미를 가진다. 이를 <strong>분포 가설(Distributional Hypothesis)</strong>이라 하며, 오늘날 단어 임베딩의 핵심 철학이다. '강아지'가 나오는 문장에는 '귀엽다', '산책', '주인'이 함께 등장한다.</p>
+
+<div class="note">
+  <b>벡터(Vector)란</b>
+  <p>여러 숫자를 모아 하나의 의미를 표현하는 단위다. 어떤 사람을 [175cm, 70kg, 25세]로 나타내는 것처럼. 단어를 벡터로 바꾸면 컴퓨터가 단어의 유사도와 관계를 수학적으로 계산할 수 있다.</p>
+</div>
+
+<h3>임베딩의 발전 3단계</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>단계</th><th>대표</th><th>원리</th><th>한계</th></tr></thead>
+<tbody>
+<tr><td>빈도 기반</td><td>BOW, TF-IDF</td><td>단어가 몇 번 나왔는지 센다</td><td>의미 유사성·순서·문맥을 못 담음</td></tr>
+<tr><td>정적 임베딩</td><td>Word2Vec, GloVe</td><td>주변 단어와 함께 등장하는 패턴을 학습</td><td><strong>단어 하나에 벡터 하나</strong> — '배'가 문맥에 따라 달라지는 것을 표현 못함</td></tr>
+<tr><td>문맥 임베딩</td><td>BERT, GPT</td><td>문장 전체를 보고 <strong>같은 단어라도 매번 다른 벡터</strong>를 만듦</td><td>연산 비용이 큼</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Transformer의 결정적 성과가 세 번째다. "배가 아프다"의 '배'와 "배를 타고"의 '배'는 <strong>서로 다른 벡터</strong>가 된다. 모호성 문제가 구조적으로 풀린 지점이다.</p>
+
+<h3>위치 인코딩 <span class="en">Positional Encoding</span></h3>
+<p>Transformer는 문장을 한꺼번에 보기 때문에, 그 자체로는 <strong>단어의 순서를 전혀 모른다</strong>. "The dog chased the cat"과 "The cat chased the dog"이 똑같이 보인다. 그래서 위치 정보를 벡터에 더해서 주입한다.</p>
+
+<div class="formula">
+  <span class="eq">PE(pos, 2i)   = sin( pos / 10000^(2i/d) )</span>
+  <span class="eq">PE(pos, 2i+1) = cos( pos / 10000^(2i/d) )</span>
+  <span class="cap">원논문의 사인·코사인 방식. 위치마다 고유한 파형 패턴을 만들어 임베딩 벡터에 더한다. 학습이 필요 없고, 학습 때 본 적 없는 길이에도 대응된다.</span>
+</div>
+
+<ul>
+  <li><strong>학습형 위치 임베딩</strong> — 위치도 하나의 임베딩 테이블로 학습 (BERT 방식).</li>
+  <li><strong>RoPE(Rotary Position Embedding)</strong> — 벡터를 위치에 따라 회전시켜 <em>상대적</em> 거리를 표현. LLaMA를 비롯한 최신 LLM의 사실상 표준.</li>
+</ul>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+<h2>4. 셀프 어텐션: Transformer의 심장</h2>
+
+<h3>직관</h3>
+<p>"그 동물은 너무 지쳐서 <strong>그것은</strong> 길을 건너지 못했다"에서 '그것'이 무엇인지 알려면 앞의 '동물'을 봐야 한다. 셀프 어텐션은 <strong>문장 안의 모든 단어가 모든 단어를 한 번에 둘러보고, 자기와 관련 깊은 단어에 가중치를 몰아주는</strong> 연산이다. RNN처럼 정보를 릴레이로 전달하지 않기 때문에, 몇 단어 떨어져 있든 연결 거리는 항상 1이다.</p>
+
+<h3>Query · Key · Value</h3>
+<p>각 토큰 벡터에 서로 다른 가중치 행렬을 곱해 세 가지 역할의 벡터를 만든다. 도서관에 비유하면 이렇다.</p>
+<ul>
+  <li><strong>Query(Q)</strong> — 내가 찾는 것. "나는 어떤 단어와 관련이 있지?"</li>
+  <li><strong>Key(K)</strong> — 각 단어가 내건 색인표. "나는 이런 단어야."</li>
+  <li><strong>Value(V)</strong> — 실제로 가져올 내용물.</li>
+</ul>
+<p>Q와 모든 K를 비교해 관련도 점수를 매기고, 그 점수로 V를 가중 평균한다.</p>
+
+<div class="formula">
+  <span class="eq">Attention(Q, K, V) = softmax( Q·Kᵀ / √d_k ) · V</span>
+  <span class="cap">① Q·Kᵀ로 모든 단어 쌍의 유사도를 구하고 ② √d_k로 나눠 값이 커지는 것을 막고 ③ softmax로 합이 1인 가중치로 바꾼 뒤 ④ V에 곱해 섞는다.</span>
+</div>
+
+<h4>√d_k로 나누는 이유 (Scaled)</h4>
+<p>차원 d_k가 커질수록 내적값의 분산이 커진다. 그대로 softmax에 넣으면 한 곳만 1에 가깝고 나머지는 0이 되어 <strong>기울기가 거의 흐르지 않는다</strong>. √d_k로 나눠 분산을 일정하게 맞춰 준다. RNN에서 tanh가 값 폭주를 막던 역할과 목적이 비슷하다.</p>
+
+<h3>멀티 헤드 어텐션 <span class="en">Multi-Head Attention</span></h3>
+<p>어텐션을 한 번만 하면 관점이 하나뿐이다. 그래서 벡터를 여러 갈래(head)로 쪼개 <strong>각각 독립적으로 어텐션을 수행한 뒤 다시 이어 붙인다</strong>. 어떤 헤드는 문법적 의존 관계를, 어떤 헤드는 지시 대상을, 어떤 헤드는 바로 옆 단어를 보는 식으로 역할이 자연스럽게 분화된다.</p>
+<p>보통 <code>d_model = 512</code>, <code>heads = 8</code>이면 헤드마다 64차원을 담당한다. <strong>총 연산량은 단일 헤드와 같으면서 관점만 늘어나는</strong> 것이 핵심이다.</p>
+
+<h3>마스킹 두 종류</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>마스크</th><th>목적</th><th>쓰이는 곳</th></tr></thead>
+<tbody>
+<tr><td>패딩 마스크</td><td>PAD 토큰을 어텐션 계산에서 제외</td><td>모든 모델</td></tr>
+<tr><td>인과 마스크 <span class="en">Causal</span></td><td>미래 토큰을 못 보게 가림 — 다음 단어 예측 학습에 필수</td><td>GPT 계열 디코더</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>계산 비용이라는 대가</h3>
+<p>모든 단어가 모든 단어를 보므로 어텐션 행렬 크기는 <strong>n × n</strong>이다. 문장 길이가 2배가 되면 연산은 4배가 된다. 이 O(n²)이 긴 문서 처리의 병목이며, FlashAttention(메모리 최적화), 슬라이딩 윈도우 어텐션, 선형 어텐션 등이 이를 완화하려는 시도다.</p>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+<h2>5. Transformer 블록과 3가지 계열</h2>
+
+<h3>블록 하나의 구성</h3>
+<pre><code>입력
+ ├─→ LayerNorm → 멀티 헤드 셀프 어텐션 ─┐
+ └──────────────── 잔차 연결 ──────────→(+)
+                                        │
+ ├─→ LayerNorm → 피드포워드(FFN) ───────┐
+ └──────────────── 잔차 연결 ──────────→(+)
+출력  (이 블록을 N번 쌓는다)</code></pre>
+
+<dl class="defs">
+  <dt>피드포워드 네트워크 <span class="en">FFN</span></dt>
+  <dd><code>Linear → 활성화(GELU/ReLU) → Linear</code>. 보통 중간 차원을 4배로 늘렸다가 줄인다. 어텐션이 '단어들 사이를 섞는' 역할이라면, FFN은 <strong>각 단어를 개별적으로 깊이 가공하는</strong> 역할이다.</dd>
+  <dt>잔차 연결 <span class="en">Residual Connection</span></dt>
+  <dd>입력을 출력에 그대로 더한다. 층을 깊게 쌓아도 기울기가 소실되지 않는 통로가 된다.</dd>
+  <dt>층 정규화 <span class="en">Layer Normalization</span></dt>
+  <dd>각 토큰 벡터의 값 분포를 정규화해 학습을 안정시킨다. 최근에는 블록 앞쪽에 두는 <strong>Pre-LN</strong> 방식이 표준이다.</dd>
+</dl>
+
+<h3>세 가지 계열</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>계열</th><th>구조</th><th>잘하는 일</th><th>대표 모델</th></tr></thead>
+<tbody>
+<tr><td>인코더 전용</td><td>양방향 어텐션 (앞뒤 모두 봄)</td><td>분류, 개체명 인식, 문장 임베딩 — <strong>이해</strong></td><td>BERT, RoBERTa, DeBERTa</td></tr>
+<tr><td>디코더 전용</td><td>인과 마스크 (앞만 봄)</td><td>텍스트 생성, 대화 — <strong>생성</strong></td><td>GPT, LLaMA, Claude</td></tr>
+<tr><td>인코더-디코더</td><td>둘 다</td><td>번역, 요약 — <strong>변환</strong></td><td>원논문 Transformer, T5, BART</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>감정 분류처럼 문장을 '이해'하는 과제에는 <strong>인코더 전용</strong> 구조가 정석이다. 아래 실습도 이 구조를 쓴다.</p>
+
+<h3>사전학습과 파인튜닝</h3>
+<p>Transformer의 진짜 위력은 구조보다 <strong>학습 전략</strong>에서 나온다.</p>
+<ol>
+  <li><strong>사전학습(Pre-training)</strong> — 레이블 없는 대규모 말뭉치로 언어 자체를 익힌다. BERT는 가려진 단어 맞히기(MLM), GPT는 다음 단어 맞히기(NTP).</li>
+  <li><strong>파인튜닝(Fine-tuning)</strong> — 그 위에 작은 분류층을 붙여 내 과제 데이터로 짧게 추가 학습한다.</li>
+</ol>
+<p>덕분에 레이블 데이터가 수천 건뿐이어도 꽤 좋은 성능이 나온다. RNN 시대에는 매번 밑바닥부터 학습해야 했던 것과 결정적으로 다른 점이다.</p>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+<h2>6. 실습 A: Transformer 인코더 직접 만들기</h2>
+
+<p>원문과 같은 과제 — 트위터 20,000건을 6가지 감정으로 분류한다. 레이블은 0(sadness), 1(joy), 2(love), 3(anger), 4(fear), 5(surprise). 구조 이해가 목적이므로 사전학습 없이 밑바닥부터 만든다.</p>
+
+<h3>전처리 — RNN 버전과 같은 부분, 다른 부분</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>단계</th><th>RNN 버전</th><th>Transformer 버전</th></tr></thead>
+<tbody>
+<tr><td>토큰화</td><td>word_tokenize + 불용어 제거</td><td>동일하게 써도 되고, 서브워드로 바꿔도 된다</td></tr>
+<tr><td>Vocab</td><td>빈도순 인덱스, PAD=0</td><td><strong>동일</strong></td></tr>
+<tr><td>정수 변환</td><td>필요</td><td><strong>동일</strong></td></tr>
+<tr><td>패딩</td><td>필요 (길이 20)</td><td>필요 + <strong>어텐션 마스크 추가</strong></td></tr>
+<tr><td>순서 정보</td><td>구조에 내재</td><td><strong>위치 인코딩을 명시적으로 더함</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+  <b>불용어 제거는 재고할 것</b>
+  <p>RNN 시절의 관행이지만, 어텐션 기반 모델에서는 'not', 'no' 같은 부정어를 지우면 감정이 뒤집힌다. 사전학습 모델을 쓸 때는 <strong>불용어 제거와 소문자 변환을 하지 않고 원문 그대로 넣는 것</strong>이 기본이다.</p>
+</div>
+
+<pre><code>import math, numpy as np, torch
+import torch.nn as nn, torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from keras.utils import pad_sequences
+
+max_len = 20                  # 토큰 길이 분포의 95% 지점
+sequences = pad_sequences(data["sequences"], maxlen=max_len,
+                          padding='post', truncating='post',
+                          value=vocab["&lt;PAD&gt;"])
+
+x = np.array(sequences)
+y = np.array(data["label"])
+x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2,
+                                                  stratify=y, random_state=42)</code></pre>
+<p><code>stratify=y</code>를 추가했다. 범주 불균형이 심한 데이터(surprise는 전체의 3% 남짓)에서 검증 세트의 비율을 원본과 같게 유지해 준다.</p>
+
+<h3>위치 인코딩 층</h3>
+<pre><code>class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=512, dropout=0.1):
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len).unsqueeze(1).float()
+        div_term = torch.exp(torch.arange(0, d_model, 2).float()
+                             * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        self.register_buffer("pe", pe.unsqueeze(0))   # [1, max_len, d_model]
+
+    def forward(self, x):                # x: [B, L, D]
+        return self.dropout(x + self.pe[:, :x.size(1)])</code></pre>
+<p><code>register_buffer</code>로 등록하면 학습 대상은 아니지만 모델과 함께 GPU로 옮겨지고 저장된다.</p>
+
+<h3>분류 모델</h3>
+<pre><code>class TransformerClassifier(nn.Module):
+    def __init__(self, vocab_size, d_model=128, nhead=4, num_layers=2,
+                 dim_ff=256, output_size=6, max_len=20, dropout=0.1):
+        super().__init__()
+        self.d_model = d_model
+        self.embedding = nn.Embedding(vocab_size, d_model, padding_idx=0)
+        self.pos = PositionalEncoding(d_model, max_len, dropout)
+        layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=dim_ff,
+            dropout=dropout, activation="gelu",
+            batch_first=True, norm_first=True)
+        self.encoder = nn.TransformerEncoder(layer, num_layers=num_layers)
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(d_model, output_size)
+
+    def forward(self, x):                             # x: [B, L] 정수 인덱스
+        pad_mask = (x == 0)                           # True인 자리가 PAD
+        h = self.embedding(x) * math.sqrt(self.d_model)
+        h = self.pos(h)                               # [B, L, D]
+        h = self.encoder(h, src_key_padding_mask=pad_mask)
+        h = h.masked_fill(pad_mask.unsqueeze(-1), 0.0)          # PAD 자리 0으로
+        pooled = h.sum(1) / (~pad_mask).sum(1, keepdim=True).clamp(min=1)
+        return self.fc(self.dropout(pooled))          # [B, 6]</code></pre>
+
+<h4>코드에서 짚을 점</h4>
+<ul>
+  <li><code>padding_idx=0</code> — PAD 토큰의 임베딩을 0으로 고정하고 학습에서 제외한다.</li>
+  <li><code>* math.sqrt(d_model)</code> — 임베딩 크기를 위치 인코딩과 비슷한 스케일로 맞추는 원논문의 관행.</li>
+  <li><code>src_key_padding_mask</code> — 이걸 빼먹으면 모델이 <strong>빈칸까지 의미로 읽는다</strong>. Transformer 구현에서 가장 흔한 버그다.</li>
+  <li><strong>마스크 평균 풀링</strong> — 실제 토큰 자리의 벡터만 평균 낸다. 대안으로 문장 앞에 <code>[CLS]</code>를 붙이고 그 위치 벡터(<code>h[:, 0]</code>)만 쓰는 방법도 있다. LSTM의 <code>hidden[-1]</code>에 해당하는 자리다.</li>
+  <li><code>norm_first=True</code> — Pre-LN. 작은 모델에서도 학습이 훨씬 안정적이다.</li>
+</ul>
+
+<div class="tbl">
+<table>
+<caption>데이터가 흘러가는 모양 (batch=32, seq_len=20, d_model=128)</caption>
+<thead><tr><th>단계</th><th>설명</th><th>출력 크기</th></tr></thead>
+<tbody>
+<tr><td>입력</td><td>정수 인덱스 시퀀스</td><td><code>[32, 20]</code></td></tr>
+<tr><td>임베딩 + 위치</td><td>토큰 의미 + 순서 정보</td><td><code>[32, 20, 128]</code></td></tr>
+<tr><td>인코더 블록 ×2</td><td>어텐션으로 문맥 반영 (모양 유지)</td><td><code>[32, 20, 128]</code></td></tr>
+<tr><td>마스크 평균 풀링</td><td>문장 하나당 벡터 하나로 압축</td><td><code>[32, 128]</code></td></tr>
+<tr><td>출력층</td><td>감정 6범주 점수</td><td><code>[32, 6]</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>학습</h3>
+<pre><code>model = TransformerClassifier(vocab_size=len(vocab), d_model=128, nhead=4,
+                              num_layers=2, dim_ff=256, output_size=6,
+                              max_len=max_len).to(device)
+
+loss_fn   = nn.CrossEntropyLoss()
+optimizer = optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)
+scheduler = optim.lr_scheduler.OneCycleLR(
+    optimizer, max_lr=3e-4, total_steps=epochs * len(train_loader),
+    pct_start=0.1)                      # 앞 10%는 워밍업</code></pre>
+
+<div class="note">
+  <b>Transformer 학습의 3대 관례</b>
+  <p><strong>AdamW</strong>(가중치 감쇠를 분리한 Adam), <strong>워밍업</strong>(초반 학습률을 서서히 올림), <strong>그래디언트 클리핑</strong>(<code>clip_grad_norm_(model.parameters(), 1.0)</code>). 셋 다 없어도 돌아가지만, 있으면 학습 안정성이 눈에 띄게 달라진다. 특히 워밍업 없이 높은 학습률로 시작하면 초반에 발산하는 일이 잦다.</p>
+</div>
+
+<h3>예상 성능</h3>
+<p>사전학습 없이 20,000건으로 학습하면 <strong>정확도 0.88~0.91 수준</strong>으로, 같은 조건의 LSTM과 큰 차이가 나지 않는다. 데이터가 작으면 Transformer의 구조적 이점이 충분히 드러나지 않기 때문이다. 진짜 차이는 다음 절에서 나온다.</p>
+<p>클래스별로 보면 데이터가 많은 sadness·joy는 f1 0.92 안팎, 데이터가 147건뿐인 surprise는 0.75 내외에 머문다. 이건 구조의 문제가 아니라 <strong>범주 불균형의 문제</strong>다. <code>CrossEntropyLoss(weight=...)</code>로 클래스 가중치를 주거나 소수 클래스를 오버샘플링하면 개선된다.</p>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+<h2>7. 실습 B: 사전학습 모델 파인튜닝</h2>
+
+<p>실무에서 이 과제를 받으면 실제로 쓰게 될 방법이다. 코드는 오히려 더 짧다.</p>
+
+<pre><code>from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from torch.utils.data import DataLoader
+
+model_name = "distilbert-base-uncased"       # 한국어라면 "klue/roberta-base"
+tokenizer  = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(
+            model_name, num_labels=6).to(device)
+
+enc = tokenizer(list(data["text"]),          # 원문 그대로! 전처리 불필요
+                truncation=True, padding="max_length",
+                max_length=64, return_tensors="pt")
+
+dataset = TensorDataset(enc["input_ids"], enc["attention_mask"],
+                        torch.tensor(data["label"].values))</code></pre>
+
+<pre><code>optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)   # 파인튜닝은 작은 lr
+
+for epoch in range(3):                        # 2~4 에포크면 충분하다
+    model.train()
+    for input_ids, attn_mask, labels in train_loader:
+        out = model(input_ids=input_ids.to(device),
+                    attention_mask=attn_mask.to(device),
+                    labels=labels.to(device))
+        out.loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step(); optimizer.zero_grad()</code></pre>
+
+<h4>달라지는 점</h4>
+<ul>
+  <li><strong>전처리가 사라진다</strong> — 토큰화, Vocab 생성, 정수 변환, 패딩을 토크나이저가 한 줄로 처리한다. 불용어 제거와 소문자 변환도 하지 않는다.</li>
+  <li><strong>학습률이 10배 이상 작다</strong> — 밑바닥 학습은 3e-4, 파인튜닝은 2e-5~5e-5. 이미 좋은 가중치를 망가뜨리지 않기 위해서다.</li>
+  <li><strong>에포크가 짧다</strong> — 3 에포크를 넘기면 대개 과적합된다.</li>
+  <li><strong>성능</strong> — 같은 데이터에서 정확도 0.93 내외까지 올라가고, 데이터가 적은 surprise 같은 범주에서 격차가 가장 크게 벌어진다. 언어 지식을 이미 갖고 시작하기 때문이다.</li>
+</ul>
+
+<div class="note">
+  <b>그 다음 단계</b>
+  <p>모델이 더 커지면 전체 파라미터를 갱신하는 대신 <strong>LoRA</strong> 같은 경량 파인튜닝(PEFT)으로 일부만 학습한다. 레이블 데이터가 아예 없다면 LLM에 프롬프트만 주는 제로샷·퓨샷 분류도 선택지다. 다만 수만 건 규모의 고정된 분류 과제라면, 작은 모델을 파인튜닝하는 쪽이 비용과 지연시간 면에서 여전히 유리하다.</p>
+</div>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+<h2>8. 한 장 요약과 점검 목록</h2>
+
+<h3>흐름 한 줄로</h3>
+<p>텍스트 → <strong>서브워드 토큰화</strong>(쪼개기+번호표) → <strong>패딩과 어텐션 마스크</strong> → <strong>임베딩 + 위치 인코딩</strong> → <strong>셀프 어텐션 블록 ×N</strong>(문맥 반영) → <strong>풀링</strong>(문장 벡터 하나로) → <strong>출력층</strong>(감정 예측)</p>
+
+<h3>자주 헷갈리는 구분</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>구분</th><th>이것</th><th>저것</th></tr></thead>
+<tbody>
+<tr><td>토큰화 vs 임베딩</td><td>어떤 토큰인지 (번호표)</td><td>어떤 뜻인지 (의미 벡터)</td></tr>
+<tr><td>정적 vs 문맥 임베딩</td><td>Word2Vec — 단어당 벡터 1개</td><td>BERT — 문맥마다 다른 벡터</td></tr>
+<tr><td>Q, K, V</td><td>Q는 질문, K는 색인</td><td>V는 실제로 가져오는 내용</td></tr>
+<tr><td>패딩 마스크 vs 인과 마스크</td><td>빈칸 제외 (모든 모델)</td><td>미래 차단 (생성 모델만)</td></tr>
+<tr><td>인코더 vs 디코더 전용</td><td>BERT — 이해·분류</td><td>GPT — 생성</td></tr>
+<tr><td>사전학습 vs 파인튜닝</td><td>레이블 없는 대량 데이터로 언어 습득</td><td>내 과제 데이터로 짧게 조정</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>스스로 점검하기</h3>
+<ul class="check">
+  <li>Transformer가 RNN을 대체한 이유를 병렬성과 거리 두 축으로 설명할 수 있다.</li>
+  <li>서브워드 토큰화가 OOV와 사전 폭발을 어떻게 동시에 해결하는지 예시로 말할 수 있다.</li>
+  <li>Attention(Q,K,V) 수식의 네 단계를 순서대로 짚을 수 있다.</li>
+  <li>√d_k로 나누는 이유를 softmax와 기울기로 설명할 수 있다.</li>
+  <li>멀티 헤드가 연산량을 늘리지 않고 관점만 늘리는 구조임을 설명할 수 있다.</li>
+  <li>위치 인코딩이 왜 필요한지, 없으면 무엇이 무너지는지 말할 수 있다.</li>
+  <li>패딩 마스크를 빠뜨렸을 때 생기는 문제를 설명할 수 있다.</li>
+  <li>인코더 전용·디코더 전용·인코더-디코더의 용도를 구분할 수 있다.</li>
+  <li>파인튜닝의 학습률이 밑바닥 학습보다 작아야 하는 이유를 말할 수 있다.</li>
+  <li>surprise 범주의 성능이 낮은 원인을 데이터와 연결해 설명할 수 있다.</li>
+</ul>
+
+<h3>RNN 버전에서 무엇이 바뀌었나</h3>
+<div class="tbl">
+<table>
+<thead><tr><th>원문(RNN 기준)</th><th>이 문서(Transformer 기준)</th></tr></thead>
+<tbody>
+<tr><td>단어 단위 토큰화 + 형태소 분석</td><td>서브워드 토큰화 (BPE / WordPiece / SentencePiece)</td></tr>
+<tr><td>불용어·구두점 제거</td><td>원문 유지 — 부정어 손실을 막기 위해</td></tr>
+<tr><td>h_t = tanh(W_h·h_(t−1) + W_x·x_t + b)</td><td>Attention(Q,K,V) = softmax(QKᵀ/√d_k)V</td></tr>
+<tr><td>순서가 구조에 내재</td><td>위치 인코딩으로 명시적 주입</td></tr>
+<tr><td>기울기 소실 → LSTM 게이트로 완화</td><td>잔차 연결 + LayerNorm으로 구조적 해결</td></tr>
+<tr><td>장기 의존성 문제</td><td>거리와 무관한 직접 연결 (대신 O(n²) 비용)</td></tr>
+<tr><td>병렬 처리 불가</td><td>완전 병렬</td></tr>
+<tr><td><code>hidden[-1]</code>로 문장 벡터 추출</td><td><code>[CLS]</code> 토큰 또는 마스크 평균 풀링</td></tr>
+<tr><td>매번 밑바닥부터 학습</td><td>사전학습 모델 파인튜닝</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<footer>9일 차 학습 정리 · Transformer 개정판</footer>
+
+</div>
+</body>
+</html>
