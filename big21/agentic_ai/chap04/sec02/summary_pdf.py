@@ -76,7 +76,7 @@ def pdf_to_text(pdf_file_path:str)->str:
 # def summarize_pdf(pdf 파일 경로, 최종 파일 경로)
 def summarize_pdf(pdf_file_path:str, output_file_path: str):
     # 1. pdf -> txt : pdf_to_text(pdf_file_path)
-    summary = summerize_txt(pdf_to_text(pdf_file_path)) # pdf_to_text() -> summarize_pdf() 실행.
+    summary = summerize_txt(pdf_to_text(pdf_file_path)) # pdf_to_text() -> summarize_txt() 실행.
 
     # 2. summary 파일에 저장
     with open(output_file_path, "w", encoding="utf-8") as f:

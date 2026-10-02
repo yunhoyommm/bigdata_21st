@@ -1,0 +1,42 @@
+[
+    {
+        "no": 1,
+        "eng": "Which of the following descriptions of the image is incorrect?\n- (1) Many people are attending an indoor event.\n- (2) People are sitting at tables using laptops.\n- (3) The phrase 'DIVE 2024 IN BUSAN' is visible on the wall.\n- (4) All attendees are wearing black clothes.",
+        "img": "busan_dive.jpg"
+    },
+    {
+        "no": 2,
+        "eng": "Which of the following descriptions of the image is incorrect?\n- (1) A yellow sculpture is on the left side of the image.\n- (2) The words \"Local Stitch\" are visible on a building.\n- (3) There are no brick buildings, only modern ones.\n- (4) Sunlight is shining on the building.",
+        "img": "local_stitch.jpg"
+    },
+    {
+        "no": 3,
+        "eng": "Which of the following descriptions of the image is incorrect?\n\n- (1) It shows the interior of a café.\n- (2) The wall is painted bright yellow.\n- (3) There are two staff members behind the counter.\n- (4) All the tables are black.",
+        "img": "local_stitch_terrarosa.jpg"
+    },
+    {
+        "no": 4,
+        "eng": "Which of the following descriptions of the image is incorrect?\n- (1) The exterior of the building is made of brick.\n- (2) There is an orange cone placed in front of the building.\n- (3) The first-floor window has the text \"PERSONAL COFFEE\" visible.\n- (4) The building has a two-story structure.",
+        "img": "mangwon.jpg"
+    },
+    {
+        "no": 5,
+        "eng": "Which of the following descriptions of the image is incorrect?\n- (1) Various types of bread are displayed.\n- (2) All the bread prices on the price tags are 3.2.\n- (3) The worker is wearing a hat.\n- (4) There are many loaves of bread stacked in the glass display case.",
+        "img": "mangwon_bakery.jpg"
+    },
+    {
+        "no": 6,
+        "eng": "Which of the following descriptions of the image is incorrect?\n\n- (1) People are seen working on construction.\n- (2) A sign for \"뉴트리코어\" is visible.\n- (3) A wooden bench is placed under the tree shade.\n- (4) The \"베이커리 카페\" is currently open for business.",
+        "img": "sangam_interior.jpg"
+    },
+    {
+        "no": 7,
+        "eng": "Which of the following descriptions of the image is incorrect?\n- (1) Natural light is coming through large windows.\n- (2) The floor is made of wood.\n- (3) The chairs are all arranged by the window.\n- (4) Some people are sitting at tables.",
+        "img": "seolleung_terrarosa.jpg"
+    },
+    {
+        "no": 8,
+        "eng": "Which of the following descriptions of the image is incorrect?\n\n- (1) People are gathered in front of a bus.\n- (2) A man is talking on the phone.\n- (3) The scene is viewed through a coffee shop window.\n- (4) The trees have red leaves, giving an autumn vibe.",
+        "img": "stanford_coffee.jpg"
+    }
+]

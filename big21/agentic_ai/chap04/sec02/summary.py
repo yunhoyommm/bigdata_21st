@@ -56,7 +56,7 @@ def summary_txt(file_path: str) -> str:    # 'file_path: str': 타입힌트. 없
 
     return response.choices[0].message.content  # 답변 반환
 
-# 4. 실행 -> 파일 경로 설정ㅇ
+# 4. 실행 -> 파일 경로 설정
 file_path=r"C:\big21\agentic_ai\chap04\output\과정기반 작물모형을 이용한 웹 기반 밀 재배관리 의사결정 지원시스템 설계 및 구축_with_preprocessing.txt"
 
 # 5. 함수 호출 -> 요약 출력
